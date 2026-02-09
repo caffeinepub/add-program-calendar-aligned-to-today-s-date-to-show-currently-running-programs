@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-add-a-new-program-calendar-view-in-the-dashboard-that-defaults-to-today-highlights-today-on-a-calendar-ui-and-clearly-shows-which-programs-are-running-today",
+      "title": "Add a new \"Program Calendar\" view in the dashboard that defaults to today, highlights today on a calendar UI, and clearly shows which programs are running today.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wire-the-calendar-view-to-data-fetching-via-react-query-using-the-backend-active-on-date-query-ensure-correct-date-conversion-between-javascript-date-and-backend-int-bigint-epoch-values",
+      "title": "Wire the calendar view to data fetching via React Query, using the backend active-on-date query; ensure correct date conversion between JavaScript Date and backend Int/BigInt epoch values.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Add a program calendar feature aligned to today's date to show which program is currently running",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add a backend query API to return programs that are active on a given date, based on each program’s startDate/endDate.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Add program calendar aligned to today's date to show currently running programs",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

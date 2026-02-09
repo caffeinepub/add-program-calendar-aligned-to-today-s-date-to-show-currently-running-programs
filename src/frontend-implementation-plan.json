@@ -1,0 +1,57 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Program Calendar dashboard view with active-programs-by-date query",
+  "requirements": [
+    {
+      "id": "REQ-2",
+      "summary": "Add a new Program Calendar dashboard tab that defaults to today, highlights today, and lists programs running on the selected date.",
+      "acceptanceCriteria": [
+        "A new dashboard tab (or equivalent prominent entry point) labeled in English as \"Calendar\" or \"Program Calendar\" is available to all authenticated users.",
+        "The calendar view defaults to the current month and visually highlights today.",
+        "The view includes a \"Today\" control to quickly return to today’s date/month.",
+        "For the currently selected date (default: today), the UI shows a list of programs active on that date, including at minimum: program name, unit/division, PIC name, start/end date, and status/priority badges consistent with existing program UI patterns.",
+        "When there are no active programs for the selected date, the UI shows an English empty state message (e.g., \"No programs scheduled for this date\")."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProgramCalendarTab.tsx",
+          "operation": "create",
+          "description": "Create a new authenticated dashboard tab view that renders a month calendar UI (with today highlighted, selected-day state, and a \"Today\" control) and a details panel listing programs active on the selected date. Use existing shadcn/ui components (e.g., Card, Button, Badge, Table, Input as needed) to match current dashboard styling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Wire the new Program Calendar view into the existing dashboard Tabs by adding a TabsTrigger labeled \"Program Calendar\" (or \"Calendar\") and a corresponding TabsContent that renders ProgramCalendarTab. Ensure it is available to all authenticated users (same visibility as other non-admin tabs)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Fetch programs active on the selected date via a new React Query hook using the backend active-on-date query, with correct epoch-millisecond conversion and proper loading/error handling.",
+      "acceptanceCriteria": [
+        "Frontend adds a React Query hook that requests programs active on the selected date and caches by query key that includes the selected date value.",
+        "Selected date changes trigger refetch and update the active program list without a full page reload.",
+        "Date conversion is consistent with existing usage in ProgramsTab (i.e., startDate/endDate are treated as epoch milliseconds and rendered correctly).",
+        "Loading and error states are handled in the calendar view (English user-facing messages)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a new React Query hook (e.g., useGetProgramsActiveOnDate) that calls the backend capability for \"active on date\" using an epoch-milliseconds value derived from the selected JavaScript Date, and caches results under a queryKey that includes the date value. Ensure the hook is actor-aware (enabled only when actor is ready) consistent with other hooks."
+        },
+        {
+          "path": "frontend/src/components/ProgramCalendarTab.tsx",
+          "operation": "modify",
+          "description": "Connect the calendar selected date state to the new React Query hook: convert selected Date to backend epoch-milliseconds BigInt for the request, refetch on date changes, and render English loading/error/empty states. Render program start/end dates using the same epoch-milliseconds handling pattern as ProgramsTab (Number(bigint) -> Date)."
+        },
+        {
+          "path": "frontend/src/backend.d.ts",
+          "operation": "modify",
+          "description": "Update the typed backend interface to include the new active-on-date query method signature (accepting a single epoch-milliseconds date value and returning Program[]), so the new React Query hook can call it with type safety."
+        }
+      ]
+    }
+  ]
+}

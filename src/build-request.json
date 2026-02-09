@@ -1,0 +1,88 @@
+{
+  "kind": "build_request",
+  "title": "Add program calendar aligned to today's date to show currently running programs",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Add a backend query API to return programs that are active on a given date, based on each program’s startDate/endDate.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-10"
+        ],
+        "quotes": [
+          "Tambahkan fitur kalender program sesuai dengan kalender hari ini, untuk mengetahui program apa yang sedang berjalan"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes a new query method that accepts a single date value (same epoch-milliseconds convention used by existing startDate/endDate) and returns a list of Program items where startDate <= date <= endDate.",
+        "The method enforces the same read authorization checks as other program queries (authentication required).",
+        "If no programs match the date, the method returns an empty array (no trap)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add a new \"Program Calendar\" view in the dashboard that defaults to today, highlights today on a calendar UI, and clearly shows which programs are running today.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-10"
+        ],
+        "quotes": [
+          "Tambahkan fitur kalender program sesuai dengan kalender hari ini, untuk mengetahui program apa yang sedang berjalan"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new dashboard tab (or equivalent prominent entry point) labeled in English as \"Calendar\" or \"Program Calendar\" is available to all authenticated users.",
+        "The calendar view defaults to the current month and visually highlights today.",
+        "The view includes a \"Today\" control to quickly return to today’s date/month.",
+        "For the currently selected date (default: today), the UI shows a list of programs active on that date, including at minimum: program name, unit/division, PIC name, start/end date, and status/priority badges consistent with existing program UI patterns.",
+        "When there are no active programs for the selected date, the UI shows an English empty state message (e.g., \"No programs scheduled for this date\")."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Wire the calendar view to data fetching via React Query, using the backend active-on-date query; ensure correct date conversion between JavaScript Date and backend Int/BigInt epoch values.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-10"
+        ],
+        "quotes": [
+          "Tambahkan fitur kalender program sesuai dengan kalender hari ini, untuk mengetahui program apa yang sedang berjalan"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Frontend adds a React Query hook that requests programs active on the selected date and caches by query key that includes the selected date value.",
+        "Selected date changes trigger refetch and update the active program list without a full page reload.",
+        "Date conversion is consistent with existing usage in ProgramsTab (i.e., startDate/endDate are treated as epoch milliseconds and rendered correctly).",
+        "Loading and error states are handled in the calendar view (English user-facing messages)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in backend/main.mo; add new logic there.",
+    "Do not edit files under frontend/src/components/ui or any frontend immutablePaths (compose existing components instead).",
+    "Use English for any new user-facing text added by this change."
+  ],
+  "nonGoals": [
+    "Do not integrate with external calendar providers (Google Calendar, Outlook, etc.).",
+    "Do not add notifications, reminders, or real-time updates.",
+    "Do not change the existing Program create/edit schema (startDate/endDate fields remain as-is)."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

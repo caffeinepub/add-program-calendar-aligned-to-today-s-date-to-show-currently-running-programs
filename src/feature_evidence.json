@@ -1,0 +1,45 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-a-new-program-calendar-view-in-the-dashboard-that-defaults-to-today-highlights-today-on-a-calendar-ui-and-clearly-shows-which-programs-are-running-today",
+      "featureTitle": "Add a new \"Program Calendar\" view in the dashboard that defaults to today, highlights today on a calendar UI, and clearly shows which programs are running today.",
+      "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-wire-the-calendar-view-to-data-fetching-via-react-query-using-the-backend-active-on-date-query-ensure-correct-date-conversion-between-javascript-date-and-backend-int-bigint-epoch-values",
+      "featureTitle": "Wire the calendar view to data fetching via React Query, using the backend active-on-date query; ensure correct date conversion between JavaScript Date and backend Int/BigInt epoch values.",
+      "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
