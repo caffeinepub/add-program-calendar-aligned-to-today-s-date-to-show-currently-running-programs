@@ -133,6 +133,21 @@ export function useGetProgramsActiveOnDate(date: Date) {
   });
 }
 
+// Get programs active in a date range (for calendar views)
+export function useGetProgramsActiveInRange(range: TimeRange) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Program[]>({
+    queryKey: ['programsActiveInRange', range.start.toString(), range.end.toString()],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getProgramsActiveInRange(range);
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 30000, // 30 seconds
+  });
+}
+
 export function useCreateProgram() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -145,6 +160,7 @@ export function useCreateProgram() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
       queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
       toast.success('Program berhasil dibuat');
     },
@@ -166,6 +182,7 @@ export function useUpdateProgram() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
       queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
       toast.success('Program berhasil diperbarui');
     },
@@ -187,6 +204,7 @@ export function useDeleteProgram() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
       queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
       queryClient.invalidateQueries({ queryKey: ['kpis'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
       toast.success('Program berhasil dihapus');
@@ -337,7 +355,6 @@ export function useCreateTeamMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
       queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
-      queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
       toast.success('Anggota tim berhasil ditambahkan');
     },
     onError: (error: Error) => {
@@ -358,7 +375,6 @@ export function useUpdateTeamMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
       queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
-      queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
       toast.success('Anggota tim berhasil diperbarui');
     },
     onError: (error: Error) => {
@@ -379,31 +395,10 @@ export function useDeleteTeamMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
       queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
-      queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
       toast.success('Anggota tim berhasil dihapus');
     },
     onError: (error: Error) => {
       toast.error('Gagal menghapus anggota tim: ' + error.message);
     },
   });
-}
-
-// Dashboard Metrics
-export function useGetDashboardMetrics() {
-  const { data: programs = [], isLoading: programsLoading } = useGetAllPrograms();
-  const { data: kpis = [], isLoading: kpisLoading } = useGetAllKPIs();
-
-  const metrics = {
-    activePrograms: programs.filter(p => p.status === 'ongoing').length,
-    ongoingTimelines: programs.filter(p => p.status === 'ongoing').length,
-    activeKpis: kpis.filter(k => k.status === 'inProgress' || k.status === 'notAchieved').length,
-    achievedKpisPercentage: kpis.length > 0 
-      ? Math.round((kpis.filter(k => k.status === 'achieved').length / kpis.length) * 100)
-      : 0,
-  };
-
-  return {
-    data: metrics,
-    isLoading: programsLoading || kpisLoading,
-  };
 }

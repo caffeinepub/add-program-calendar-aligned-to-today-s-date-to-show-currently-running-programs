@@ -1,8 +1,15 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
+  "projectStateVersion": 5,
+  "summary": "Redesign the Program Calendar dashboard view for SHQ AQL tracking web app with a full-width, highly readable, modern UX: large calendar UI with Monthly/Weekly/Agenda modes, rich filters, clickable day badges opening program details in a drawer/modal, and a mobile-first agenda list view.",
+  "architectural_notes": [
+    "Program Calendar UI must be full-width and dominant (not sidebar), with responsive design: desktop calendar grid + mobile agenda list view.",
+    "Calendar supports switchable views: Monthly / Weekly / Agenda.",
+    "Provide filter controls above the calendar: Unit/Divisi, PIC, Status, Priority.",
+    "Each date shows a badge count of programs; clicking a date opens a right-side detail panel (drawer) or modal.",
+    "Clicking a program opens a detail drawer with description, period, PIC, progress visualization, status, and an Edit action.",
+    "UI styling direction: prioritize readability (larger fonts, generous spacing, clear contrast), card-based layout, soft shadows, consistent icons, and restrained status colors."
+  ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
@@ -21,6 +28,62 @@
         "REQ-3"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-redesign-the-existing-program-calendar-dashboard-tab-frontend-src-components-programcalendartab-tsx-into-a-full-width-readability-first-calendar-experience-that-feels-like-a-professional-management-tool-e-g-notion-clickup-google-calendar-style-prioritizing-large-typography-generous-spacing-clear-contrast-and-a-clean-calendar-grid-on-both-desktop-and-mobile",
+      "title": "Redesign the existing Program Calendar dashboard tab (frontend/src/components/ProgramCalendarTab.tsx) into a full-width, readability-first calendar experience that feels like a professional management tool (e.g., Notion/ClickUp/Google Calendar style), prioritizing large typography, generous spacing, clear contrast, and a clean calendar grid on both desktop and mobile.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-view-mode-switcher-to-the-program-calendar-tab-with-three-modes-monthly-weekly-and-agenda-ensure-the-default-mode-is-monthly-on-desktop-and-mobile-defaults-to-agenda-for-better-readability",
+      "title": "Add a view mode switcher to the Program Calendar tab with three modes: Monthly, Weekly, and Agenda; ensure the default mode is Monthly on desktop, and mobile defaults to Agenda for better readability.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-filter-controls-directly-above-the-calendar-for-unit-division-pic-status-and-priority-and-apply-these-filters-consistently-across-monthly-weekly-agenda-views-and-the-day-program-detail-panels",
+      "title": "Add filter controls directly above the calendar for Unit/Division, PIC, Status, and Priority, and apply these filters consistently across Monthly/Weekly/Agenda views and the day/program detail panels.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-monthly-and-weekly-calendar-grid-views-display-a-badge-on-each-date-cell-indicating-the-number-of-programs-matching-current-filters-that-are-active-on-that-date-clicking-a-date-opens-a-detail-panel-right-side-panel-on-desktop-or-a-modal-sheet-on-smaller-screens-listing-the-programs-for-that-date",
+      "title": "In Monthly and Weekly calendar grid views, display a badge on each date cell indicating the number of programs matching current filters that are active on that date; clicking a date opens a detail panel (right-side panel on desktop or a modal/sheet on smaller screens) listing the programs for that date.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-a-user-clicks-a-program-from-any-calendar-day-agenda-list-open-a-program-detail-drawer-sheet-showing-description-period-start-end-pic-a-visual-progress-bar-status-and-an-edit-button-that-opens-the-existing-program-edit-flow-reuse-the-current-programformdialog-behavior",
+      "title": "When a user clicks a program from any calendar/day/agenda list, open a program detail drawer/sheet showing: description, period (start/end), PIC, a visual progress bar, status, and an Edit button that opens the existing program edit flow (reuse the current ProgramFormDialog behavior).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-program-calendar-data-loading-strategy-to-support-monthly-weekly-visible-ranges-using-the-existing-backend-range-query-getprogramsactiveinrange-via-react-query-ensure-correct-conversion-between-javascript-date-ranges-and-backend-timerange-bigint-milliseconds-and-avoid-excessive-refetches-when-navigating-within-the-calendar",
+      "title": "Update the Program Calendar data loading strategy to support Monthly/Weekly visible ranges using the existing backend range query (getProgramsActiveInRange) via React Query; ensure correct conversion between JavaScript Date ranges and backend TimeRange BigInt milliseconds, and avoid excessive refetches when navigating within the calendar.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refine-program-calendar-visual-design-to-follow-a-modern-card-based-ui-with-soft-shadows-consistent-iconography-non-garish-status-priority-colors-and-strong-readability-over-dark-aesthetic-heavy-styling-ensure-the-calendar-remains-full-width-without-a-cramped-sidebar-layout",
+      "title": "Refine Program Calendar visual design to follow a modern, card-based UI with soft shadows, consistent iconography, non-garish status/priority colors, and strong readability over dark/aesthetic-heavy styling; ensure the calendar remains full-width without a cramped sidebar layout.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -36,6 +99,12 @@
       "reqIds": [
         "REQ-1"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Redesign Program Calendar UX/UI: full-width large calendar with Monthly/Weekly/Agenda switch, day badges + click-to-open detail drawer/modal, filters (Unit/Divisi, PIC, Status, Priority), program detail drawer (description, period, PIC, progress bar, status, edit), and mobile agenda list view",
+      "reqIds": [],
       "status": "pending"
     }
   ],

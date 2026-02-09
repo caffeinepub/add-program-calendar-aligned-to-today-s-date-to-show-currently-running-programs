@@ -1,12 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Add a Program Calendar experience aligned to today’s date so users can quickly see which programs are currently running.
+**Goal:** Redesign the Program Calendar tab into a full-width, readability-first management calendar with multiple views, filtering, day-level counts, and program detail drawers.
 
 **Planned changes:**
-- Add a backend query method that accepts an epoch-milliseconds date value and returns programs where `startDate <= date <= endDate`, enforcing existing read authentication/authorization behavior.
-- Add a new dashboard view/tab labeled “Calendar” or “Program Calendar” that defaults to the current month, highlights today, and includes a “Today” control.
-- Display, for the selected date (default: today), a list of active programs including program name, unit/division, PIC name, start/end dates, and existing-style status/priority badges; show an English empty state when none match.
-- Wire the calendar view data fetching via React Query with caching keyed by selected date, refetching on date change, handling JS Date ↔ epoch-milliseconds conversion, and showing English loading/error states.
+- Redesign `frontend/src/components/ProgramCalendarTab.tsx` to use a full-width, large-typography calendar layout that remains usable on mobile without horizontal scrolling.
+- Add a clearly visible view switcher: Monthly, Weekly, and Agenda (default Monthly on desktop; default Agenda on mobile) while preserving the selected date/visible range when switching.
+- Add filter controls above the calendar for Unit/Division, PIC, Status, and Priority, including a clear/reset action; apply filters consistently across all views and detail panels.
+- In Monthly/Weekly grid views, show per-day numeric badges for the count of matching programs; clicking a day opens a day detail panel (right-side on desktop, modal/sheet on smaller screens) listing programs for that date.
+- Add a program detail drawer/sheet when selecting a program from any list/view, showing description, period (start/end), PIC, visual progress bar, status, and an Edit button that reuses the existing `ProgramFormDialog` edit flow.
+- Update data loading to fetch programs for the visible Monthly/Weekly ranges using the existing backend range query (`getProgramsActiveInRange`) via React Query, with correct Date → BigInt milliseconds conversion and stable caching to avoid excessive refetches.
+- Refine visuals to a modern card-based UI (soft shadows, consistent iconography, non-garish status/priority colors) while keeping the calendar full-width and readability-focused.
 
-**User-visible outcome:** Authenticated users can open a new Program Calendar in the dashboard, jump to today, select dates on a calendar, and see which programs are active on each selected date (or an empty-state message if none).
+**User-visible outcome:** Users can view programs in Monthly/Weekly/Agenda modes, filter what they see, quickly understand workload via per-day badge counts, open a day’s program list, and open/edit individual program details from a drawer/sheet with updates reflected back in the calendar.

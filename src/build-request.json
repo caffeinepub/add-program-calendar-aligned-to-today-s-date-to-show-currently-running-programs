@@ -1,75 +1,157 @@
 {
   "kind": "build_request",
-  "title": "Add program calendar aligned to today's date to show currently running programs",
+  "title": "Redesign Program Calendar as full-width calendar with view switch, filters, day badges, and detail drawer",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Add a backend query API to return programs that are active on a given date, based on each program’s startDate/endDate.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-10"
-        ],
-        "quotes": [
-          "Tambahkan fitur kalender program sesuai dengan kalender hari ini, untuk mengetahui program apa yang sedang berjalan"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend exposes a new query method that accepts a single date value (same epoch-milliseconds convention used by existing startDate/endDate) and returns a list of Program items where startDate <= date <= endDate.",
-        "The method enforces the same read authorization checks as other program queries (authentication required).",
-        "If no programs match the date, the method returns an empty array (no trap)."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Add a new \"Program Calendar\" view in the dashboard that defaults to today, highlights today on a calendar UI, and clearly shows which programs are running today.",
+      "id": "REQ-4",
+      "text": "Redesign the existing Program Calendar dashboard tab (frontend/src/components/ProgramCalendarTab.tsx) into a full-width, readability-first calendar experience that feels like a professional management tool (e.g., Notion/ClickUp/Google Calendar style), prioritizing large typography, generous spacing, clear contrast, and a clean calendar grid on both desktop and mobile.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-10"
+          "msg-7",
+          "msg-9"
         ],
         "quotes": [
-          "Tambahkan fitur kalender program sesuai dengan kalender hari ini, untuk mengetahui program apa yang sedang berjalan"
+          "Buat ulang fitur Program Calendar ... fokus utama pada keterbacaan, kerapian layout, dan pengalaman pengguna (UX). Desain kalender harus lebih besar, dominan di layar, dan mudah dibaca, baik di desktop maupun mobile.",
+          "Lanjutkan"
         ]
       },
       "acceptanceCriteria": [
-        "A new dashboard tab (or equivalent prominent entry point) labeled in English as \"Calendar\" or \"Program Calendar\" is available to all authenticated users.",
-        "The calendar view defaults to the current month and visually highlights today.",
-        "The view includes a \"Today\" control to quickly return to today’s date/month.",
-        "For the currently selected date (default: today), the UI shows a list of programs active on that date, including at minimum: program name, unit/division, PIC name, start/end date, and status/priority badges consistent with existing program UI patterns.",
-        "When there are no active programs for the selected date, the UI shows an English empty state message (e.g., \"No programs scheduled for this date\")."
+        "On desktop, the calendar UI is the dominant element on the screen (no small sidebar calendar layout).",
+        "Typography and spacing are noticeably larger/more spacious than the current calendar tab, improving readability.",
+        "Calendar grid layout is visually consistent and aligned (no cramped cells, clear day boundaries).",
+        "The calendar tab remains accessible and usable on mobile without horizontal scrolling."
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Wire the calendar view to data fetching via React Query, using the backend active-on-date query; ensure correct date conversion between JavaScript Date and backend Int/BigInt epoch values.",
-      "target": "both",
+      "id": "REQ-5",
+      "text": "Add a view mode switcher to the Program Calendar tab with three modes: Monthly, Weekly, and Agenda; ensure the default mode is Monthly on desktop, and mobile defaults to Agenda for better readability.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-10"
+          "msg-7"
         ],
         "quotes": [
-          "Tambahkan fitur kalender program sesuai dengan kalender hari ini, untuk mengetahui program apa yang sedang berjalan"
+          "Gunakan tampilan full-width calendar (bukan sidebar kecil), dengan mode Monthly / Weekly / Agenda View yang bisa di-switch.",
+          "Untuk mobile, gunakan agenda list view vertikal (seperti Google Calendar) agar tidak sempit."
         ]
       },
       "acceptanceCriteria": [
-        "Frontend adds a React Query hook that requests programs active on the selected date and caches by query key that includes the selected date value.",
-        "Selected date changes trigger refetch and update the active program list without a full page reload.",
-        "Date conversion is consistent with existing usage in ProgramsTab (i.e., startDate/endDate are treated as epoch milliseconds and rendered correctly).",
-        "Loading and error states are handled in the calendar view (English user-facing messages)."
+        "Users can switch between Monthly, Weekly, and Agenda views via a clearly visible control above the calendar.",
+        "Monthly and Weekly modes render as a calendar grid on desktop.",
+        "On small screens, Agenda view presents a vertical agenda list (Google Calendar-like) that is readable and not cramped.",
+        "Switching modes preserves the currently selected date (or visible range) and updates the displayed content accordingly."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add filter controls directly above the calendar for Unit/Division, PIC, Status, and Priority, and apply these filters consistently across Monthly/Weekly/Agenda views and the day/program detail panels.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "Tambahkan fitur filter by Unit/Divisi, PIC, Status, dan Priority langsung di atas kalender."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Filter controls are placed above the calendar and remain visible/accessible in all view modes.",
+        "Selecting filters updates the visible programs and counts without requiring a page refresh.",
+        "A clear/reset action exists to return filters to the unfiltered state.",
+        "Filtering works consistently for the selected day’s program list and for agenda lists."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "In Monthly and Weekly calendar grid views, display a badge on each date cell indicating the number of programs matching current filters that are active on that date; clicking a date opens a detail panel (right-side panel on desktop or a modal/sheet on smaller screens) listing the programs for that date.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "Setiap tanggal menampilkan badge jumlah program dan bisa diklik untuk membuka panel detail di sisi kanan atau modal."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each day cell in Monthly/Weekly views can show a numeric badge count when programs exist for that date (respecting filters).",
+        "Clicking a day opens a detail UI (right-side panel on desktop; modal/sheet on mobile) that lists programs active on that date.",
+        "The day detail UI clearly indicates the chosen date and supports closing/dismissing.",
+        "If no programs match for a date, the UI communicates this state clearly."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "When a user clicks a program from any calendar/day/agenda list, open a program detail drawer/sheet showing: description, period (start/end), PIC, a visual progress bar, status, and an Edit button that opens the existing program edit flow (reuse the current ProgramFormDialog behavior).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "Saat klik satu program, tampilkan drawer detail berisi: deskripsi, periode, PIC, progress bar visual, status, dan tombol edit."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Program detail drawer/sheet includes: description, period dates, PIC, progress bar visualization, status, and an Edit button.",
+        "Edit button opens the existing program edit dialog and successfully saves updates.",
+        "After editing, the calendar/day/agenda views refresh to reflect changes (including badges/counts and lists).",
+        "The drawer/sheet is usable on both desktop and mobile (scrollable if content overflows)."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Update the Program Calendar data loading strategy to support Monthly/Weekly visible ranges using the existing backend range query (getProgramsActiveInRange) via React Query; ensure correct conversion between JavaScript Date ranges and backend TimeRange BigInt milliseconds, and avoid excessive refetches when navigating within the calendar.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "mode Monthly / Weekly / Agenda View yang bisa di-switch",
+          "Setiap tanggal menampilkan badge jumlah program"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Monthly and Weekly views fetch programs for the currently visible date range (not just a single selected day).",
+        "Date range conversion to BigInt milliseconds is correct and consistent with existing useGetProgramsActiveOnDate behavior.",
+        "React Query caching keys differentiate by range so navigation between months/weeks behaves predictably (no stale data displayed).",
+        "No backend schema changes are required to support the new calendar views."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Refine Program Calendar visual design to follow a modern, card-based UI with soft shadows, consistent iconography, non-garish status/priority colors, and strong readability over dark/aesthetic-heavy styling; ensure the calendar remains full-width without a cramped sidebar layout.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "Terapkan prinsip UI modern: card-based design, soft shadow, konsisten icon, warna status yang tidak norak, dan fokus ke readability over aesthetic gelap berlebihan."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Status/priority colors are readable and not overly saturated; contrast meets readability expectations in both light/dark modes.",
+        "Cards/panels use consistent spacing, radius, and soft shadow styling aligned with the rest of the dashboard.",
+        "Icons used in the calendar area are consistent in size and style.",
+        "Calendar layout remains full-width and visually balanced on desktop and mobile."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo; add new logic there.",
-    "Do not edit files under frontend/src/components/ui or any frontend immutablePaths (compose existing components instead).",
-    "Use English for any new user-facing text added by this change."
+    "Do not modify files under frontend/src/components/ui (Shadcn UI components are read-only); compose them instead.",
+    "Do not modify frontend/src/hooks/useInternetIdentity.ts / .tsx, frontend/src/hooks/useActor.ts, or frontend/src/main.tsx (immutable paths).",
+    "Backend must remain a single Motoko actor in backend/main.mo; only add migration.mo if existing stable state requires changes (avoid if not necessary).",
+    "Use the existing backend query getProgramsActiveInRange(TimeRange) rather than introducing external services or databases."
   ],
   "nonGoals": [
-    "Do not integrate with external calendar providers (Google Calendar, Outlook, etc.).",
-    "Do not add notifications, reminders, or real-time updates.",
-    "Do not change the existing Program create/edit schema (startDate/endDate fields remain as-is)."
+    "Implementing real-time updates (no WebSockets/push).",
+    "Adding third-party authentication providers beyond Internet Identity.",
+    "Introducing a new backend database or external storage.",
+    "Creating new unrelated dashboard features beyond the Program Calendar redesign."
   ],
   "imageRequirements": {
     "required": [],

@@ -1,15 +1,31 @@
-import { useGetDashboardMetrics, useGetAllPrograms, useGetAllKPIs } from '../hooks/useQueries';
+import { useGetAllPrograms, useGetAllKPIs } from '../hooks/useQueries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LabelList } from 'recharts';
 import { Activity, TrendingUp, Target, CheckCircle2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProgramStatus, KpiStatus } from '../backend';
 import { Progress } from '@/components/ui/progress';
+import { useMemo } from 'react';
 
 export default function DashboardOverview() {
-  const { data: metrics, isLoading: metricsLoading } = useGetDashboardMetrics();
   const { data: programs = [], isLoading: programsLoading } = useGetAllPrograms();
   const { data: kpis = [], isLoading: kpisLoading } = useGetAllKPIs();
+
+  // Compute metrics from programs and KPIs
+  const metrics = useMemo(() => {
+    const activePrograms = programs.filter(p => p.status === ProgramStatus.ongoing).length;
+    const ongoingTimelines = programs.filter(p => p.status === ProgramStatus.ongoing).length;
+    const activeKpis = kpis.filter(k => k.status !== KpiStatus.achieved).length;
+    const achievedKpis = kpis.filter(k => k.status === KpiStatus.achieved).length;
+    const achievedKpisPercentage = kpis.length > 0 ? Math.round((achievedKpis / kpis.length) * 100) : 0;
+
+    return {
+      activePrograms,
+      ongoingTimelines,
+      activeKpis,
+      achievedKpisPercentage,
+    };
+  }, [programs, kpis]);
 
   // Prepare chart data
   const programStatusData = [
@@ -60,7 +76,7 @@ export default function DashboardOverview() {
     }))
     .slice(0, 6);
 
-  if (metricsLoading || programsLoading || kpisLoading) {
+  if (programsLoading || kpisLoading) {
     return (
       <div className="space-y-8 fade-in">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -84,7 +100,7 @@ export default function DashboardOverview() {
   const metricCards = [
     {
       title: 'Program Aktif',
-      value: metrics?.activePrograms || 0,
+      value: metrics.activePrograms,
       description: 'Program yang sedang berjalan',
       icon: Activity,
       gradient: 'from-blue-500 to-blue-600',
@@ -93,7 +109,7 @@ export default function DashboardOverview() {
     },
     {
       title: 'Timeline Berjalan',
-      value: metrics?.ongoingTimelines || 0,
+      value: metrics.ongoingTimelines,
       description: 'Timeline dalam progress',
       icon: TrendingUp,
       gradient: 'from-purple-500 to-purple-600',
@@ -102,7 +118,7 @@ export default function DashboardOverview() {
     },
     {
       title: 'KPI Aktif',
-      value: metrics?.activeKpis || 0,
+      value: metrics.activeKpis,
       description: 'KPI yang sedang dipantau',
       icon: Target,
       gradient: 'from-green-500 to-green-600',
@@ -111,7 +127,7 @@ export default function DashboardOverview() {
     },
     {
       title: 'KPI Tercapai',
-      value: `${metrics?.achievedKpisPercentage || 0}%`,
+      value: `${metrics.achievedKpisPercentage}%`,
       description: 'Persentase pencapaian KPI',
       icon: CheckCircle2,
       gradient: 'from-emerald-500 to-emerald-600',
@@ -364,4 +380,3 @@ export default function DashboardOverview() {
     </div>
   );
 }
-

@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-new-program-calendar-view-in-the-dashboard-that-defaults-to-today-highlights-today-on-a-calendar-ui-and-clearly-shows-which-programs-are-running-today",
-      "featureTitle": "Add a new \"Program Calendar\" view in the dashboard that defaults to today, highlights today on a calendar UI, and clearly shows which programs are running today.",
+      "featureId": "feature-redesign-the-existing-program-calendar-dashboard-tab-frontend-src-components-programcalendartab-tsx-into-a-full-width-readability-first-calendar-experience-that-feels-like-a-professional-management-tool-e-g-notion-clickup-google-calendar-style-prioritizing-large-typography-generous-spacing-clear-contrast-and-a-clean-calendar-grid-on-both-desktop-and-mobile",
+      "featureTitle": "Redesign the existing Program Calendar dashboard tab (frontend/src/components/ProgramCalendarTab.tsx) into a full-width, readability-first calendar experience that feels like a professional management tool (e.g., Notion/ClickUp/Google Calendar style), prioritizing large typography, generous spacing, clear contrast, and a clean calendar grid on both desktop and mobile.",
       "files": [
-        "frontend/src/components/ProgramCalendarTab.tsx",
-        "frontend/src/pages/Dashboard.tsx"
+        "frontend/src/components/ProgramCalendarTab.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,13 +16,103 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-4"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-wire-the-calendar-view-to-data-fetching-via-react-query-using-the-backend-active-on-date-query-ensure-correct-date-conversion-between-javascript-date-and-backend-int-bigint-epoch-values",
-      "featureTitle": "Wire the calendar view to data fetching via React Query, using the backend active-on-date query; ensure correct date conversion between JavaScript Date and backend Int/BigInt epoch values.",
+      "featureId": "feature-add-a-view-mode-switcher-to-the-program-calendar-tab-with-three-modes-monthly-weekly-and-agenda-ensure-the-default-mode-is-monthly-on-desktop-and-mobile-defaults-to-agenda-for-better-readability",
+      "featureTitle": "Add a view mode switcher to the Program Calendar tab with three modes: Monthly, Weekly, and Agenda; ensure the default mode is Monthly on desktop, and mobile defaults to Agenda for better readability.",
+      "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
+        "frontend/src/components/program-calendar/views/AgendaListView.tsx",
+        "frontend/src/components/program-calendar/views/MonthGridView.tsx",
+        "frontend/src/components/program-calendar/views/WeekGridView.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-filter-controls-directly-above-the-calendar-for-unit-division-pic-status-and-priority-and-apply-these-filters-consistently-across-monthly-weekly-agenda-views-and-the-day-program-detail-panels",
+      "featureTitle": "Add filter controls directly above the calendar for Unit/Division, PIC, Status, and Priority, and apply these filters consistently across Monthly/Weekly/Agenda views and the day/program detail panels.",
+      "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/components/program-calendar/programFilterUtils.ts",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-in-monthly-and-weekly-calendar-grid-views-display-a-badge-on-each-date-cell-indicating-the-number-of-programs-matching-current-filters-that-are-active-on-that-date-clicking-a-date-opens-a-detail-panel-right-side-panel-on-desktop-or-a-modal-sheet-on-smaller-screens-listing-the-programs-for-that-date",
+      "featureTitle": "In Monthly and Weekly calendar grid views, display a badge on each date cell indicating the number of programs matching current filters that are active on that date; clicking a date opens a detail panel (right-side panel on desktop or a modal/sheet on smaller screens) listing the programs for that date.",
+      "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/components/program-calendar/DayCell.tsx",
+        "frontend/src/components/program-calendar/DayDetailPanel.tsx",
+        "frontend/src/components/program-calendar/views/MonthGridView.tsx",
+        "frontend/src/components/program-calendar/views/WeekGridView.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-when-a-user-clicks-a-program-from-any-calendar-day-agenda-list-open-a-program-detail-drawer-sheet-showing-description-period-start-end-pic-a-visual-progress-bar-status-and-an-edit-button-that-opens-the-existing-program-edit-flow-reuse-the-current-programformdialog-behavior",
+      "featureTitle": "When a user clicks a program from any calendar/day/agenda list, open a program detail drawer/sheet showing: description, period (start/end), PIC, a visual progress bar, status, and an Edit button that opens the existing program edit flow (reuse the current ProgramFormDialog behavior).",
+      "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/components/program-calendar/DayDetailPanel.tsx",
+        "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
+        "frontend/src/components/program-calendar/views/AgendaListView.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-program-calendar-data-loading-strategy-to-support-monthly-weekly-visible-ranges-using-the-existing-backend-range-query-getprogramsactiveinrange-via-react-query-ensure-correct-conversion-between-javascript-date-ranges-and-backend-timerange-bigint-milliseconds-and-avoid-excessive-refetches-when-navigating-within-the-calendar",
+      "featureTitle": "Update the Program Calendar data loading strategy to support Monthly/Weekly visible ranges using the existing backend range query (getProgramsActiveInRange) via React Query; ensure correct conversion between JavaScript Date ranges and backend TimeRange BigInt milliseconds, and avoid excessive refetches when navigating within the calendar.",
       "files": [
         "frontend/src/components/ProgramCalendarTab.tsx",
         "frontend/src/hooks/useQueries.ts"
@@ -37,7 +126,29 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-3"
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-refine-program-calendar-visual-design-to-follow-a-modern-card-based-ui-with-soft-shadows-consistent-iconography-non-garish-status-priority-colors-and-strong-readability-over-dark-aesthetic-heavy-styling-ensure-the-calendar-remains-full-width-without-a-cramped-sidebar-layout",
+      "featureTitle": "Refine Program Calendar visual design to follow a modern, card-based UI with soft shadows, consistent iconography, non-garish status/priority colors, and strong readability over dark/aesthetic-heavy styling; ensure the calendar remains full-width without a cramped sidebar layout.",
+      "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/components/program-calendar/DayDetailPanel.tsx",
+        "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
+        "frontend/src/components/program-calendar/statusPriorityStyles.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
       ],
       "confidence": "high"
     }
