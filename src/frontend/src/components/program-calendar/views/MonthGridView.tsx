@@ -1,14 +1,17 @@
 import { useMemo } from 'react';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, addDays } from 'date-fns';
-import { id as idLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import type { Program } from '../../../backend';
 import DayCell from '../DayCell';
+
+type GridDensity = 'comfortable' | 'compact';
 
 interface MonthGridViewProps {
   currentDate: Date;
   programs: Program[];
   onDayClick: (date: Date) => void;
   onProgramClick: (program: Program) => void;
+  gridDensity?: GridDensity;
 }
 
 export default function MonthGridView({
@@ -16,6 +19,7 @@ export default function MonthGridView({
   programs,
   onDayClick,
   onProgramClick,
+  gridDensity = 'comfortable',
 }: MonthGridViewProps) {
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 });
@@ -23,16 +27,18 @@ export default function MonthGridView({
     return eachDayOfInterval({ start, end });
   }, [currentDate]);
 
-  const weekDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  const gapClass = gridDensity === 'comfortable' ? 'gap-3 md:gap-4' : 'gap-1.5 md:gap-2';
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {/* Week day headers */}
-      <div className="grid grid-cols-7 gap-1 md:gap-2">
+      <div className={`grid grid-cols-7 ${gapClass}`}>
         {weekDays.map((day) => (
           <div
             key={day}
-            className="text-center text-xs md:text-sm font-semibold text-muted-foreground py-2"
+            className="text-center text-sm md:text-base font-semibold text-muted-foreground py-3"
           >
             {day}
           </div>
@@ -40,7 +46,7 @@ export default function MonthGridView({
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1 md:gap-2">
+      <div className={`grid grid-cols-7 ${gapClass}`}>
         {days.map((day) => {
           const dayPrograms = programs.filter((p) => {
             const dayStart = new Date(day);
@@ -61,6 +67,7 @@ export default function MonthGridView({
               programs={dayPrograms}
               isCurrentMonth={isSameMonth(day, currentDate)}
               onClick={() => onDayClick(day)}
+              gridDensity={gridDensity}
             />
           );
         })}

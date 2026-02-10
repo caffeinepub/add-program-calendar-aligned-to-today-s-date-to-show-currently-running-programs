@@ -21,26 +21,26 @@ export default function ProgramCalendarViewSwitcher({
         size="sm"
         onClick={() => onViewModeChange('month')}
         disabled={disabled}
-        className="h-8 px-3"
+        className="h-9 px-3"
       >
         <Calendar className="h-4 w-4 mr-1.5" />
-        <span className="hidden sm:inline">Bulan</span>
+        <span className="hidden sm:inline">Month</span>
       </Button>
       <Button
         variant={viewMode === 'week' ? 'default' : 'ghost'}
         size="sm"
         onClick={() => onViewModeChange('week')}
         disabled={disabled}
-        className="h-8 px-3"
+        className="h-9 px-3"
       >
         <Columns3 className="h-4 w-4 mr-1.5" />
-        <span className="hidden sm:inline">Minggu</span>
+        <span className="hidden sm:inline">Week</span>
       </Button>
       <Button
         variant={viewMode === 'agenda' ? 'default' : 'ghost'}
         size="sm"
         onClick={() => onViewModeChange('agenda')}
-        className="h-8 px-3"
+        className="h-9 px-3"
       >
         <List className="h-4 w-4 mr-1.5" />
         <span className="hidden sm:inline">Agenda</span>

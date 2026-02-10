@@ -1,53 +1,23 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T16:40:33.844Z",
-  "summary": "The diff implements most of the Program Calendar redesign: new Month/Week grid views with day badges, an Agenda list view, a view switcher with mobile defaulting to agenda, day detail sheet, program detail sheet with progress/status/priority styling helpers, and range-based data loading via a new React Query hook. However, based on the truncated evidence, some required behaviors (notably filter reset UI and edit-flow wiring/refresh) cannot be conclusively verified. There are also unrelated dashboard changes (DashboardOverview) that were not requested and conflict with the “no new unrelated dashboard features” non-goal.",
-  "missing_requirements": [
-    {
-      "id": "REQ-6",
-      "requirement": "Provide a clear/reset action to return filters to the unfiltered state.",
-      "reason": "ProgramCalendarTab.tsx shows filter state and imports Button and X icon, but the diff snippet is truncated before any explicit reset/clear control implementation is visible.",
-      "evidence": [
-        "frontend/src/components/ProgramCalendarTab.tsx"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "requirement": "Edit button opens the existing ProgramFormDialog behavior and saving updates refreshes calendar/day/agenda views (badges/counts and lists).",
-      "reason": "ProgramCalendarTab imports ProgramFormDialog and maintains edit-related state, and ProgramDetailDrawer accepts an onEdit callback, but the provided snippets are truncated before showing (1) an Edit button invoking onEdit, (2) ProgramFormDialog opening with the selected program, and (3) post-save invalidation/refetch to refresh calendar views.",
-      "evidence": [
-        "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
-        "frontend/src/components/ProgramCalendarTab.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ]
-    }
-  ],
+  "generatedAt": "2026-02-10T16:27:14.995Z",
+  "summary": "REQ-23 appears implemented in ProgramDetailDrawer by adding composed Tailwind animation/transition classes to SheetContent, including fade + directional slide for desktop (right) vs mobile (bottom) and reduced-motion handling. No evidence of edits under frontend/src/components/ui. Two additional non-functional metadata files were also modified.",
+  "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Dashboard overview metrics/charts redesign and enhancements unrelated to the Program Calendar redesign.",
-      "reason": "BuildRequest scope is limited to the Program Calendar tab redesign; the change modifies DashboardOverview with new computed metrics and chart styling/logic, which is an unrelated dashboard feature per the non-goals.",
+      "description": "Modified repository metadata/summary files (frontend-file-summaries.txt and project_state.json) even though the request only asked for a UI animation change in ProgramDetailDrawer.",
+      "reason": "These changes are not part of REQ-23 and are not necessary to implement the drawer transition behavior.",
       "evidence": [
-        "frontend/src/components/DashboardOverview.tsx"
+        "frontend-file-summaries.txt",
+        "project_state.json"
       ]
     }
   ],
-  "confidence": 0.64,
+  "confidence": 0.78,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/DashboardOverview.tsx",
-    "frontend/src/components/ProgramCalendarTab.tsx",
-    "frontend/src/components/program-calendar/DayCell.tsx",
-    "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-    "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
     "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
-    "frontend/src/components/program-calendar/programFilterUtils.ts",
-    "frontend/src/components/program-calendar/statusPriorityStyles.ts",
-    "frontend/src/components/program-calendar/views/AgendaListView.tsx",
-    "frontend/src/components/program-calendar/views/MonthGridView.tsx",
-    "frontend/src/components/program-calendar/views/WeekGridView.tsx",
-    "frontend/src/hooks/useMediaQuery.ts",
-    "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]
 }

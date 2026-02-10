@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
 import { format, addDays, isSameDay } from 'date-fns';
-import { id as idLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import type { Program } from '../../../backend';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Calendar, User, Building2 } from 'lucide-react';
 import { getStatusConfig, getPriorityConfig } from '../statusPriorityStyles';
 
@@ -46,32 +45,32 @@ export default function AgendaListView({
 
   if (agendaDays.length === 0) {
     return (
-      <div className="text-center py-16">
-        <Calendar className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-        <p className="text-lg font-medium text-muted-foreground">
-          Tidak ada program dalam 2 minggu ke depan
+      <div className="text-center py-20">
+        <Calendar className="h-20 w-20 mx-auto text-muted-foreground/30 mb-6" />
+        <p className="text-xl font-medium text-muted-foreground">
+          No programs in the next 2 weeks
         </p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Coba ubah filter atau tambah program baru
+        <p className="text-base text-muted-foreground mt-3">
+          Try adjusting your filters or add new programs
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {agendaDays.map(({ date, programs: dayPrograms }) => (
-        <div key={date.toISOString()} className="space-y-3">
-          <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 py-2 border-b">
-            <h3 className="text-base md:text-lg font-bold">
-              {format(date, 'EEEE, d MMMM yyyy', { locale: idLocale })}
+        <div key={date.toISOString()} className="space-y-4">
+          <div className="pb-3 border-b">
+            <h3 className="text-lg md:text-xl font-bold">
+              {format(date, 'EEEE, MMMM d, yyyy', { locale: enUS })}
             </h3>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              {dayPrograms.length} program
+            <p className="text-sm md:text-base text-muted-foreground mt-1">
+              {dayPrograms.length} {dayPrograms.length === 1 ? 'program' : 'programs'}
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             {dayPrograms.map((program) => {
               const statusConfig = getStatusConfig(program.status);
               const priorityConfig = getPriorityConfig(program.priority);
@@ -82,44 +81,35 @@ export default function AgendaListView({
                   className="cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() => onProgramClick(program)}
                 >
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-base md:text-lg line-clamp-2">
-                            {program.name}
-                          </h4>
-                          {program.description && (
-                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                              {program.description}
-                            </p>
-                          )}
-                        </div>
+                  <CardContent className="p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <h4 className="font-semibold text-lg md:text-xl flex-1">
+                          {program.name}
+                        </h4>
                         <Badge className={priorityConfig.className}>
                           {priorityConfig.label}
                         </Badge>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-4 text-sm md:text-base text-muted-foreground">
+                        <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4" />
                           <span>{program.unit}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <User className="h-4 w-4" />
                           <span>{program.personInCharge.name}</span>
                         </div>
-                        <Badge variant={statusConfig.variant} className="text-xs">
-                          {statusConfig.label}
-                        </Badge>
                       </div>
 
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs md:text-sm">
-                          <span className="text-muted-foreground">Progress</span>
-                          <span className="font-semibold">{Number(program.progress)}%</span>
-                        </div>
-                        <Progress value={Number(program.progress)} className="h-2" />
+                      <div className="flex items-center justify-between">
+                        <Badge variant={statusConfig.variant}>
+                          {statusConfig.label}
+                        </Badge>
+                        <span className="text-base font-semibold">
+                          {Number(program.progress)}% complete
+                        </span>
                       </div>
                     </div>
                   </CardContent>

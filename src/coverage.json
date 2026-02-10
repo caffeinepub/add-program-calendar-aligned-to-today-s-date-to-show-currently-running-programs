@@ -1,154 +1,34 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T16:40:33.847Z",
+  "generatedAt": "2026-02-10T16:27:14.997Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 7,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-10",
-        "summary": "Refine Program Calendar visual design to follow a modern, card-based UI with soft shadows, consistent iconography, non-garish status/priority colors, and strong readability over dark/aesthetic-heavy styling; ensure the calendar remains full-width without a cramped sidebar layout.",
+        "id": "REQ-23",
+        "summary": "Add a subtle, smooth open/close transition for the Program Detail drawer/sheet (frontend/src/components/program-calendar/ProgramDetailDrawer.tsx) so that when a program is opened from the calendar or programs list, the panel animates in with a gentle fade + slide (slide from the right on desktop, slide up from the bottom on mobile) and animates out on close.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/program-calendar/statusPriorityStyles.ts",
-          "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
-          "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-          "frontend/src/components/ProgramCalendarTab.tsx"
+          "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/program-calendar/statusPriorityStyles.ts",
-          "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
-          "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-          "frontend/src/components/ProgramCalendarTab.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Redesign the existing Program Calendar dashboard tab (frontend/src/components/ProgramCalendarTab.tsx) into a full-width, readability-first calendar experience that feels like a professional management tool (e.g., Notion/ClickUp/Google Calendar style), prioritizing large typography, generous spacing, clear contrast, and a clean calendar grid on both desktop and mobile.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ProgramCalendarTab.tsx",
-          "frontend/src/components/program-calendar/ProgramCalendarLayout.tsx",
-          "frontend/src/components/program-calendar/calendarStyles.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ProgramCalendarTab.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Add a view mode switcher to the Program Calendar tab with three modes: Monthly, Weekly, and Agenda; ensure the default mode is Monthly on desktop, and mobile defaults to Agenda for better readability.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
-          "frontend/src/components/program-calendar/ProgramCalendarResponsiveDefaults.ts",
-          "frontend/src/components/ProgramCalendarTab.tsx",
-          "frontend/src/components/program-calendar/views/MonthGridView.tsx",
-          "frontend/src/components/program-calendar/views/WeekGridView.tsx",
-          "frontend/src/components/program-calendar/views/AgendaListView.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
-          "frontend/src/components/ProgramCalendarTab.tsx",
-          "frontend/src/components/program-calendar/views/MonthGridView.tsx",
-          "frontend/src/components/program-calendar/views/WeekGridView.tsx",
-          "frontend/src/components/program-calendar/views/AgendaListView.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Add filter controls directly above the calendar for Unit/Division, PIC, Status, and Priority, and apply these filters consistently across Monthly/Weekly/Agenda views and the day/program detail panels.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/program-calendar/ProgramCalendarFilters.tsx",
-          "frontend/src/components/program-calendar/programFilterUtils.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/ProgramCalendarTab.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/program-calendar/programFilterUtils.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/ProgramCalendarTab.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "In Monthly and Weekly calendar grid views, display a badge on each date cell indicating the number of programs matching current filters that are active on that date; clicking a date opens a detail panel (right-side panel on desktop or a modal/sheet on smaller screens) listing the programs for that date.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/program-calendar/DayCell.tsx",
-          "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-          "frontend/src/components/program-calendar/views/MonthGridView.tsx",
-          "frontend/src/components/program-calendar/views/WeekGridView.tsx",
-          "frontend/src/components/ProgramCalendarTab.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/program-calendar/DayCell.tsx",
-          "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-          "frontend/src/components/program-calendar/views/MonthGridView.tsx",
-          "frontend/src/components/program-calendar/views/WeekGridView.tsx",
-          "frontend/src/components/ProgramCalendarTab.tsx"
-        ]
-      },
-      {
-        "id": "REQ-8",
-        "summary": "When a user clicks a program from any calendar/day/agenda list, open a program detail drawer/sheet showing: description, period (start/end), PIC, a visual progress bar, status, and an Edit button that opens the existing program edit flow (reuse the current ProgramFormDialog behavior).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
-          "frontend/src/components/ProgramCalendarTab.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/program-calendar/views/AgendaListView.tsx",
-          "frontend/src/components/program-calendar/DayDetailPanel.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
-          "frontend/src/components/ProgramCalendarTab.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/program-calendar/views/AgendaListView.tsx",
-          "frontend/src/components/program-calendar/DayDetailPanel.tsx"
-        ]
-      },
-      {
-        "id": "REQ-9",
-        "summary": "Update the Program Calendar data loading strategy to support Monthly/Weekly visible ranges using the existing backend range query (getProgramsActiveInRange) via React Query; ensure correct conversion between JavaScript Date ranges and backend TimeRange BigInt milliseconds, and avoid excessive refetches when navigating within the calendar.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/timeRange.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/ProgramCalendarTab.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/ProgramCalendarTab.tsx"
+          "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/DashboardOverview.tsx",
-    "frontend/src/components/ProgramCalendarTab.tsx",
-    "frontend/src/components/program-calendar/DayCell.tsx",
-    "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-    "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
     "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
-    "frontend/src/components/program-calendar/programFilterUtils.ts",
-    "frontend/src/components/program-calendar/statusPriorityStyles.ts",
-    "frontend/src/components/program-calendar/views/AgendaListView.tsx",
-    "frontend/src/components/program-calendar/views/MonthGridView.tsx",
-    "frontend/src/components/program-calendar/views/WeekGridView.tsx",
-    "frontend/src/hooks/useMediaQuery.ts",
-    "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

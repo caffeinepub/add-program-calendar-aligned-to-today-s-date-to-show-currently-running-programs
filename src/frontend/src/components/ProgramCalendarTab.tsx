@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, X } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, addWeeks, format, isSameDay, isSameMonth } from 'date-fns';
-import { id as idLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import type { Program, ProgramStatus, ProgramPriority } from '../backend';
 import ProgramCalendarViewSwitcher from './program-calendar/ProgramCalendarViewSwitcher';
 import MonthGridView from './program-calendar/views/MonthGridView';
@@ -14,10 +14,12 @@ import AgendaListView from './program-calendar/views/AgendaListView';
 import DayDetailPanel from './program-calendar/DayDetailPanel';
 import ProgramDetailDrawer from './program-calendar/ProgramDetailDrawer';
 import ProgramFormDialog from './ProgramFormDialog';
+import GridDensityControl from './program-calendar/GridDensityControl';
 import { applyProgramFilters } from './program-calendar/programFilterUtils';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
 type ViewMode = 'month' | 'week' | 'agenda';
+type GridDensity = 'comfortable' | 'compact';
 
 interface FilterState {
   division: string;
@@ -29,6 +31,7 @@ interface FilterState {
 export default function ProgramCalendarTab() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [viewMode, setViewMode] = useState<ViewMode>(isMobile ? 'agenda' : 'month');
+  const [gridDensity, setGridDensity] = useState<GridDensity>('comfortable');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
@@ -147,57 +150,57 @@ export default function ProgramCalendarTab() {
 
   const getViewTitle = () => {
     if (viewMode === 'month') {
-      return format(currentDate, 'MMMM yyyy', { locale: idLocale });
+      return format(currentDate, 'MMMM yyyy', { locale: enUS });
     } else if (viewMode === 'week') {
       const start = startOfWeek(currentDate, { weekStartsOn: 0 });
       const end = endOfWeek(currentDate, { weekStartsOn: 0 });
-      return `${format(start, 'd MMM', { locale: idLocale })} - ${format(end, 'd MMM yyyy', { locale: idLocale })}`;
+      return `${format(start, 'MMM d', { locale: enUS })} - ${format(end, 'MMM d, yyyy', { locale: enUS })}`;
     } else {
-      return format(currentDate, 'MMMM yyyy', { locale: idLocale });
+      return format(currentDate, 'MMMM yyyy', { locale: enUS });
     }
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Program Calendar
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-1">
-            Kelola dan pantau jadwal program secara visual
+          <p className="text-base md:text-lg text-muted-foreground mt-2">
+            Manage and track program schedules visually
           </p>
         </div>
       </div>
 
       {/* Filters */}
       <Card className="shadow-soft">
-        <CardContent className="pt-6">
-          <div className="space-y-4">
+        <CardContent className="pt-8 pb-8 px-6 md:px-8">
+          <div className="space-y-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">Filter Program</h3>
+              <h3 className="text-base font-semibold text-foreground">Filter Programs</h3>
               {hasActiveFilters && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleResetFilters}
-                  className="h-8 text-xs"
+                  className="h-9 text-sm"
                 >
-                  <X className="h-3 w-3 mr-1" />
-                  Reset
+                  <X className="h-4 w-4 mr-1.5" />
+                  Reset Filters
                 </Button>
               )}
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Unit/Divisi</label>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-2.5">
+                <label className="text-sm font-medium text-muted-foreground">Unit/Division</label>
                 <Select value={filters.division} onValueChange={(value) => setFilters({ ...filters, division: value })}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Semua divisi" />
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="All divisions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Semua divisi</SelectItem>
+                    <SelectItem value="">All divisions</SelectItem>
                     {divisions.map((div) => (
                       <SelectItem key={div} value={div}>
                         {div}
@@ -207,14 +210,14 @@ export default function ProgramCalendarTab() {
                 </Select>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">PIC</label>
+              <div className="space-y-2.5">
+                <label className="text-sm font-medium text-muted-foreground">Person in Charge</label>
                 <Select value={filters.pic} onValueChange={(value) => setFilters({ ...filters, pic: value })}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Semua PIC" />
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="All PICs" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Semua PIC</SelectItem>
+                    <SelectItem value="">All PICs</SelectItem>
                     {uniquePICs.map((pic) => (
                       <SelectItem key={pic} value={pic}>
                         {pic}
@@ -224,32 +227,32 @@ export default function ProgramCalendarTab() {
                 </Select>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Status</label>
+              <div className="space-y-2.5">
+                <label className="text-sm font-medium text-muted-foreground">Status</label>
                 <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Semua status" />
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Semua status</SelectItem>
-                    <SelectItem value="planning">Perencanaan</SelectItem>
-                    <SelectItem value="ongoing">Berjalan</SelectItem>
-                    <SelectItem value="completed">Selesai</SelectItem>
+                    <SelectItem value="">All statuses</SelectItem>
+                    <SelectItem value="planning">Planning</SelectItem>
+                    <SelectItem value="ongoing">Ongoing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Prioritas</label>
+              <div className="space-y-2.5">
+                <label className="text-sm font-medium text-muted-foreground">Priority</label>
                 <Select value={filters.priority} onValueChange={(value) => setFilters({ ...filters, priority: value })}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Semua prioritas" />
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="All priorities" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Semua prioritas</SelectItem>
-                    <SelectItem value="high">Tinggi</SelectItem>
-                    <SelectItem value="middle">Sedang</SelectItem>
-                    <SelectItem value="low">Rendah</SelectItem>
+                    <SelectItem value="">All priorities</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="middle">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -260,41 +263,49 @@ export default function ProgramCalendarTab() {
 
       {/* View Controls */}
       <Card className="shadow-soft">
-        <CardContent className="pt-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handlePrevious}>
+        <CardContent className="pt-8 pb-8 px-6 md:px-8">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="default" onClick={handlePrevious} className="h-10 px-4">
                 ←
               </Button>
-              <Button variant="outline" size="sm" onClick={handleToday}>
-                Hari Ini
+              <Button variant="outline" size="default" onClick={handleToday} className="h-10 px-5">
+                Today
               </Button>
-              <Button variant="outline" size="sm" onClick={handleNext}>
+              <Button variant="outline" size="default" onClick={handleNext} className="h-10 px-4">
                 →
               </Button>
-              <div className="ml-2 text-base md:text-lg font-semibold">
+              <div className="ml-3 text-lg md:text-xl font-semibold">
                 {getViewTitle()}
               </div>
             </div>
-            <ProgramCalendarViewSwitcher
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              disabled={isMobile}
-            />
+            <div className="flex items-center gap-4">
+              {(viewMode === 'month' || viewMode === 'week') && (
+                <GridDensityControl
+                  density={gridDensity}
+                  onDensityChange={setGridDensity}
+                />
+              )}
+              <ProgramCalendarViewSwitcher
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                disabled={isMobile}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Calendar View */}
       <Card className="shadow-soft">
-        <CardContent className="p-3 md:p-6">
+        <CardContent className="p-5 md:p-8">
           {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <div className="flex items-center justify-center py-24">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
           ) : error ? (
-            <div className="text-center py-20">
-              <p className="text-destructive">Error: {(error as Error).message}</p>
+            <div className="text-center py-24">
+              <p className="text-destructive text-lg">Error: {(error as Error).message}</p>
             </div>
           ) : (
             <>
@@ -304,6 +315,7 @@ export default function ProgramCalendarTab() {
                   programs={filteredPrograms}
                   onDayClick={handleDayClick}
                   onProgramClick={handleProgramClick}
+                  gridDensity={gridDensity}
                 />
               )}
               {viewMode === 'week' && (
@@ -312,6 +324,7 @@ export default function ProgramCalendarTab() {
                   programs={filteredPrograms}
                   onDayClick={handleDayClick}
                   onProgramClick={handleProgramClick}
+                  gridDensity={gridDensity}
                 />
               )}
               {viewMode === 'agenda' && (

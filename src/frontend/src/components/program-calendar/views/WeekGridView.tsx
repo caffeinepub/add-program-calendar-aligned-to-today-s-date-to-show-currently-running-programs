@@ -1,14 +1,17 @@
 import { useMemo } from 'react';
 import { startOfWeek, endOfWeek, eachDayOfInterval, format } from 'date-fns';
-import { id as idLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import type { Program } from '../../../backend';
 import DayCell from '../DayCell';
+
+type GridDensity = 'comfortable' | 'compact';
 
 interface WeekGridViewProps {
   currentDate: Date;
   programs: Program[];
   onDayClick: (date: Date) => void;
   onProgramClick: (program: Program) => void;
+  gridDensity?: GridDensity;
 }
 
 export default function WeekGridView({
@@ -16,6 +19,7 @@ export default function WeekGridView({
   programs,
   onDayClick,
   onProgramClick,
+  gridDensity = 'comfortable',
 }: WeekGridViewProps) {
   const days = useMemo(() => {
     const start = startOfWeek(currentDate, { weekStartsOn: 0 });
@@ -23,11 +27,13 @@ export default function WeekGridView({
     return eachDayOfInterval({ start, end });
   }, [currentDate]);
 
-  const weekDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  const gapClass = gridDensity === 'comfortable' ? 'gap-3 md:gap-4' : 'gap-2 md:gap-2.5';
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-2 md:gap-3">
+    <div className="space-y-5">
+      <div className={`grid grid-cols-1 md:grid-cols-7 ${gapClass}`}>
         {days.map((day, index) => {
           const dayPrograms = programs.filter((p) => {
             const dayStart = new Date(day);
@@ -44,11 +50,11 @@ export default function WeekGridView({
           return (
             <div key={day.toISOString()} className="space-y-2">
               <div className="text-center">
-                <div className="text-xs md:text-sm font-semibold text-muted-foreground">
+                <div className="text-sm font-semibold text-muted-foreground">
                   {weekDays[index]}
                 </div>
-                <div className="text-lg md:text-2xl font-bold">
-                  {format(day, 'd', { locale: idLocale })}
+                <div className="text-lg md:text-xl font-bold mt-1">
+                  {format(day, 'd')}
                 </div>
               </div>
               <DayCell
@@ -57,6 +63,7 @@ export default function WeekGridView({
                 isCurrentMonth={true}
                 onClick={() => onDayClick(day)}
                 variant="week"
+                gridDensity={gridDensity}
               />
             </div>
           );

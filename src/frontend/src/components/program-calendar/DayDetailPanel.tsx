@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
-import { id as idLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { Calendar, Building2, User } from 'lucide-react';
 import type { Program } from '../../backend';
 import { getStatusConfig, getPriorityConfig } from './statusPriorityStyles';
@@ -42,25 +42,25 @@ export default function DayDetailPanel({
     <Sheet open={!!date} onOpenChange={onClose}>
       <SheetContent side={isMobile ? 'bottom' : 'right'} className="w-full sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
+          <SheetTitle className="flex items-center gap-2.5 text-xl">
             <Calendar className="h-5 w-5" />
-            {format(date, 'EEEE, d MMMM yyyy', { locale: idLocale })}
+            {format(date, 'EEEE, MMMM d, yyyy', { locale: enUS })}
           </SheetTitle>
-          <SheetDescription>
-            {dayPrograms.length} program aktif pada tanggal ini
+          <SheetDescription className="text-base">
+            {dayPrograms.length} {dayPrograms.length === 1 ? 'program' : 'programs'} active on this date
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-120px)] mt-6 pr-4">
+        <ScrollArea className="h-[calc(100vh-140px)] mt-8 pr-4">
           {dayPrograms.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-              <p className="text-muted-foreground">
-                Tidak ada program pada tanggal ini
+            <div className="text-center py-16">
+              <Calendar className="h-16 w-16 mx-auto text-muted-foreground/30 mb-5" />
+              <p className="text-base text-muted-foreground">
+                No programs on this date
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {dayPrograms.map((program) => {
                 const statusConfig = getStatusConfig(program.status);
                 const priorityConfig = getPriorityConfig(program.priority);
@@ -74,10 +74,10 @@ export default function DayDetailPanel({
                       onClose();
                     }}
                   >
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <h4 className="font-semibold text-base line-clamp-2 flex-1">
+                    <CardContent className="p-5">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <h4 className="font-semibold text-lg line-clamp-2 flex-1">
                             {program.name}
                           </h4>
                           <Badge className={priorityConfig.className}>
@@ -91,12 +91,12 @@ export default function DayDetailPanel({
                           </p>
                         )}
 
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1.5">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
                             <Building2 className="h-4 w-4" />
                             <span>{program.unit}</span>
                           </div>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-2">
                             <User className="h-4 w-4" />
                             <span>{program.personInCharge.name}</span>
                           </div>

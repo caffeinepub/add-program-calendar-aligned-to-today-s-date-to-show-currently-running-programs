@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
+  "projectStateVersion": 15,
   "summary": "Redesign the Program Calendar dashboard view for SHQ AQL tracking web app with a full-width, highly readable, modern UX: large calendar UI with Monthly/Weekly/Agenda modes, rich filters, clickable day badges opening program details in a drawer/modal, and a mobile-first agenda list view.",
   "architectural_notes": [
     "Program Calendar UI must be full-width and dominant (not sidebar), with responsive design: desktop calendar grid + mobile agenda list view.",
@@ -8,9 +8,16 @@
     "Provide filter controls above the calendar: Unit/Divisi, PIC, Status, Priority.",
     "Each date shows a badge count of programs; clicking a date opens a right-side detail panel (drawer) or modal.",
     "Clicking a program opens a detail drawer with description, period, PIC, progress visualization, status, and an Edit action.",
-    "UI styling direction: prioritize readability (larger fonts, generous spacing, clear contrast), card-based layout, soft shadows, consistent icons, and restrained status colors."
+    "UI styling direction: prioritize readability (larger fonts, generous spacing, clear contrast), card-based layout, soft shadows, consistent icons, and restrained status colors.",
+    "Calendar UI polish direction confirmed: more spacious layout (larger spacing), softer colors, larger/more readable typography, simpler agenda layout; adjust calendar grid density (tighter vs looser) as part of this refinement.",
+    "Avoid horizontal scrolling to access program details; ensure details are accessible without shifting/scrolling sideways (e.g., responsive drawer/modal or inline details on smaller screens) and improve overall scroll smoothness/usability.",
+    "Add a subtle smooth open/close transition for the program detail drawer/modal/sheet to improve perceived UX polish."
   ],
-  "known_issues": [],
+  "known_issues": [
+    "KPI program dropdown is hard to use: scrolling/searching for a program is not smooth/doesn't work well.",
+    "KPI “Related Program” dropdown still does not scroll smoothly (issue persists after latest deploy/build).",
+    "Users need to scroll/shift to the right to see program details; overall scrolling feels cumbersome/not smooth when browsing programs."
+  ],
   "isFixRequest": false,
   "existing_features": [
     {
@@ -84,6 +91,110 @@
         "REQ-10"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-kpi-create-edit-form-frontend-src-components-kpiformdialog-tsx-so-the-related-program-dropdown-supports-smooth-scrolling-for-long-program-lists-and-allows-users-to-quickly-search-filter-programs-by-name-before-selecting",
+      "title": "Update the KPI create/edit form (frontend/src/components/KpiFormDialog.tsx) so the “Related Program” dropdown supports smooth scrolling for long program lists and allows users to quickly search/filter programs by name before selecting.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-kpi-program-dropdown-ui-is-accessible-and-keyboard-friendly-users-can-open-the-selector-type-to-filter-navigate-results-with-arrow-keys-and-confirm-selection-with-enter-escape-without-losing-focus-or-closing-unexpectedly",
+      "title": "Ensure the KPI program dropdown UI is accessible and keyboard-friendly: users can open the selector, type to filter, navigate results with arrow keys, and confirm selection with Enter/Escape without losing focus or closing unexpectedly.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-kpi-related-program-dropdown-so-the-options-list-scrolls-smoothly-and-reliably-for-long-program-lists-mouse-wheel-trackpad-without-scrolling-the-underlying-page-or-closing-the-popover-unexpectedly",
+      "title": "Fix the KPI “Related Program” dropdown so the options list scrolls smoothly and reliably for long program lists (mouse wheel + trackpad), without scrolling the underlying page or closing the popover unexpectedly.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-the-dropdown-s-scroll-behavior-implementation-in-frontend-src-components-relatedprogramcombobox-tsx-to-ensure-consistent-scroll-capture-inside-the-popover-content-e-g-prevent-scroll-chaining-propagation-to-the-document-and-ensure-the-scroll-container-is-the-element-receiving-wheel-events",
+      "title": "Improve the dropdown’s scroll behavior implementation in frontend/src/components/RelatedProgramCombobox.tsx to ensure consistent scroll capture inside the popover content (e.g., prevent scroll chaining/propagation to the document and ensure the scroll container is the element receiving wheel events).",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-all-user-facing-text-within-the-program-calendar-feature-to-english-including-headers-buttons-filter-labels-placeholders-empty-states-view-switcher-labels-and-drawer-panel-copy-while-keeping-existing-functionality-unchanged",
+      "title": "Update all user-facing text within the Program Calendar feature to English (including headers, buttons, filter labels/placeholders, empty states, view switcher labels, and drawer/panel copy) while keeping existing functionality unchanged.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refine-the-program-calendar-layout-to-be-more-spacious-and-readability-first-by-increasing-typography-scale-and-spacing-in-the-program-calendar-tab-header-filter-card-view-controls-and-calendar-container-ensuring-consistent-vertical-rhythm-on-both-desktop-and-mobile",
+      "title": "Refine the Program Calendar layout to be more spacious and readability-first by increasing typography scale and spacing in the Program Calendar tab header, filter card, view controls, and calendar container, ensuring consistent vertical rhythm on both desktop and mobile.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-calendar-grid-density-control-for-month-and-week-views-with-at-least-two-options-e-g-comfortable-and-compact-that-adjusts-day-cell-padding-height-and-grid-gaps-so-users-can-choose-a-tighter-or-looser-grid-without-affecting-agenda-view",
+      "title": "Add a calendar grid density control for Month and Week views with at least two options (e.g., Comfortable and Compact) that adjusts day-cell padding/height and grid gaps so users can choose a tighter or looser grid without affecting agenda view.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-simplify-the-agenda-view-layout-to-reduce-visual-clutter-while-keeping-all-essential-information-program-name-unit-pic-status-priority-and-progress-and-preserving-click-to-open-program-details-behavior",
+      "title": "Simplify the Agenda view layout to reduce visual clutter while keeping all essential information (program name, unit, PIC, status, priority, and progress) and preserving click-to-open program details behavior.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-soften-the-program-calendar-color-usage-including-status-priority-badges-and-calendar-day-states-such-as-today-has-programs-empty-to-use-restrained-non-garish-tones-with-strong-contrast-for-readability-in-both-light-and-dark-themes",
+      "title": "Soften the Program Calendar color usage (including status/priority badges and calendar day states such as today/has-programs/empty) to use restrained, non-garish tones with strong contrast for readability in both light and dark themes.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-programs-list-screen-frontend-src-components-programstab-tsx-so-users-can-view-full-program-details-without-needing-to-horizontally-scroll-right-swipe-the-page-e-g-provide-a-row-card-click-that-opens-a-detail-drawer-sheet-and-avoid-wide-tables-that-overflow-the-viewport-on-common-laptop-mobile-widths",
+      "title": "Update the Programs list screen (frontend/src/components/ProgramsTab.tsx) so users can view full program details without needing to horizontally scroll/right-swipe the page (e.g., provide a row/card click that opens a detail drawer/sheet, and avoid wide tables that overflow the viewport on common laptop/mobile widths).",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-scrolling-ergonomics-on-the-programs-screen-by-ensuring-the-primary-scroll-area-is-straightforward-and-stable-no-nested-scroll-traps-and-that-any-secondary-scroll-containers-tables-drawers-popovers-capture-wheel-trackpad-scrolling-reliably-without-scrolling-the-underlying-page-unexpectedly",
+      "title": "Improve scrolling ergonomics on the Programs screen by ensuring the primary scroll area is straightforward and stable (no nested scroll traps), and that any secondary scroll containers (tables, drawers, popovers) capture wheel/trackpad scrolling reliably without scrolling the underlying page unexpectedly.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-reuse-the-existing-program-details-presentation-used-by-the-calendar-frontend-src-components-program-calendar-programdetaildrawer-tsx-for-program-details-from-the-programs-screen-so-the-detail-view-is-consistent-and-does-not-require-widening-the-list-layout-to-show-details",
+      "title": "Reuse the existing program details presentation used by the calendar (frontend/src/components/program-calendar/ProgramDetailDrawer.tsx) for program details from the Programs screen, so the detail view is consistent and does not require widening the list layout to show details.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-subtle-smooth-open-close-transition-for-the-program-detail-drawer-sheet-frontend-src-components-program-calendar-programdetaildrawer-tsx-so-that-when-a-program-is-opened-from-the-calendar-or-programs-list-the-panel-animates-in-with-a-gentle-fade-slide-slide-from-the-right-on-desktop-slide-up-from-the-bottom-on-mobile-and-animates-out-on-close",
+      "title": "Add a subtle, smooth open/close transition for the Program Detail drawer/sheet (frontend/src/components/program-calendar/ProgramDetailDrawer.tsx) so that when a program is opened from the calendar or programs list, the panel animates in with a gentle fade + slide (slide from the right on desktop, slide up from the bottom on mobile) and animates out on close.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -104,6 +215,24 @@
     {
       "id": "AR-3",
       "summary": "Redesign Program Calendar UX/UI: full-width large calendar with Monthly/Weekly/Agenda switch, day badges + click-to-open detail drawer/modal, filters (Unit/Divisi, PIC, Status, Priority), program detail drawer (description, period, PIC, progress bar, status, edit), and mobile agenda list view",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Fix KPI dropdown so users can scroll and easily search/select a program",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Improve Program Calendar UX to avoid needing horizontal scrolling/right shift to view details; make scrolling/navigation smoother and easier to browse all programs",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add a subtle smooth transition/animation when opening the program detail drawer/modal (e.g., slide/fade)",
       "reqIds": [],
       "status": "pending"
     }

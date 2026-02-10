@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreateKpi, useUpdateKpi, useGetAllPrograms, useGetAllTeamMembers } from '../hooks/useQueries';
 import { KpiStatus, KpiPeriod, type Kpi, type PersonInCharge } from '../backend';
 import { Loader2 } from 'lucide-react';
+import RelatedProgramCombobox from './RelatedProgramCombobox';
 
 interface KpiFormDialogProps {
   open: boolean;
@@ -117,27 +118,12 @@ export default function KpiFormDialog({ open, onClose, kpi }: KpiFormDialogProps
 
           <div className="space-y-2">
             <Label htmlFor="relatedProgramId">Program Terkait *</Label>
-            <Select
+            <RelatedProgramCombobox
+              programs={programs}
               value={formData.relatedProgramId}
               onValueChange={(value) => setFormData({ ...formData, relatedProgramId: value })}
-            >
-              <SelectTrigger id="relatedProgramId">
-                <SelectValue placeholder="Pilih program" />
-              </SelectTrigger>
-              <SelectContent>
-                {programs.length === 0 ? (
-                  <SelectItem value="no-programs" disabled>
-                    Belum ada program
-                  </SelectItem>
-                ) : (
-                  programs.map((program) => (
-                    <SelectItem key={program.id.toString()} value={program.id.toString()}>
-                      {program.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+              disabled={isPending}
+            />
           </div>
 
           <div className="space-y-2">
