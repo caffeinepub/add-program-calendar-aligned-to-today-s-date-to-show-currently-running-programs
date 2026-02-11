@@ -7,6 +7,7 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export type Time = bigint;
 export interface Kpi {
     id: bigint;
     status: KpiStatus;
@@ -14,19 +15,22 @@ export interface Kpi {
     relatedProgramId: bigint;
     name: string;
     team: PersonInCharge;
+    deadline?: bigint;
     realizationValue: bigint;
     targetValue: bigint;
 }
-export type Time = bigint;
+export interface TeamAgendaItem {
+    id: bigint;
+    startTime: bigint;
+    title: string;
+    endTime: bigint;
+    description: string;
+    attendees: Array<string>;
+    category: AgendaCategory;
+}
 export interface TimeRange {
     end: Time;
     start: Time;
-}
-export interface TeamMember {
-    id: bigint;
-    name: string;
-    role: string;
-    division: string;
 }
 export interface Program {
     id: bigint;
@@ -40,6 +44,12 @@ export interface Program {
     personInCharge: PersonInCharge;
     startDate: bigint;
 }
+export interface TeamMember {
+    id: bigint;
+    name: string;
+    role: string;
+    division: string;
+}
 export interface PersonInCharge {
     id: bigint;
     name: string;
@@ -49,6 +59,12 @@ export interface PersonInCharge {
 export interface UserProfile {
     name: string;
     role: UserRole;
+}
+export enum AgendaCategory {
+    workshop = "workshop",
+    meeting = "meeting",
+    general = "general",
+    training = "training"
 }
 export enum KpiPeriod {
     annual = "annual",
@@ -84,12 +100,15 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole__1): Promise<void>;
     createKpi(newKpi: Kpi): Promise<bigint>;
     createProgram(newProgram: Program): Promise<bigint>;
+    createTeamAgendaItem(newItem: TeamAgendaItem): Promise<bigint>;
     createTeamMember(newMember: TeamMember): Promise<void>;
     deleteKpi(id: bigint): Promise<void>;
     deleteProgram(id: bigint): Promise<void>;
+    deleteTeamAgendaItem(id: bigint): Promise<void>;
     deleteTeamMember(id: bigint): Promise<void>;
     getAllKPIs(): Promise<Array<Kpi>>;
     getAllPrograms(): Promise<Array<Program>>;
+    getAllTeamAgendaItems(): Promise<Array<TeamAgendaItem>>;
     getAllTeamMembers(): Promise<Array<TeamMember>>;
     getAllUserProfiles(): Promise<Array<[Principal, UserProfile]>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -112,6 +131,7 @@ export interface backendInterface {
     getProgramsByName(name: string): Promise<Array<Program>>;
     getProgramsByStatus(_status: ProgramStatus): Promise<Array<Program>>;
     getProgramsByTeam(team: string): Promise<Array<Program>>;
+    getTeamAgendaItemsByRange(range: TimeRange): Promise<Array<TeamAgendaItem>>;
     getTeamMembersByDivision(division: string): Promise<Array<TeamMember>>;
     getTeamMembersByDivisionFiltered(division: string): Promise<Array<TeamMember>>;
     getUniqueDivisions(): Promise<Array<string>>;
@@ -122,6 +142,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateKpi(id: bigint, updatedKpi: Kpi): Promise<void>;
     updateProgram(id: bigint, updatedProgram: Program): Promise<void>;
+    updateTeamAgendaItem(id: bigint, updatedItem: TeamAgendaItem): Promise<void>;
     updateTeamMember(id: bigint, updatedMember: TeamMember): Promise<void>;
     updateUserProfileRole(user: Principal, newRole: UserRole): Promise<void>;
 }

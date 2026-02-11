@@ -36,6 +36,7 @@ export const Kpi = IDL.Record({
   'relatedProgramId' : IDL.Nat,
   'name' : IDL.Text,
   'team' : PersonInCharge,
+  'deadline' : IDL.Opt(IDL.Int),
   'realizationValue' : IDL.Nat,
   'targetValue' : IDL.Nat,
 });
@@ -61,6 +62,21 @@ export const Program = IDL.Record({
   'personInCharge' : PersonInCharge,
   'startDate' : IDL.Int,
 });
+export const AgendaCategory = IDL.Variant({
+  'workshop' : IDL.Null,
+  'meeting' : IDL.Null,
+  'general' : IDL.Null,
+  'training' : IDL.Null,
+});
+export const TeamAgendaItem = IDL.Record({
+  'id' : IDL.Nat,
+  'startTime' : IDL.Int,
+  'title' : IDL.Text,
+  'endTime' : IDL.Int,
+  'description' : IDL.Text,
+  'attendees' : IDL.Vec(IDL.Text),
+  'category' : AgendaCategory,
+});
 export const TeamMember = IDL.Record({
   'id' : IDL.Nat,
   'name' : IDL.Text,
@@ -81,12 +97,15 @@ export const idlService = IDL.Service({
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
   'createKpi' : IDL.Func([Kpi], [IDL.Nat], []),
   'createProgram' : IDL.Func([Program], [IDL.Nat], []),
+  'createTeamAgendaItem' : IDL.Func([TeamAgendaItem], [IDL.Nat], []),
   'createTeamMember' : IDL.Func([TeamMember], [], []),
   'deleteKpi' : IDL.Func([IDL.Nat], [], []),
   'deleteProgram' : IDL.Func([IDL.Nat], [], []),
+  'deleteTeamAgendaItem' : IDL.Func([IDL.Nat], [], []),
   'deleteTeamMember' : IDL.Func([IDL.Nat], [], []),
   'getAllKPIs' : IDL.Func([], [IDL.Vec(Kpi)], ['query']),
   'getAllPrograms' : IDL.Func([], [IDL.Vec(Program)], ['query']),
+  'getAllTeamAgendaItems' : IDL.Func([], [IDL.Vec(TeamAgendaItem)], ['query']),
   'getAllTeamMembers' : IDL.Func([], [IDL.Vec(TeamMember)], ['query']),
   'getAllUserProfiles' : IDL.Func(
       [],
@@ -145,6 +164,11 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getProgramsByTeam' : IDL.Func([IDL.Text], [IDL.Vec(Program)], ['query']),
+  'getTeamAgendaItemsByRange' : IDL.Func(
+      [TimeRange],
+      [IDL.Vec(TeamAgendaItem)],
+      ['query'],
+    ),
   'getTeamMembersByDivision' : IDL.Func(
       [IDL.Text],
       [IDL.Vec(TeamMember)],
@@ -167,6 +191,7 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'updateKpi' : IDL.Func([IDL.Nat, Kpi], [], []),
   'updateProgram' : IDL.Func([IDL.Nat, Program], [], []),
+  'updateTeamAgendaItem' : IDL.Func([IDL.Nat, TeamAgendaItem], [], []),
   'updateTeamMember' : IDL.Func([IDL.Nat, TeamMember], [], []),
   'updateUserProfileRole' : IDL.Func([IDL.Principal, UserRole], [], []),
 });
@@ -202,6 +227,7 @@ export const idlFactory = ({ IDL }) => {
     'relatedProgramId' : IDL.Nat,
     'name' : IDL.Text,
     'team' : PersonInCharge,
+    'deadline' : IDL.Opt(IDL.Int),
     'realizationValue' : IDL.Nat,
     'targetValue' : IDL.Nat,
   });
@@ -227,6 +253,21 @@ export const idlFactory = ({ IDL }) => {
     'personInCharge' : PersonInCharge,
     'startDate' : IDL.Int,
   });
+  const AgendaCategory = IDL.Variant({
+    'workshop' : IDL.Null,
+    'meeting' : IDL.Null,
+    'general' : IDL.Null,
+    'training' : IDL.Null,
+  });
+  const TeamAgendaItem = IDL.Record({
+    'id' : IDL.Nat,
+    'startTime' : IDL.Int,
+    'title' : IDL.Text,
+    'endTime' : IDL.Int,
+    'description' : IDL.Text,
+    'attendees' : IDL.Vec(IDL.Text),
+    'category' : AgendaCategory,
+  });
   const TeamMember = IDL.Record({
     'id' : IDL.Nat,
     'name' : IDL.Text,
@@ -247,12 +288,19 @@ export const idlFactory = ({ IDL }) => {
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
     'createKpi' : IDL.Func([Kpi], [IDL.Nat], []),
     'createProgram' : IDL.Func([Program], [IDL.Nat], []),
+    'createTeamAgendaItem' : IDL.Func([TeamAgendaItem], [IDL.Nat], []),
     'createTeamMember' : IDL.Func([TeamMember], [], []),
     'deleteKpi' : IDL.Func([IDL.Nat], [], []),
     'deleteProgram' : IDL.Func([IDL.Nat], [], []),
+    'deleteTeamAgendaItem' : IDL.Func([IDL.Nat], [], []),
     'deleteTeamMember' : IDL.Func([IDL.Nat], [], []),
     'getAllKPIs' : IDL.Func([], [IDL.Vec(Kpi)], ['query']),
     'getAllPrograms' : IDL.Func([], [IDL.Vec(Program)], ['query']),
+    'getAllTeamAgendaItems' : IDL.Func(
+        [],
+        [IDL.Vec(TeamAgendaItem)],
+        ['query'],
+      ),
     'getAllTeamMembers' : IDL.Func([], [IDL.Vec(TeamMember)], ['query']),
     'getAllUserProfiles' : IDL.Func(
         [],
@@ -315,6 +363,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getProgramsByTeam' : IDL.Func([IDL.Text], [IDL.Vec(Program)], ['query']),
+    'getTeamAgendaItemsByRange' : IDL.Func(
+        [TimeRange],
+        [IDL.Vec(TeamAgendaItem)],
+        ['query'],
+      ),
     'getTeamMembersByDivision' : IDL.Func(
         [IDL.Text],
         [IDL.Vec(TeamMember)],
@@ -337,6 +390,7 @@ export const idlFactory = ({ IDL }) => {
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'updateKpi' : IDL.Func([IDL.Nat, Kpi], [], []),
     'updateProgram' : IDL.Func([IDL.Nat, Program], [], []),
+    'updateTeamAgendaItem' : IDL.Func([IDL.Nat, TeamAgendaItem], [], []),
     'updateTeamMember' : IDL.Func([IDL.Nat, TeamMember], [], []),
     'updateUserProfileRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   });

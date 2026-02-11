@@ -40,6 +40,10 @@
         --gradient-from: 0.55 0.20 264;
         --gradient-via: 0.60 0.18 280;
         --gradient-to: 0.65 0.20 160;
+        
+        --category-program: 59 130 246;
+        --category-agenda: 16 185 129;
+        --category-kpi: 239 68 68;
     }
 
     .dark {
@@ -78,6 +82,10 @@
         --gradient-from: 0.65 0.22 264;
         --gradient-via: 0.62 0.20 280;
         --gradient-to: 0.65 0.20 160;
+        
+        --category-program: 96 165 250;
+        --category-agenda: 52 211 153;
+        --category-kpi: 248 113 113;
     }
 
     * {

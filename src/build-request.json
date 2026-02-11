@@ -1,39 +1,111 @@
 {
   "kind": "build_request",
-  "title": "Add smooth transition animation when opening Program Detail drawer",
+  "title": "Simplify Program Calendar UI across all modes (Month/Week/Day/Agenda)",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-23",
-      "text": "Add a subtle, smooth open/close transition for the Program Detail drawer/sheet (frontend/src/components/program-calendar/ProgramDetailDrawer.tsx) so that when a program is opened from the calendar or programs list, the panel animates in with a gentle fade + slide (slide from the right on desktop, slide up from the bottom on mobile) and animates out on close.",
+      "id": "REQ-29",
+      "text": "Simplify the overall visual presentation of the Program Calendar tab to a minimal, distraction-free style while keeping all existing functionality (filters, view switching, reminders toggle, day/program interactions) unchanged.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-9",
+          "msg-11"
         ],
         "quotes": [
-          "Buatkan transisi halu saat membuka detail program"
+          "Semuanya sekaligus",
+          "Ok, bangun versi sederhananya"
         ]
       },
       "acceptanceCriteria": [
-        "Opening Program Detail animates in smoothly (fade + directional slide) and feels responsive (no jank).",
-        "Closing Program Detail animates out smoothly (reverse animation) without leaving the UI in a visually broken state.",
-        "Desktop/right drawer uses a horizontal slide-in; mobile/bottom sheet uses a vertical slide-up motion.",
-        "Animation respects reduced-motion preferences (if the user has prefers-reduced-motion enabled, the animation is disabled or significantly minimized).",
-        "No edits are made to any files under frontend/src/components/ui; the animation is applied via composition (e.g., className) in ProgramDetailDrawer."
+        "Program Calendar still supports Month/Week/Day/Agenda modes, date navigation (Previous/Today/Next), filters, reminders toggle, day detail panel, and program detail drawer exactly as before.",
+        "The Program Calendar header and surrounding layout no longer uses visually loud styling (e.g., gradient title treatment, heavy shadows) and instead uses clean typography, subtle borders, and restrained spacing.",
+        "No new features are introduced; changes are limited to simplifying UI/UX and visual density."
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "text": "Simplify the Month and Week grid views by reducing visual chrome in day cells and grid layout (less shadow, fewer borders/rounding, fewer high-emphasis hover effects) while preserving today highlight, out-of-month dimming, and category indicators.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9",
+          "msg-11"
+        ],
+        "quotes": [
+          "Semuanya sekaligus",
+          "Ok, bangun versi sederhananya"
+        ]
+      },
+      "acceptanceCriteria": [
+        "In Month and Week views, day cells remain clickable and continue to open the existing day detail panel behavior.",
+        "Day cells keep: (1) date number, (2) today state, (3) out-of-month dimming (Month view), (4) category presence indicators; but appear visually simpler (no prominent shadow-on-hover, no heavy borders, no overly large rounding).",
+        "The calendar grid reads clearly in both light and dark themes with restrained contrast (no garish color blocks), using existing category colors only as subtle indicators."
+      ]
+    },
+    {
+      "id": "REQ-31",
+      "text": "Make the Day and Agenda views more compact and consistent by simplifying list items (reduce padding, reduce icon prominence, remove unnecessary visual decoration) while preserving essential information and click-to-open Program Detail behavior.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9",
+          "msg-11"
+        ],
+        "quotes": [
+          "Semuanya sekaligus",
+          "Ok, bangun versi sederhananya"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Day view and Agenda view remain functionally identical: items still include Programs, Team Agenda, and KPI Deadlines; program rows still open the Program Detail drawer on click.",
+        "List item rows are visually compact and consistent across item types, using minimal decoration (e.g., avoid large icons and thick left borders), while still showing core fields (program name, unit, PIC, status, priority, progress; agenda title/time; KPI name/team/target/deadline label).",
+        "Empty states remain in English and remain present for Day and Agenda views."
+      ]
+    },
+    {
+      "id": "REQ-32",
+      "text": "Simplify the filter and control areas above the calendar to reduce perceived complexity (more compact layout, fewer heavy card/shadow treatments), without removing any filter fields or controls.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9",
+          "msg-11"
+        ],
+        "quotes": [
+          "Semuanya sekaligus",
+          "Ok, bangun versi sederhananya"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All existing filters remain available: Unit/Division, Person in Charge, Status, Priority; Reset Filters remains available when filters are active.",
+        "View controls remain available and usable: grid density (Month/Week only), view mode switcher, and reminders toggle.",
+        "The category legend remains present but is visually minimal (e.g., color dots without prominent icons) while keeping labels in English: Programs, Team Agenda, KPI Deadlines."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any read-only shadcn UI sources under frontend/src/components/ui; apply transitions by composing/adding classes in app-level components only.",
-    "Keep the backend unchanged; this is a UI-only enhancement."
+    "Frontend must not modify any files under frontend/src/components/ui or any paths listed in SYSTEM_CONTEXT.frontend.immutablePaths.",
+    "Backend architecture must remain single-actor; no backend changes are required for this request.",
+    "Keep all user-facing text in the Program Calendar feature in English."
   ],
   "nonGoals": [
-    "Redesigning the Program Detail content layout or changing the information shown in the drawer.",
-    "Adding new program fields, backend APIs, or changing program selection/navigation logic."
+    "Do not change backend data models, queries, or reminder logic.",
+    "Do not remove any calendar modes (Month/Week/Day/Agenda) or existing interactions (day click, program click, edit flow).",
+    "Do not introduce new calendar features (e.g., new filters, new categories, new notification channels)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

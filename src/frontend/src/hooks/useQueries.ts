@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Program, Kpi, UserProfile, TeamMember, ProgramStatus, KpiStatus, KpiPeriod, PersonInCharge, UserRole, TimeRange } from '../backend';
+import type { Program, Kpi, UserProfile, TeamMember, ProgramStatus, KpiStatus, KpiPeriod, PersonInCharge, UserRole, TimeRange, TeamAgendaItem } from '../backend';
 import { toast } from 'sonner';
 import { Principal } from '@dfinity/principal';
 
@@ -144,7 +144,53 @@ export function useGetProgramsActiveInRange(range: TimeRange) {
       return actor.getProgramsActiveInRange(range);
     },
     enabled: !!actor && !isFetching,
-    staleTime: 30000, // 30 seconds
+  });
+}
+
+// Team Agenda Queries
+export function useGetTeamAgendaItemsByRange(range: TimeRange) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<TeamAgendaItem[]>({
+    queryKey: ['teamAgendaItemsByRange', range.start.toString(), range.end.toString()],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getTeamAgendaItemsByRange(range);
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetAllTeamAgendaItems() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<TeamAgendaItem[]>({
+    queryKey: ['teamAgendaItems'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllTeamAgendaItems();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// KPI Queries with deadline filtering
+export function useGetKPIsWithDeadlinesInRange(range: TimeRange) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Kpi[]>({
+    queryKey: ['kpisWithDeadlines', range.start.toString(), range.end.toString()],
+    queryFn: async () => {
+      if (!actor) return [];
+      const allKpis = await actor.getAllKPIs();
+      // Filter KPIs that have deadlines within the range
+      return allKpis.filter(kpi => {
+        if (!kpi.deadline) return false;
+        const deadline = Number(kpi.deadline);
+        return deadline >= Number(range.start) && deadline <= Number(range.end);
+      });
+    },
+    enabled: !!actor && !isFetching,
   });
 }
 
@@ -153,15 +199,14 @@ export function useCreateProgram() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newProgram: Omit<Program, 'id'>) => {
+    mutationFn: async (newProgram: Program) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createProgram({ ...newProgram, id: BigInt(0) } as Program);
+      return actor.createProgram(newProgram);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
       queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
       toast.success('Program berhasil dibuat');
     },
     onError: (error: Error) => {
@@ -181,9 +226,8 @@ export function useUpdateProgram() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
       queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
       toast.success('Program berhasil diperbarui');
     },
     onError: (error: Error) => {
@@ -203,10 +247,8 @@ export function useDeleteProgram() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['programs'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
       queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
-      queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
       toast.success('Program berhasil dihapus');
     },
     onError: (error: Error) => {
@@ -229,18 +271,31 @@ export function useGetAllKPIs() {
   });
 }
 
+export function useGetUniquePICNames() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string[]>({
+    queryKey: ['uniquePICNames'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getUniquePICNames();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useCreateKpi() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newKpi: Omit<Kpi, 'id'>) => {
+    mutationFn: async (newKpi: Kpi) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createKpi({ ...newKpi, id: BigInt(0) } as Kpi);
+      return actor.createKpi(newKpi);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
+      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
       toast.success('KPI berhasil dibuat');
     },
     onError: (error: Error) => {
@@ -260,7 +315,7 @@ export function useUpdateKpi() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
+      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
       toast.success('KPI berhasil diperbarui');
     },
     onError: (error: Error) => {
@@ -280,7 +335,7 @@ export function useDeleteKpi() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
+      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
       toast.success('KPI berhasil dihapus');
     },
     onError: (error: Error) => {
@@ -316,28 +371,14 @@ export function useGetUniqueDivisions() {
   });
 }
 
-export function useGetUniquePICNames() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<string[]>({
-    queryKey: ['uniquePICNames'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getUniquePICNames();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
 export function useGetTeamMembersByDivision(division: string) {
   const { actor, isFetching } = useActor();
 
   return useQuery<TeamMember[]>({
     queryKey: ['teamMembersByDivision', division],
     queryFn: async () => {
-      if (!actor) return [];
-      if (!division) return [];
-      return actor.getTeamMembersByDivisionFiltered(division);
+      if (!actor || !division) return [];
+      return actor.getTeamMembersByDivision(division);
     },
     enabled: !!actor && !isFetching && !!division,
   });
@@ -348,13 +389,14 @@ export function useCreateTeamMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newMember: Omit<TeamMember, 'id'>) => {
+    mutationFn: async (newMember: TeamMember) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createTeamMember({ ...newMember, id: BigInt(0) } as TeamMember);
+      return actor.createTeamMember(newMember);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
       queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
+      queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
       toast.success('Anggota tim berhasil ditambahkan');
     },
     onError: (error: Error) => {
@@ -375,6 +417,7 @@ export function useUpdateTeamMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
       queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
+      queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
       toast.success('Anggota tim berhasil diperbarui');
     },
     onError: (error: Error) => {
@@ -395,6 +438,7 @@ export function useDeleteTeamMember() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
       queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
+      queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
       toast.success('Anggota tim berhasil dihapus');
     },
     onError: (error: Error) => {

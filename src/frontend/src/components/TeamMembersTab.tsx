@@ -190,7 +190,7 @@ export default function TeamMembersTab() {
       {/* Form Dialog */}
       <TeamMemberFormDialog
         open={isFormOpen}
-        onOpenChange={handleFormClose}
+        onClose={handleFormClose}
         member={editingMember}
       />
 

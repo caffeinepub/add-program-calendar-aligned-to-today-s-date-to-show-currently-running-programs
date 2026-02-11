@@ -2,9 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-subtle-smooth-open-close-transition-for-the-program-detail-drawer-sheet-frontend-src-components-program-calendar-programdetaildrawer-tsx-so-that-when-a-program-is-opened-from-the-calendar-or-programs-list-the-panel-animates-in-with-a-gentle-fade-slide-slide-from-the-right-on-desktop-slide-up-from-the-bottom-on-mobile-and-animates-out-on-close",
-      "featureTitle": "Add a subtle, smooth open/close transition for the Program Detail drawer/sheet (frontend/src/components/program-calendar/ProgramDetailDrawer.tsx) so that when a program is opened from the calendar or programs list, the panel animates in with a gentle fade + slide (slide from the right on desktop, slide up from the bottom on mobile) and animates out on close.",
+      "featureId": "feature-simplify-the-overall-visual-presentation-of-the-program-calendar-tab-to-a-minimal-distraction-free-style-while-keeping-all-existing-functionality-filters-view-switching-reminders-toggle-day-program-interactions-unchanged",
+      "featureTitle": "Simplify the overall visual presentation of the Program Calendar tab to a minimal, distraction-free style while keeping all existing functionality (filters, view switching, reminders toggle, day/program interactions) unchanged.",
       "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/components/program-calendar/DayDetailPanel.tsx",
         "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx"
       ],
       "components": [
@@ -16,7 +18,70 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-23"
+        "REQ-29"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-simplify-the-month-and-week-grid-views-by-reducing-visual-chrome-in-day-cells-and-grid-layout-less-shadow-fewer-borders-rounding-fewer-high-emphasis-hover-effects-while-preserving-today-highlight-out-of-month-dimming-and-category-indicators",
+      "featureTitle": "Simplify the Month and Week grid views by reducing visual chrome in day cells and grid layout (less shadow, fewer borders/rounding, fewer high-emphasis hover effects) while preserving today highlight, out-of-month dimming, and category indicators.",
+      "files": [
+        "frontend/src/components/program-calendar/DayCell.tsx",
+        "frontend/src/components/program-calendar/views/MonthGridView.tsx",
+        "frontend/src/components/program-calendar/views/WeekGridView.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-30"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-the-day-and-agenda-views-more-compact-and-consistent-by-simplifying-list-items-reduce-padding-reduce-icon-prominence-remove-unnecessary-visual-decoration-while-preserving-essential-information-and-click-to-open-program-detail-behavior",
+      "featureTitle": "Make the Day and Agenda views more compact and consistent by simplifying list items (reduce padding, reduce icon prominence, remove unnecessary visual decoration) while preserving essential information and click-to-open Program Detail behavior.",
+      "files": [
+        "frontend/src/components/program-calendar/views/AgendaListView.tsx",
+        "frontend/src/components/program-calendar/views/DayListView.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-31"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-simplify-the-filter-and-control-areas-above-the-calendar-to-reduce-perceived-complexity-more-compact-layout-fewer-heavy-card-shadow-treatments-without-removing-any-filter-fields-or-controls",
+      "featureTitle": "Simplify the filter and control areas above the calendar to reduce perceived complexity (more compact layout, fewer heavy card/shadow treatments), without removing any filter fields or controls.",
+      "files": [
+        "frontend/src/components/ProgramCalendarTab.tsx",
+        "frontend/src/components/program-calendar/CalendarCategoryLegend.tsx",
+        "frontend/src/components/program-calendar/GridDensityControl.tsx",
+        "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-32"
       ],
       "confidence": "high"
     }

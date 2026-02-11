@@ -1,44 +1,49 @@
 import { useMemo } from 'react';
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, addDays } from 'date-fns';
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import type { Program } from '../../../backend';
+import type { Program, TeamAgendaItem, Kpi } from '../../../backend';
 import DayCell from '../DayCell';
-
-type GridDensity = 'comfortable' | 'compact';
+import { computeDayCategoryCounts } from '../calendarCategoryUtils';
 
 interface MonthGridViewProps {
   currentDate: Date;
   programs: Program[];
+  agendaItems: TeamAgendaItem[];
+  kpiDeadlines: Kpi[];
   onDayClick: (date: Date) => void;
   onProgramClick: (program: Program) => void;
-  gridDensity?: GridDensity;
+  gridDensity: 'comfortable' | 'compact';
 }
 
 export default function MonthGridView({
   currentDate,
   programs,
+  agendaItems,
+  kpiDeadlines,
   onDayClick,
-  onProgramClick,
-  gridDensity = 'comfortable',
+  gridDensity,
 }: MonthGridViewProps) {
-  const days = useMemo(() => {
-    const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 });
-    const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 });
-    return eachDayOfInterval({ start, end });
-  }, [currentDate]);
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
-  const gapClass = gridDensity === 'comfortable' ? 'gap-3 md:gap-4' : 'gap-1.5 md:gap-2';
+  const dayCounts = useMemo(() => {
+    return computeDayCategoryCounts(days, programs, agendaItems, kpiDeadlines);
+  }, [days, programs, agendaItems, kpiDeadlines]);
+
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="space-y-4">
-      {/* Week day headers */}
-      <div className={`grid grid-cols-7 ${gapClass}`}>
-        {weekDays.map((day) => (
+    <div className="space-y-2">
+      {/* Weekday headers */}
+      <div className="grid grid-cols-7 gap-1.5">
+        {weekdays.map((day) => (
           <div
             key={day}
-            className="text-center text-sm md:text-base font-semibold text-muted-foreground py-3"
+            className="text-center text-xs font-medium text-muted-foreground py-1.5"
           >
             {day}
           </div>
@@ -46,28 +51,19 @@ export default function MonthGridView({
       </div>
 
       {/* Calendar grid */}
-      <div className={`grid grid-cols-7 ${gapClass}`}>
+      <div className="grid grid-cols-7 gap-1.5">
         {days.map((day) => {
-          const dayPrograms = programs.filter((p) => {
-            const dayStart = new Date(day);
-            dayStart.setHours(0, 0, 0, 0);
-            const dayEnd = new Date(day);
-            dayEnd.setHours(23, 59, 59, 999);
-            
-            return (
-              Number(p.endDate) >= dayStart.getTime() &&
-              Number(p.startDate) <= dayEnd.getTime()
-            );
-          });
-
+          const dateKey = format(day, 'yyyy-MM-dd');
+          const counts = dayCounts[dateKey] || { program: 0, agenda: 0, kpi: 0 };
+          
           return (
             <DayCell
               key={day.toISOString()}
               date={day}
-              programs={dayPrograms}
               isCurrentMonth={isSameMonth(day, currentDate)}
+              categoryCounts={counts}
               onClick={() => onDayClick(day)}
-              gridDensity={gridDensity}
+              density={gridDensity}
             />
           );
         })}

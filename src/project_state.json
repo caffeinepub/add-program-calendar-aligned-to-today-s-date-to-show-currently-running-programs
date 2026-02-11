@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
-  "summary": "Redesign the Program Calendar dashboard view for SHQ AQL tracking web app with a full-width, highly readable, modern UX: large calendar UI with Monthly/Weekly/Agenda modes, rich filters, clickable day badges opening program details in a drawer/modal, and a mobile-first agenda list view.",
+  "projectStateVersion": 19,
+  "summary": "Redesign the Program Calendar dashboard view for SHQ AQL tracking web app with a full-width, highly readable, modern UX, now with a simplified/minimal visual style applied consistently across all calendar modes (Month/Week/Daily/Agenda).",
   "architectural_notes": [
     "Program Calendar UI must be full-width and dominant (not sidebar), with responsive design: desktop calendar grid + mobile agenda list view.",
     "Calendar supports switchable views: Monthly / Weekly / Agenda.",
@@ -11,7 +11,8 @@
     "UI styling direction: prioritize readability (larger fonts, generous spacing, clear contrast), card-based layout, soft shadows, consistent icons, and restrained status colors.",
     "Calendar UI polish direction confirmed: more spacious layout (larger spacing), softer colors, larger/more readable typography, simpler agenda layout; adjust calendar grid density (tighter vs looser) as part of this refinement.",
     "Avoid horizontal scrolling to access program details; ensure details are accessible without shifting/scrolling sideways (e.g., responsive drawer/modal or inline details on smaller screens) and improve overall scroll smoothness/usability.",
-    "Add a subtle smooth open/close transition for the program detail drawer/modal/sheet to improve perceived UX polish."
+    "Add a subtle smooth open/close transition for the program detail drawer/modal/sheet to improve perceived UX polish.",
+    "Support automatic reminders for calendar items (e.g., 1 day and 3 hours before start/deadline)."
   ],
   "known_issues": [
     "KPI program dropdown is hard to use: scrolling/searching for a program is not smooth/doesn't work well.",
@@ -195,6 +196,62 @@
         "REQ-23"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-a-new-daily-view-mode-to-the-program-calendar-ui-intended-for-operational-usage-alongside-the-existing-monthly-view-intended-for-management-usage",
+      "title": "Add a new Daily view mode to the Program Calendar UI intended for operational usage, alongside the existing Monthly view intended for management usage.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-category-based-color-coding-in-the-calendar-ui-and-display-calendar-items-from-three-categories-programs-blue-team-agenda-green-and-kpi-deadlines-red",
+      "title": "Implement category-based color coding in the calendar UI and display calendar items from three categories: Programs (blue), Team Agenda (green), and KPI Deadlines (red).",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-automatic-in-app-reminders-for-calendar-items-at-h-1-day-and-h-3-hours-before-the-relevant-time-with-clear-limitations-and-user-controls",
+      "title": "Add automatic in-app reminders for calendar items at H-1 day and H-3 hours before the relevant time, with clear limitations and user controls.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-simplify-the-overall-visual-presentation-of-the-program-calendar-tab-to-a-minimal-distraction-free-style-while-keeping-all-existing-functionality-filters-view-switching-reminders-toggle-day-program-interactions-unchanged",
+      "title": "Simplify the overall visual presentation of the Program Calendar tab to a minimal, distraction-free style while keeping all existing functionality (filters, view switching, reminders toggle, day/program interactions) unchanged.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-simplify-the-month-and-week-grid-views-by-reducing-visual-chrome-in-day-cells-and-grid-layout-less-shadow-fewer-borders-rounding-fewer-high-emphasis-hover-effects-while-preserving-today-highlight-out-of-month-dimming-and-category-indicators",
+      "title": "Simplify the Month and Week grid views by reducing visual chrome in day cells and grid layout (less shadow, fewer borders/rounding, fewer high-emphasis hover effects) while preserving today highlight, out-of-month dimming, and category indicators.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-day-and-agenda-views-more-compact-and-consistent-by-simplifying-list-items-reduce-padding-reduce-icon-prominence-remove-unnecessary-visual-decoration-while-preserving-essential-information-and-click-to-open-program-detail-behavior",
+      "title": "Make the Day and Agenda views more compact and consistent by simplifying list items (reduce padding, reduce icon prominence, remove unnecessary visual decoration) while preserving essential information and click-to-open Program Detail behavior.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-simplify-the-filter-and-control-areas-above-the-calendar-to-reduce-perceived-complexity-more-compact-layout-fewer-heavy-card-shadow-treatments-without-removing-any-filter-fields-or-controls",
+      "title": "Simplify the filter and control areas above the calendar to reduce perceived complexity (more compact layout, fewer heavy card/shadow treatments), without removing any filter fields or controls.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -235,6 +292,46 @@
       "summary": "Add a subtle smooth transition/animation when opening the program detail drawer/modal (e.g., slide/fade)",
       "reqIds": [],
       "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Add automatic reminders/notifications for calendar items (e.g., H-1 day and H-3 hours before)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Add category-based color coding: Program (blue), Team agenda (green), KPI deadline (red)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Add an additional calendar mode focused on Daily view for operational use (alongside Monthly view for management)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Add a new backend data model and APIs for Team Agenda items that can be displayed on the Program Calendar and queried by date range.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Add a KPI deadline date field in the backend so KPI deadlines can be shown on the calendar and used for reminders.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Simplify the Program Calendar UI across all modes (Month/Week/Daily/Agenda) by reducing visual clutter (colors/borders/icons/shadows), using a more minimal grid, and making Day/Agenda lists more compact and consistent.",
+      "reqIds": [],
+      "status": "in_progress"
     }
   ],
   "projectName": "Add program calendar aligned to today's date to show currently running programs",

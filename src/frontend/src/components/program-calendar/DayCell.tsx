@@ -1,70 +1,70 @@
-import { Badge } from '@/components/ui/badge';
 import { format, isToday } from 'date-fns';
-import type { Program } from '../../backend';
-import { cn } from '@/lib/utils';
-
-type GridDensity = 'comfortable' | 'compact';
+import { enUS } from 'date-fns/locale';
+import { getCategoryColor } from './calendarCategoryUtils';
 
 interface DayCellProps {
   date: Date;
-  programs: Program[];
   isCurrentMonth: boolean;
+  categoryCounts: {
+    program: number;
+    agenda: number;
+    kpi: number;
+  };
   onClick: () => void;
-  variant?: 'month' | 'week';
-  gridDensity?: GridDensity;
+  density: 'comfortable' | 'compact';
 }
 
 export default function DayCell({
   date,
-  programs,
   isCurrentMonth,
+  categoryCounts,
   onClick,
-  variant = 'month',
-  gridDensity = 'comfortable',
+  density,
 }: DayCellProps) {
   const today = isToday(date);
-  const count = programs.length;
+  const hasItems = categoryCounts.program > 0 || categoryCounts.agenda > 0 || categoryCounts.kpi > 0;
 
-  const paddingClass = gridDensity === 'comfortable' 
-    ? (variant === 'month' ? 'p-2.5 md:p-3' : 'p-4 md:p-5')
-    : (variant === 'month' ? 'p-1.5 md:p-2' : 'p-3 md:p-4');
-
-  const minHeightClass = gridDensity === 'comfortable'
-    ? (variant === 'week' ? 'min-h-[120px]' : '')
-    : (variant === 'week' ? 'min-h-[90px]' : '');
+  const paddingClass = density === 'comfortable' ? 'p-2.5' : 'p-2';
+  const heightClass = density === 'comfortable' ? 'min-h-[90px]' : 'min-h-[70px]';
 
   return (
     <button
       onClick={onClick}
-      className={cn(
-        'relative w-full rounded-xl border-2 transition-all hover:shadow-md hover:border-primary/40',
-        'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-        variant === 'month' ? 'aspect-square' : minHeightClass,
-        paddingClass,
-        today && 'bg-primary/10 border-primary/60',
-        !isCurrentMonth && variant === 'month' && 'opacity-40',
-        count > 0 ? 'bg-background hover:bg-accent/40' : 'bg-muted/20'
-      )}
+      className={`
+        ${paddingClass} ${heightClass}
+        w-full text-left rounded border
+        transition-colors
+        ${today ? 'bg-primary/5 border-primary' : 'bg-card border-border'}
+        ${!isCurrentMonth ? 'opacity-40' : ''}
+        ${hasItems ? 'hover:bg-accent/30' : 'hover:bg-accent/20'}
+        focus:outline-none focus:ring-1 focus:ring-primary
+      `}
     >
       <div className="flex flex-col h-full">
-        <div className={cn(
-          'text-base md:text-lg font-semibold',
-          today ? 'text-primary' : isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'
-        )}>
-          {format(date, 'd')}
+        <div className={`text-sm font-medium mb-1 ${today ? 'text-primary' : 'text-foreground'}`}>
+          {format(date, 'd', { locale: enUS })}
         </div>
         
-        {count > 0 && (
-          <div className="mt-auto">
-            <Badge
-              variant={today ? 'default' : 'secondary'}
-              className={cn(
-                'text-xs px-2 py-0.5',
-                variant === 'month' && 'text-[11px] md:text-xs'
-              )}
-            >
-              {count}
-            </Badge>
+        {hasItems && (
+          <div className="flex flex-col gap-0.5 mt-auto">
+            {categoryCounts.program > 0 && (
+              <div
+                className="h-1 rounded-full"
+                style={{ backgroundColor: getCategoryColor('program'), opacity: 0.7 }}
+              />
+            )}
+            {categoryCounts.agenda > 0 && (
+              <div
+                className="h-1 rounded-full"
+                style={{ backgroundColor: getCategoryColor('agenda'), opacity: 0.7 }}
+              />
+            )}
+            {categoryCounts.kpi > 0 && (
+              <div
+                className="h-1 rounded-full"
+                style={{ backgroundColor: getCategoryColor('kpi'), opacity: 0.7 }}
+              />
+            )}
           </div>
         )}
       </div>

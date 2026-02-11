@@ -10,6 +10,10 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type AgendaCategory = { 'workshop' : null } |
+  { 'meeting' : null } |
+  { 'general' : null } |
+  { 'training' : null };
 export interface Kpi {
   'id' : bigint,
   'status' : KpiStatus,
@@ -17,6 +21,7 @@ export interface Kpi {
   'relatedProgramId' : bigint,
   'name' : string,
   'team' : PersonInCharge,
+  'deadline' : [] | [bigint],
   'realizationValue' : bigint,
   'targetValue' : bigint,
 }
@@ -50,6 +55,15 @@ export type ProgramPriority = { 'low' : null } |
 export type ProgramStatus = { 'completed' : null } |
   { 'ongoing' : null } |
   { 'planning' : null };
+export interface TeamAgendaItem {
+  'id' : bigint,
+  'startTime' : bigint,
+  'title' : string,
+  'endTime' : bigint,
+  'description' : string,
+  'attendees' : Array<string>,
+  'category' : AgendaCategory,
+}
 export interface TeamMember {
   'id' : bigint,
   'name' : string,
@@ -70,12 +84,15 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole__1], undefined>,
   'createKpi' : ActorMethod<[Kpi], bigint>,
   'createProgram' : ActorMethod<[Program], bigint>,
+  'createTeamAgendaItem' : ActorMethod<[TeamAgendaItem], bigint>,
   'createTeamMember' : ActorMethod<[TeamMember], undefined>,
   'deleteKpi' : ActorMethod<[bigint], undefined>,
   'deleteProgram' : ActorMethod<[bigint], undefined>,
+  'deleteTeamAgendaItem' : ActorMethod<[bigint], undefined>,
   'deleteTeamMember' : ActorMethod<[bigint], undefined>,
   'getAllKPIs' : ActorMethod<[], Array<Kpi>>,
   'getAllPrograms' : ActorMethod<[], Array<Program>>,
+  'getAllTeamAgendaItems' : ActorMethod<[], Array<TeamAgendaItem>>,
   'getAllTeamMembers' : ActorMethod<[], Array<TeamMember>>,
   'getAllUserProfiles' : ActorMethod<[], Array<[Principal, UserProfile]>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
@@ -101,6 +118,7 @@ export interface _SERVICE {
   'getProgramsByName' : ActorMethod<[string], Array<Program>>,
   'getProgramsByStatus' : ActorMethod<[ProgramStatus], Array<Program>>,
   'getProgramsByTeam' : ActorMethod<[string], Array<Program>>,
+  'getTeamAgendaItemsByRange' : ActorMethod<[TimeRange], Array<TeamAgendaItem>>,
   'getTeamMembersByDivision' : ActorMethod<[string], Array<TeamMember>>,
   'getTeamMembersByDivisionFiltered' : ActorMethod<[string], Array<TeamMember>>,
   'getUniqueDivisions' : ActorMethod<[], Array<string>>,
@@ -111,6 +129,7 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateKpi' : ActorMethod<[bigint, Kpi], undefined>,
   'updateProgram' : ActorMethod<[bigint, Program], undefined>,
+  'updateTeamAgendaItem' : ActorMethod<[bigint, TeamAgendaItem], undefined>,
   'updateTeamMember' : ActorMethod<[bigint, TeamMember], undefined>,
   'updateUserProfileRole' : ActorMethod<[Principal, UserRole], undefined>,
 }

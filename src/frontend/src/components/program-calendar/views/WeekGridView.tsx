@@ -1,74 +1,60 @@
 import { useMemo } from 'react';
 import { startOfWeek, endOfWeek, eachDayOfInterval, format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import type { Program } from '../../../backend';
+import type { Program, TeamAgendaItem, Kpi } from '../../../backend';
 import DayCell from '../DayCell';
-
-type GridDensity = 'comfortable' | 'compact';
+import { computeDayCategoryCounts } from '../calendarCategoryUtils';
 
 interface WeekGridViewProps {
   currentDate: Date;
   programs: Program[];
+  agendaItems: TeamAgendaItem[];
+  kpiDeadlines: Kpi[];
   onDayClick: (date: Date) => void;
   onProgramClick: (program: Program) => void;
-  gridDensity?: GridDensity;
+  gridDensity: 'comfortable' | 'compact';
 }
 
 export default function WeekGridView({
   currentDate,
   programs,
+  agendaItems,
+  kpiDeadlines,
   onDayClick,
-  onProgramClick,
-  gridDensity = 'comfortable',
+  gridDensity,
 }: WeekGridViewProps) {
-  const days = useMemo(() => {
-    const start = startOfWeek(currentDate, { weekStartsOn: 0 });
-    const end = endOfWeek(currentDate, { weekStartsOn: 0 });
-    return eachDayOfInterval({ start, end });
-  }, [currentDate]);
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+  const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
 
-  const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
-  const gapClass = gridDensity === 'comfortable' ? 'gap-3 md:gap-4' : 'gap-2 md:gap-2.5';
+  const dayCounts = useMemo(() => {
+    return computeDayCategoryCounts(days, programs, agendaItems, kpiDeadlines);
+  }, [days, programs, agendaItems, kpiDeadlines]);
 
   return (
-    <div className="space-y-5">
-      <div className={`grid grid-cols-1 md:grid-cols-7 ${gapClass}`}>
-        {days.map((day, index) => {
-          const dayPrograms = programs.filter((p) => {
-            const dayStart = new Date(day);
-            dayStart.setHours(0, 0, 0, 0);
-            const dayEnd = new Date(day);
-            dayEnd.setHours(23, 59, 59, 999);
-            
-            return (
-              Number(p.endDate) >= dayStart.getTime() &&
-              Number(p.startDate) <= dayEnd.getTime()
-            );
-          });
+    <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
+      {days.map((day) => {
+        const dateKey = format(day, 'yyyy-MM-dd');
+        const counts = dayCounts[dateKey] || { program: 0, agenda: 0, kpi: 0 };
 
-          return (
-            <div key={day.toISOString()} className="space-y-2">
-              <div className="text-center">
-                <div className="text-sm font-semibold text-muted-foreground">
-                  {weekDays[index]}
-                </div>
-                <div className="text-lg md:text-xl font-bold mt-1">
-                  {format(day, 'd')}
-                </div>
+        return (
+          <div key={day.toISOString()} className="space-y-1.5">
+            <div className="text-center">
+              <div className="text-xs font-medium text-muted-foreground">
+                {format(day, 'EEE', { locale: enUS })}
               </div>
-              <DayCell
-                date={day}
-                programs={dayPrograms}
-                isCurrentMonth={true}
-                onClick={() => onDayClick(day)}
-                variant="week"
-                gridDensity={gridDensity}
-              />
             </div>
-          );
-        })}
-      </div>
+            <DayCell
+              date={day}
+              isCurrentMonth={true}
+              categoryCounts={counts}
+              onClick={() => onDayClick(day)}
+              density={gridDensity}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

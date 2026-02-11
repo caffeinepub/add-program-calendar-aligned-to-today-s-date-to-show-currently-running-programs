@@ -1,23 +1,109 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Smooth animated open/close transition for Program Detail drawer",
+  "title": "Minimal, distraction-free Program Calendar UI across Month/Week/Day/Agenda views",
   "requirements": [
     {
-      "id": "REQ-23",
-      "summary": "Add subtle fade + directional slide animations for ProgramDetailDrawer open/close (right-slide on desktop, bottom-slide on mobile) with reduced-motion support, without modifying shadcn UI source files.",
+      "id": "REQ-29",
+      "summary": "Restyle the Program Calendar tab to a minimal, distraction-free layout while preserving all current calendar behaviors and interactions.",
       "acceptanceCriteria": [
-        "Opening Program Detail animates in smoothly (fade + directional slide) and feels responsive (no jank).",
-        "Closing Program Detail animates out smoothly (reverse animation) without leaving the UI in a visually broken state.",
-        "Desktop/right drawer uses a horizontal slide-in; mobile/bottom sheet uses a vertical slide-up motion.",
-        "Animation respects reduced-motion preferences (if the user has prefers-reduced-motion enabled, the animation is disabled or significantly minimized).",
-        "No edits are made to any files under frontend/src/components/ui; the animation is applied via composition (e.g., className) in ProgramDetailDrawer."
+        "Program Calendar still supports Month/Week/Day/Agenda modes, date navigation (Previous/Today/Next), filters, reminders toggle, day detail panel, and program detail drawer exactly as before.",
+        "The Program Calendar header and surrounding layout no longer uses visually loud styling (e.g., gradient title treatment, heavy shadows) and instead uses clean typography, subtle borders, and restrained spacing.",
+        "No new features are introduced; changes are limited to simplifying UI/UX and visual density."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/ProgramCalendarTab.tsx",
+          "operation": "modify",
+          "description": "Simplify the Program Calendar header and surrounding layout: remove gradient title styling, reduce vertical spacing, and replace heavy Card/shadow presentation with restrained borders/backgrounds while keeping all existing behaviors unchanged. Use shadcn-ui components (Card, Button, Select, Switch, Label) as-is for consistent base UI; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/DayDetailPanel.tsx",
+          "operation": "modify",
+          "description": "Adjust Day Detail panel styling to match the minimal calendar aesthetic (subtle borders, reduced shadow emphasis, restrained typography/spacing) while keeping the same open/close behavior and program click-to-open detail flow. Use shadcn-ui Sheet/Card/ScrollArea/Badge as-is; verify the component's usage instructions before implementing."
+        },
+        {
           "path": "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
           "operation": "modify",
-          "description": "Implement smooth open/close transitions by composing Tailwind/tailwindcss-animate classes onto SheetContent (no edits under frontend/src/components/ui). Keep the drawer mounted during close so animate-out can run (e.g., store the last non-null program in local state and delay unmounting until after the animation duration). Apply fade + slide-in/out using data-state driven classes, selecting slide direction based on the existing isMobile logic (desktop: from/to right; mobile: from/to bottom). Add reduced-motion handling using Tailwind motion-reduce variants to disable/minimize animation for users with prefers-reduced-motion enabled."
+          "description": "Align Program Detail drawer styling with the simplified calendar look (reduce visual decoration density without changing content or edit flow), keeping the same drawer animations/behavior and Edit Program action. Use shadcn-ui Sheet/ScrollArea/Badge/Progress/Separator/Button as-is; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "summary": "Simplify Month and Week grid visuals by reducing day-cell chrome while preserving today highlight, out-of-month dimming, and category indicators.",
+      "acceptanceCriteria": [
+        "In Month and Week views, day cells remain clickable and continue to open the existing day detail panel behavior.",
+        "Day cells keep: (1) date number, (2) today state, (3) out-of-month dimming (Month view), (4) category presence indicators; but appear visually simpler (no prominent shadow-on-hover, no heavy borders, no overly large rounding).",
+        "The calendar grid reads clearly in both light and dark themes with restrained contrast (no garish color blocks), using existing category colors only as subtle indicators."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/program-calendar/DayCell.tsx",
+          "operation": "modify",
+          "description": "Redesign DayCell styling to be more minimal: remove prominent hover shadow and high-emphasis hover border, reduce rounding, and ensure today/out-of-month states remain clear and accessible. Keep category indicators but make them subtler (e.g., smaller dots/bars with restrained saturation) and preserve click/focus behavior."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/views/MonthGridView.tsx",
+          "operation": "modify",
+          "description": "Reduce Month view grid visual density by adjusting gaps/headers to a cleaner, flatter layout (e.g., tighter spacing, subtler weekday header styling) while preserving the existing day click behavior and category-count computation."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/views/WeekGridView.tsx",
+          "operation": "modify",
+          "description": "Simplify Week view layout by reducing extra chrome around each day column (subtle header, tighter spacing, avoid card-like presentation) while preserving day click behavior and category-count computation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-31",
+      "summary": "Make Day and Agenda views more compact and consistent by simplifying list rows while preserving information and program click-to-open behavior.",
+      "acceptanceCriteria": [
+        "Day view and Agenda view remain functionally identical: items still include Programs, Team Agenda, and KPI Deadlines; program rows still open the Program Detail drawer on click.",
+        "List item rows are visually compact and consistent across item types, using minimal decoration (e.g., avoid large icons and thick left borders), while still showing core fields (program name, unit, PIC, status, priority, progress; agenda title/time; KPI name/team/target/deadline label).",
+        "Empty states remain in English and remain present for Day and Agenda views."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/program-calendar/views/DayListView.tsx",
+          "operation": "modify",
+          "description": "Restyle Day view list rows to be more compact and consistent across program/agenda/KPI types: reduce padding, reduce icon prominence, remove thick left border treatment, and use subtle category color accents (e.g., small dot or thin indicator). Preserve all displayed fields, sorting, and program click-to-open behavior. Use shadcn-ui Badge as-is; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/views/AgendaListView.tsx",
+          "operation": "modify",
+          "description": "Restyle Agenda view rows and day group headers for compact consistency with Day view: reduce padding, remove heavy decoration, keep sticky day header but simplify its visual weight, and ensure program rows remain clickable to open the Program Detail drawer. Use shadcn-ui Badge as-is; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-32",
+      "summary": "Simplify the filter and control areas above the calendar without removing any controls or legend content.",
+      "acceptanceCriteria": [
+        "All existing filters remain available: Unit/Division, Person in Charge, Status, Priority; Reset Filters remains available when filters are active.",
+        "View controls remain available and usable: grid density (Month/Week only), view mode switcher, and reminders toggle.",
+        "The category legend remains present but is visually minimal (e.g., color dots without prominent icons) while keeping labels in English: Programs, Team Agenda, KPI Deadlines."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProgramCalendarTab.tsx",
+          "operation": "modify",
+          "description": "Compact the filters and view-control sections: reduce Card padding, remove/avoid heavy shadow classes, tighten spacing, and ensure all existing filters and controls remain present and usable (including Reset Filters, grid density control for Month/Week, view switcher, and reminders toggle). Use shadcn-ui Card/Button/Select/Switch/Label as-is; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/CalendarCategoryLegend.tsx",
+          "operation": "modify",
+          "description": "Make the category legend visually minimal by removing prominent icons and presenting categories as small color dots with English labels (Programs, Team Agenda, KPI Deadlines), using existing category colors as subtle indicators."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/GridDensityControl.tsx",
+          "operation": "modify",
+          "description": "Simplify grid density control styling to a more minimal segmented-control look (less border/rounding emphasis, smaller padding) while preserving the same two options and behavior. Use shadcn-ui Button as-is; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
+          "operation": "modify",
+          "description": "Simplify view switcher styling (reduce icon prominence and visual weight, tighten spacing) while preserving the same view modes (Month/Week/Day/Agenda) and the existing mobile-disabled behavior. Use shadcn-ui Button as-is; verify the component's usage instructions before implementing."
         }
       ]
     }

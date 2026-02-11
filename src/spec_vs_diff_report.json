@@ -1,23 +1,58 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T16:27:14.995Z",
-  "summary": "REQ-23 appears implemented in ProgramDetailDrawer by adding composed Tailwind animation/transition classes to SheetContent, including fade + directional slide for desktop (right) vs mobile (bottom) and reduced-motion handling. No evidence of edits under frontend/src/components/ui. Two additional non-functional metadata files were also modified.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-11T07:22:45.623Z",
+  "summary": "Diff implements several UI simplifications for the Program Calendar (minimal category legend, simplified DayCell used by Month/Week grids, compact-looking controls for view switching and grid density, and refreshed Day detail panel / program detail drawer). However, evidence suggests Day/Agenda list rows may still use prominent icons and a thick colored left bar, which conflicts with the requested “minimal decoration” requirement for those views.",
+  "missing_requirements": [
     {
-      "description": "Modified repository metadata/summary files (frontend-file-summaries.txt and project_state.json) even though the request only asked for a UI animation change in ProgramDetailDrawer.",
-      "reason": "These changes are not part of REQ-23 and are not necessary to implement the drawer transition behavior.",
+      "id": "REQ-31",
+      "requirement": "Make the Day and Agenda views more compact and consistent by simplifying list items (reduce padding, reduce icon prominence, remove unnecessary visual decoration) while preserving essential information and click-to-open Program Detail behavior.",
+      "reason": "DayListView/AgendaListView still appear to use prominent lucide icons and a thick left colored indicator bar (w-1 with full-height/rounded) and relatively large padding (p-3), which conflicts with the AC guidance to avoid large icons and thick left borders and to reduce decoration.",
       "evidence": [
-        "frontend-file-summaries.txt",
-        "project_state.json"
+        "frontend/src/components/program-calendar/views/DayListView.tsx",
+        "frontend/src/components/program-calendar/views/AgendaListView.tsx"
+      ]
+    },
+    {
+      "id": "REQ-29",
+      "requirement": "Simplify the overall visual presentation of the Program Calendar tab header and surrounding layout to a minimal, distraction-free style while keeping all existing functionality unchanged.",
+      "reason": "ProgramCalendarTab.tsx is truncated in the diff summary, so it’s not possible to verify from provided evidence that the header/surrounding layout removed visually loud styling (e.g., gradients/heavy shadows) and moved to subtle borders/typography, while preserving all interactions.",
+      "evidence": [
+        "frontend/src/components/ProgramCalendarTab.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-32",
+      "requirement": "Simplify the filter and control areas above the calendar to reduce perceived complexity (compact layout, fewer heavy card/shadow treatments), without removing any filter fields or controls.",
+      "reason": "ProgramCalendarTab.tsx (where filters/controls live) is truncated, so the diff summary does not provide enough evidence to confirm that Unit/Division, PIC, Status, Priority, Reset Filters, grid density (Month/Week), view mode switcher, reminders toggle, and the (now minimal) legend are all still present and that the area’s visual chrome was reduced.",
+      "evidence": [
+        "frontend/src/components/ProgramCalendarTab.tsx (truncated)"
       ]
     }
   ],
-  "confidence": 0.78,
+  "hallucinated_features": [
+    {
+      "description": "Added a 'Categories:' prefix label in the category legend UI.",
+      "reason": "REQ-32 specifies keeping legend labels in English for Programs/Team Agenda/KPI Deadlines, but does not request an additional 'Categories:' label; this is extra user-facing text (though still English).",
+      "evidence": [
+        "frontend/src/components/program-calendar/CalendarCategoryLegend.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.58,
   "changed_files": [
     "frontend-file-summaries.txt",
+    "frontend/src/components/ProgramCalendarTab.tsx",
+    "frontend/src/components/program-calendar/CalendarCategoryLegend.tsx",
+    "frontend/src/components/program-calendar/DayCell.tsx",
+    "frontend/src/components/program-calendar/DayDetailPanel.tsx",
+    "frontend/src/components/program-calendar/GridDensityControl.tsx",
+    "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
     "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
+    "frontend/src/components/program-calendar/views/AgendaListView.tsx",
+    "frontend/src/components/program-calendar/views/DayListView.tsx",
+    "frontend/src/components/program-calendar/views/MonthGridView.tsx",
+    "frontend/src/components/program-calendar/views/WeekGridView.tsx",
     "project_state.json"
   ]
 }

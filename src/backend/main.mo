@@ -8,8 +8,10 @@ import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+
 
 actor {
   let accessControlState = AccessControl.initState();
@@ -20,6 +22,7 @@ actor {
   type KpiPeriod = { #monthly; #quarterly; #annual };
   type UserRole = { #admin; #coordinator; #viewer };
   type ProgramPriority = { #high; #middle; #low };
+  type AgendaCategory = { #meeting; #training; #workshop; #general };
 
   type Program = {
     id : Nat;
@@ -43,6 +46,7 @@ actor {
     realizationValue : Nat;
     period : KpiPeriod;
     status : KpiStatus;
+    deadline : ?Int;
   };
 
   type PersonInCharge = {
@@ -59,9 +63,24 @@ actor {
     role : Text;
   };
 
+  type TeamAgendaItem = {
+    id : Nat;
+    title : Text;
+    description : Text;
+    startTime : Int;
+    endTime : Int;
+    category : AgendaCategory;
+    attendees : [Text];
+  };
+
   type UserProfile = {
     name : Text;
     role : UserRole;
+  };
+
+  type ReminderType = {
+    #dayBefore;
+    #threeHoursBefore;
   };
 
   module Program {
@@ -152,19 +171,16 @@ actor {
     };
   };
 
-  type TimeRange = {
-    start : Time.Time;
-    end : Time.Time;
-  };
-
   let programs = Map.empty<Nat, Program>();
   let kpis = Map.empty<Nat, Kpi>();
+  let teamAgendaItems = Map.empty<Nat, TeamAgendaItem>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   let teamMembers = Map.empty<Nat, TeamMember>();
 
   var nextProgramId = 1;
   var nextKpiId = 1;
   var nextTeamMemberId = 1;
+  var nextAgendaItemId = 1;
 
   // Helper function to check if user is authenticated (not anonymous)
   func isAuthenticated(caller : Principal) : Bool {
@@ -177,20 +193,24 @@ actor {
     if (not isAuthenticated(caller)) {
       return false;
     };
-    AccessControl.isAdmin(accessControlState, caller) or
     AccessControl.hasPermission(accessControlState, caller, #user);
   };
 
   // Helper function to check if user can read (Admin, Coordinator, or Viewer)
-  // All authenticated users can read, including viewers (#guest)
+  // All authenticated users with at least guest role can read
   func canRead(caller : Principal) : Bool {
     if (not isAuthenticated(caller)) {
       return false;
     };
-    true;
+    AccessControl.hasPermission(accessControlState, caller, #guest);
   };
 
   // Query programs active within a given date range
+  type TimeRange = {
+    start : Time.Time;
+    end : Time.Time;
+  };
+
   public query ({ caller }) func getProgramsActiveInRange(range : TimeRange) : async [Program] {
     if (not canRead(caller)) {
       Runtime.trap("Unauthorized: Authentication required to view programs");
@@ -201,6 +221,82 @@ actor {
         (p.endDate >= range.start) and (p.startDate <= range.end)
       }
     );
+  };
+
+  // Team Agenda Management
+  public shared ({ caller }) func createTeamAgendaItem(newItem : TeamAgendaItem) : async Nat {
+    if (not canWrite(caller)) {
+      Runtime.trap("Unauthorized: Only coordinators and admins can create agenda items");
+    };
+
+    validateAgendaItem(newItem);
+
+    let agendaItemId = nextAgendaItemId;
+    nextAgendaItemId += 1;
+
+    let item : TeamAgendaItem = {
+      newItem with
+      id = agendaItemId;
+    };
+
+    teamAgendaItems.add(agendaItemId, item);
+    agendaItemId;
+  };
+
+  public shared ({ caller }) func updateTeamAgendaItem(id : Nat, updatedItem : TeamAgendaItem) : async () {
+    if (not canWrite(caller)) {
+      Runtime.trap("Unauthorized: Only coordinators and admins can update agenda items");
+    };
+
+    if (not teamAgendaItems.containsKey(id)) {
+      Runtime.trap("Agenda item not found");
+    };
+
+    validateAgendaItem(updatedItem);
+    teamAgendaItems.add(id, { updatedItem with id });
+  };
+
+  public shared ({ caller }) func deleteTeamAgendaItem(id : Nat) : async () {
+    if (not canWrite(caller)) {
+      Runtime.trap("Unauthorized: Only coordinators and admins can delete agenda items");
+    };
+
+    if (not teamAgendaItems.containsKey(id)) {
+      Runtime.trap("Agenda item not found");
+    };
+
+    teamAgendaItems.remove(id);
+  };
+
+  public query ({ caller }) func getTeamAgendaItemsByRange(range : TimeRange) : async [TeamAgendaItem] {
+    if (not canRead(caller)) {
+      Runtime.trap("Unauthorized: Authentication required to view agenda items");
+    };
+
+    teamAgendaItems.values().toArray().filter(
+      func(item) {
+        (item.endTime >= range.start) and (item.startTime <= range.end)
+      }
+    );
+  };
+
+  public query ({ caller }) func getAllTeamAgendaItems() : async [TeamAgendaItem] {
+    if (not canRead(caller)) {
+      Runtime.trap("Unauthorized: Authentication required to view agenda items");
+    };
+    teamAgendaItems.values().toArray();
+  };
+
+  func validateAgendaItem(item : TeamAgendaItem) {
+    if (item.title.size() < 2) {
+      Runtime.trap("Title is required and must be at least 2 characters");
+    };
+    if (item.description.size() < 5) {
+      Runtime.trap("Description is required and must be at least 5 characters");
+    };
+    if (item.endTime <= item.startTime) {
+      Runtime.trap("End time must be after start time");
+    };
   };
 
   // Team Member Management
@@ -668,6 +764,33 @@ actor {
     if (not isAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Authentication required to save profiles");
     };
+    
+    // Sync the role with AccessControl
+    let accessControlRole = switch (profile.role) {
+      case (#admin) { #admin };
+      case (#coordinator) { #user };
+      case (#viewer) { #guest };
+    };
+    
+    // Check if this is a role change and if user has permission
+    switch (userProfiles.get(caller)) {
+      case (?existingProfile) {
+        // User is updating their profile
+        if (existingProfile.role != profile.role) {
+          // Role change - only admins can change roles
+          if (not AccessControl.isAdmin(accessControlState, caller)) {
+            Runtime.trap("Unauthorized: Only admins can change user roles");
+          };
+        };
+      };
+      case (null) {
+        // New profile - default to viewer role for safety
+        if (profile.role != #viewer and not AccessControl.isAdmin(accessControlState, caller)) {
+          Runtime.trap("Unauthorized: New users must start as viewers. Contact an admin for role assignment");
+        };
+      };
+    };
+    
     userProfiles.add(caller, profile);
   };
 
@@ -707,3 +830,4 @@ actor {
     userProfiles.entries().toArray();
   };
 };
+

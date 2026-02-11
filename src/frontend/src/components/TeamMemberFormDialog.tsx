@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useCreateTeamMember, useUpdateTeamMember } from '../hooks/useQueries';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { useCreateTeamMember, useUpdateTeamMember } from '../hooks/useQueries';
 import type { TeamMember } from '../backend';
+import { Loader2 } from 'lucide-react';
 
 interface TeamMemberFormDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   member?: TeamMember | null;
 }
 
-export default function TeamMemberFormDialog({ open, onOpenChange, member }: TeamMemberFormDialogProps) {
+export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemberFormDialogProps) {
   const createMutation = useCreateTeamMember();
   const updateMutation = useUpdateTeamMember();
 
@@ -22,8 +22,6 @@ export default function TeamMemberFormDialog({ open, onOpenChange, member }: Tea
     division: '',
     role: '',
   });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (member) {
@@ -39,121 +37,87 @@ export default function TeamMemberFormDialog({ open, onOpenChange, member }: Tea
         role: '',
       });
     }
-    setErrors({});
   }, [member, open]);
-
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Nama wajib diisi';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Nama minimal 2 karakter';
-    }
-
-    if (!formData.division.trim()) {
-      newErrors.division = 'Divisi wajib diisi';
-    } else if (formData.division.trim().length < 2) {
-      newErrors.division = 'Divisi minimal 2 karakter';
-    }
-
-    if (!formData.role.trim()) {
-      newErrors.role = 'Peran wajib diisi';
-    } else if (formData.role.trim().length < 2) {
-      newErrors.role = 'Peran minimal 2 karakter';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) return;
-
-    try {
-      if (member) {
-        await updateMutation.mutateAsync({
+    if (member) {
+      // Update existing member - include id
+      await updateMutation.mutateAsync({
+        id: member.id,
+        member: {
           id: member.id,
-          member: {
-            id: member.id,
-            name: formData.name.trim(),
-            division: formData.division.trim(),
-            role: formData.role.trim(),
-          },
-        });
-      } else {
-        await createMutation.mutateAsync({
           name: formData.name.trim(),
           division: formData.division.trim(),
           role: formData.role.trim(),
-        });
-      }
-      onOpenChange(false);
-    } catch (error) {
-      // Error handling is done in the mutation
+        },
+      });
+    } else {
+      // Create new member - backend will assign id, so we pass a placeholder
+      await createMutation.mutateAsync({
+        id: BigInt(0), // Placeholder, backend will assign the actual id
+        name: formData.name.trim(),
+        division: formData.division.trim(),
+        role: formData.role.trim(),
+      });
     }
+
+    onClose();
   };
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{member ? 'Edit Anggota Tim' : 'Tambah Anggota Tim'}</DialogTitle>
+          <DialogTitle>{member ? 'Edit Anggota Tim' : 'Tambah Anggota Tim Baru'}</DialogTitle>
+          <DialogDescription>
+            {member ? 'Perbarui informasi anggota tim' : 'Masukkan detail anggota tim baru'}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">
-              Nama <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="name">Nama *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Masukkan nama anggota tim"
-              className={errors.name ? 'border-destructive' : ''}
+              required
+              minLength={2}
             />
-            {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="division">
-              Divisi <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="division">Divisi *</Label>
             <Input
               id="division"
               value={formData.division}
               onChange={(e) => setFormData({ ...formData, division: e.target.value })}
-              placeholder="Masukkan divisi"
-              className={errors.division ? 'border-destructive' : ''}
+              required
+              minLength={2}
             />
-            {errors.division && <p className="text-sm text-destructive">{errors.division}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">
-              Peran <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="role">Peran *</Label>
             <Input
               id="role"
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              placeholder="Masukkan peran"
-              className={errors.role ? 'border-destructive' : ''}
+              required
+              minLength={2}
             />
-            {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
               Batal
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {member ? 'Perbarui' : 'Tambah'}
+            <Button type="submit" disabled={isPending}>
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {member ? 'Simpan Perubahan' : 'Tambah Anggota'}
             </Button>
           </DialogFooter>
         </form>
