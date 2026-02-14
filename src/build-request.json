@@ -1,111 +1,95 @@
 {
   "kind": "build_request",
-  "title": "Simplify Program Calendar UI across all modes (Month/Week/Day/Agenda)",
-  "priority": "normal",
+  "title": "Fix Program Calendar tab rendering blank (no UI visible)",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-29",
-      "text": "Simplify the overall visual presentation of the Program Calendar tab to a minimal, distraction-free style while keeping all existing functionality (filters, view switching, reminders toggle, day/program interactions) unchanged.",
+      "id": "REQ-33",
+      "text": "Fix the Program Calendar dashboard tab so it always renders visible UI (header, filters, view controls, and a calendar body) when the user clicks the Calendar tab, instead of showing a completely blank/empty screen.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9",
-          "msg-11"
+          "msg-1"
         ],
         "quotes": [
-          "Semuanya sekaligus",
-          "Ok, bangun versi sederhananya"
+          "Tampilan tidak muncul sama sekali... tidak muncul apa-apa",
+          "Kosong total tidak ada apa-apa. Tidak ada tampilan... hanya fitur kalender yang tidak muncul apa-apa ketika diklik."
         ]
       },
       "acceptanceCriteria": [
-        "Program Calendar still supports Month/Week/Day/Agenda modes, date navigation (Previous/Today/Next), filters, reminders toggle, day detail panel, and program detail drawer exactly as before.",
-        "The Program Calendar header and surrounding layout no longer uses visually loud styling (e.g., gradient title treatment, heavy shadows) and instead uses clean typography, subtle borders, and restrained spacing.",
-        "No new features are introduced; changes are limited to simplifying UI/UX and visual density."
+        "Clicking the Calendar tab shows the Program Calendar header and controls immediately (even while data is loading).",
+        "The Calendar tab never results in a totally blank screen; if something fails, an in-UI error state is displayed instead.",
+        "The behavior is consistent across Month/Week/Day/Agenda modes on both desktop and mobile."
       ]
     },
     {
-      "id": "REQ-30",
-      "text": "Simplify the Month and Week grid views by reducing visual chrome in day cells and grid layout (less shadow, fewer borders/rounding, fewer high-emphasis hover effects) while preserving today highlight, out-of-month dimming, and category indicators.",
+      "id": "REQ-34",
+      "text": "Add defensive runtime guards in ProgramCalendarTab (frontend/src/components/ProgramCalendarTab.tsx) so browser-API usage cannot crash rendering, including safe handling for localStorage reads/writes (e.g., blocked storage) and Notification permission requests.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9",
-          "msg-11"
+          "msg-1"
         ],
         "quotes": [
-          "Semuanya sekaligus",
-          "Ok, bangun versi sederhananya"
+          "Tampilan tidak muncul sama sekali. Sepertinya perilaku UI yang tidak sesuai."
         ]
       },
       "acceptanceCriteria": [
-        "In Month and Week views, day cells remain clickable and continue to open the existing day detail panel behavior.",
-        "Day cells keep: (1) date number, (2) today state, (3) out-of-month dimming (Month view), (4) category presence indicators; but appear visually simpler (no prominent shadow-on-hover, no heavy borders, no overly large rounding).",
-        "The calendar grid reads clearly in both light and dark themes with restrained contrast (no garish color blocks), using existing category colors only as subtle indicators."
+        "If localStorage is unavailable or throws, the calendar still renders and reminders default to enabled (or a safe default) without crashing.",
+        "Toggling reminders does not throw even when Notifications are unsupported/blocked; the UI remains usable.",
+        "No uncaught exceptions occur from localStorage/Notification access when opening the Calendar tab."
       ]
     },
     {
-      "id": "REQ-31",
-      "text": "Make the Day and Agenda views more compact and consistent by simplifying list items (reduce padding, reduce icon prominence, remove unnecessary visual decoration) while preserving essential information and click-to-open Program Detail behavior.",
+      "id": "REQ-35",
+      "text": "Ensure ProgramCalendarTab gracefully handles data-shape edge cases so calendar rendering cannot crash when program fields are unexpected (e.g., missing/undefined nested fields) by adding safe access patterns and fallback display values where needed.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9",
-          "msg-11"
+          "msg-1"
         ],
         "quotes": [
-          "Semuanya sekaligus",
-          "Ok, bangun versi sederhananya"
+          "Kosong total tidak ada apa-apa. Tidak ada tampilan."
         ]
       },
       "acceptanceCriteria": [
-        "Day view and Agenda view remain functionally identical: items still include Programs, Team Agenda, and KPI Deadlines; program rows still open the Program Detail drawer on click.",
-        "List item rows are visually compact and consistent across item types, using minimal decoration (e.g., avoid large icons and thick left borders), while still showing core fields (program name, unit, PIC, status, priority, progress; agenda title/time; KPI name/team/target/deadline label).",
-        "Empty states remain in English and remain present for Day and Agenda views."
+        "If any program item is missing a nested field (e.g., personInCharge), the Calendar tab still renders and the item is either shown with fallbacks (e.g., 'Unknown') or skipped without crashing.",
+        "Filters (PIC, Division, Status, Priority) do not throw when program data is incomplete.",
+        "No uncaught exceptions occur during render when programs/agenda/KPI arrays contain malformed entries."
       ]
     },
     {
-      "id": "REQ-32",
-      "text": "Simplify the filter and control areas above the calendar to reduce perceived complexity (more compact layout, fewer heavy card/shadow treatments), without removing any filter fields or controls.",
+      "id": "REQ-36",
+      "text": "Add a user-visible, English error/empty-state UI within the Calendar tab when data queries fail or return no items, including a clear 'Retry' action that triggers React Query refetch for the calendar range queries.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9",
-          "msg-11"
+          "msg-1"
         ],
         "quotes": [
-          "Semuanya sekaligus",
-          "Ok, bangun versi sederhananya"
+          "Saat ini tidak berfungsi",
+          "Tampilan tidak muncul sama sekali."
         ]
       },
       "acceptanceCriteria": [
-        "All existing filters remain available: Unit/Division, Person in Charge, Status, Priority; Reset Filters remains available when filters are active.",
-        "View controls remain available and usable: grid density (Month/Week only), view mode switcher, and reminders toggle.",
-        "The category legend remains present but is visually minimal (e.g., color dots without prominent icons) while keeping labels in English: Programs, Team Agenda, KPI Deadlines."
+        "If a calendar query fails, the calendar shows an English error message (not a blank area) and a Retry button.",
+        "Retry refetches the relevant calendar queries and updates the UI accordingly.",
+        "If there are no programs/agenda items/KPI deadlines in range, the calendar shows an English empty state explaining there is nothing scheduled in the visible range."
       ]
     }
   ],
   "constraints": [
-    "Frontend must not modify any files under frontend/src/components/ui or any paths listed in SYSTEM_CONTEXT.frontend.immutablePaths.",
-    "Backend architecture must remain single-actor; no backend changes are required for this request.",
-    "Keep all user-facing text in the Program Calendar feature in English."
+    "Do not edit files in frontend immutablePaths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui (compose instead of modifying).",
+    "Keep the backend as a single Motoko actor in backend/main.mo; only add backend changes if strictly required to fix the calendar rendering issue.",
+    "Use English for any new/updated user-facing text introduced as part of these fixes."
   ],
   "nonGoals": [
-    "Do not change backend data models, queries, or reminder logic.",
-    "Do not remove any calendar modes (Month/Week/Day/Agenda) or existing interactions (day click, program click, edit flow).",
-    "Do not introduce new calendar features (e.g., new filters, new categories, new notification channels)."
+    "Do not redesign the overall calendar UI/UX beyond what is necessary to stop it rendering blank.",
+    "Do not add new calendar features (new filters, new modes, new entities) as part of this fix.",
+    "Do not change authentication behavior or Internet Identity integration."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

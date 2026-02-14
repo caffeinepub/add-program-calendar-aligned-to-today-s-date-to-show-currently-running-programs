@@ -1,109 +1,114 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Minimal, distraction-free Program Calendar UI across Month/Week/Day/Agenda views",
+  "title": "Fix Program Calendar tab blank rendering with runtime guards and resilient states",
   "requirements": [
     {
-      "id": "REQ-29",
-      "summary": "Restyle the Program Calendar tab to a minimal, distraction-free layout while preserving all current calendar behaviors and interactions.",
+      "id": "REQ-33",
+      "summary": "Ensure the Calendar tab always renders visible UI and cannot go blank on open across all view modes and devices.",
       "acceptanceCriteria": [
-        "Program Calendar still supports Month/Week/Day/Agenda modes, date navigation (Previous/Today/Next), filters, reminders toggle, day detail panel, and program detail drawer exactly as before.",
-        "The Program Calendar header and surrounding layout no longer uses visually loud styling (e.g., gradient title treatment, heavy shadows) and instead uses clean typography, subtle borders, and restrained spacing.",
-        "No new features are introduced; changes are limited to simplifying UI/UX and visual density."
+        "Clicking the Calendar tab shows the Program Calendar header and controls immediately (even while data is loading).",
+        "The Calendar tab never results in a totally blank screen; if something fails, an in-UI error state is displayed instead.",
+        "The behavior is consistent across Month/Week/Day/Agenda modes on both desktop and mobile."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/ProgramCalendarTab.tsx",
           "operation": "modify",
-          "description": "Simplify the Program Calendar header and surrounding layout: remove gradient title styling, reduce vertical spacing, and replace heavy Card/shadow presentation with restrained borders/backgrounds while keeping all existing behaviors unchanged. Use shadcn-ui components (Card, Button, Select, Switch, Label) as-is for consistent base UI; verify the component's usage instructions before implementing."
+          "description": "Harden Calendar tab render flow so header/filters/view controls always render; wrap the calendar body (views + panels/drawers) in a local error boundary and ensure loading/error/empty states render inside the tab instead of allowing a blank screen. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-          "operation": "modify",
-          "description": "Adjust Day Detail panel styling to match the minimal calendar aesthetic (subtle borders, reduced shadow emphasis, restrained typography/spacing) while keeping the same open/close behavior and program click-to-open detail flow. Use shadcn-ui Sheet/Card/ScrollArea/Badge as-is; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
-          "operation": "modify",
-          "description": "Align Program Detail drawer styling with the simplified calendar look (reduce visual decoration density without changing content or edit flow), keeping the same drawer animations/behavior and Edit Program action. Use shadcn-ui Sheet/ScrollArea/Badge/Progress/Separator/Button as-is; verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx",
+          "operation": "create",
+          "description": "Add a React Error Boundary (class component) dedicated to Program Calendar tab content to catch render-time crashes and display an in-UI fallback with a reset action. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-30",
-      "summary": "Simplify Month and Week grid visuals by reducing day-cell chrome while preserving today highlight, out-of-month dimming, and category indicators.",
+      "id": "REQ-34",
+      "summary": "Add defensive runtime guards so localStorage and Notification API usage cannot crash ProgramCalendarTab rendering or reminder toggling.",
       "acceptanceCriteria": [
-        "In Month and Week views, day cells remain clickable and continue to open the existing day detail panel behavior.",
-        "Day cells keep: (1) date number, (2) today state, (3) out-of-month dimming (Month view), (4) category presence indicators; but appear visually simpler (no prominent shadow-on-hover, no heavy borders, no overly large rounding).",
-        "The calendar grid reads clearly in both light and dark themes with restrained contrast (no garish color blocks), using existing category colors only as subtle indicators."
+        "If localStorage is unavailable or throws, the calendar still renders and reminders default to enabled (or a safe default) without crashing.",
+        "Toggling reminders does not throw even when Notifications are unsupported/blocked; the UI remains usable.",
+        "No uncaught exceptions occur from localStorage/Notification access when opening the Calendar tab."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/program-calendar/DayCell.tsx",
+          "path": "frontend/src/components/ProgramCalendarTab.tsx",
           "operation": "modify",
-          "description": "Redesign DayCell styling to be more minimal: remove prominent hover shadow and high-emphasis hover border, reduce rounding, and ensure today/out-of-month states remain clear and accessible. Keep category indicators but make them subtler (e.g., smaller dots/bars with restrained saturation) and preserve click/focus behavior."
+          "description": "Replace direct localStorage reads/writes with safe guarded helpers (try/catch, feature detection) and protect Notification permission requests (feature detection + try/catch) so state initialization and toggling cannot crash render. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/program-calendar/views/MonthGridView.tsx",
-          "operation": "modify",
-          "description": "Reduce Month view grid visual density by adjusting gaps/headers to a cleaner, flatter layout (e.g., tighter spacing, subtler weekday header styling) while preserving the existing day click behavior and category-count computation."
+          "path": "frontend/src/utils/safeBrowserStorage.ts",
+          "operation": "create",
+          "description": "Introduce small utility helpers for safe get/set JSON to localStorage (returns defaults on failure) to centralize defensive behavior for blocked/unsupported storage. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/program-calendar/views/WeekGridView.tsx",
+          "path": "frontend/src/utils/reminderDedup.ts",
           "operation": "modify",
-          "description": "Simplify Week view layout by reducing extra chrome around each day column (subtle header, tighter spacing, avoid card-like presentation) while preserving day click behavior and category-count computation."
+          "description": "Refactor reminder dedup localStorage access to use the shared safe storage helpers to further reduce runtime risk in restricted browser environments. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useCalendarReminders.ts",
+          "operation": "modify",
+          "description": "Add defensive guards around Notification feature detection and permission checks to ensure reminder processing never throws and cannot interrupt rendering. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-31",
-      "summary": "Make Day and Agenda views more compact and consistent by simplifying list rows while preserving information and program click-to-open behavior.",
+      "id": "REQ-35",
+      "summary": "Make ProgramCalendarTab resilient to malformed/incomplete program and calendar item shapes so rendering and filtering never crash.",
       "acceptanceCriteria": [
-        "Day view and Agenda view remain functionally identical: items still include Programs, Team Agenda, and KPI Deadlines; program rows still open the Program Detail drawer on click.",
-        "List item rows are visually compact and consistent across item types, using minimal decoration (e.g., avoid large icons and thick left borders), while still showing core fields (program name, unit, PIC, status, priority, progress; agenda title/time; KPI name/team/target/deadline label).",
-        "Empty states remain in English and remain present for Day and Agenda views."
+        "If any program item is missing a nested field (e.g., personInCharge), the Calendar tab still renders and the item is either shown with fallbacks (e.g., 'Unknown') or skipped without crashing.",
+        "Filters (PIC, Division, Status, Priority) do not throw when program data is incomplete.",
+        "No uncaught exceptions occur during render when programs/agenda/KPI arrays contain malformed entries."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/program-calendar/views/DayListView.tsx",
+          "path": "frontend/src/components/ProgramCalendarTab.tsx",
           "operation": "modify",
-          "description": "Restyle Day view list rows to be more compact and consistent across program/agenda/KPI types: reduce padding, reduce icon prominence, remove thick left border treatment, and use subtle category color accents (e.g., small dot or thin indicator). Preserve all displayed fields, sorting, and program click-to-open behavior. Use shadcn-ui Badge as-is; verify the component's usage instructions before implementing."
+          "description": "Harden derived data (unique PIC list, filter options, labels) with safe access patterns (optional chaining / fallbacks) so unexpected/malformed items cannot throw during memoization or render. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/programFilterUtils.ts",
+          "operation": "modify",
+          "description": "Update filtering logic to safely read program fields (unit/status/priority/personInCharge) with fallbacks and skip malformed entries without throwing. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/components/program-calendar/views/AgendaListView.tsx",
           "operation": "modify",
-          "description": "Restyle Agenda view rows and day group headers for compact consistency with Day view: reduce padding, remove heavy decoration, keep sticky day header but simplify its visual weight, and ensure program rows remain clickable to open the Program Detail drawer. Use shadcn-ui Badge as-is; verify the component's usage instructions before implementing."
+          "description": "Guard all program/KPI nested field reads (e.g., personInCharge.name, team.name) with fallbacks (e.g., 'Unknown') to prevent crashes when items are incomplete. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/views/DayListView.tsx",
+          "operation": "modify",
+          "description": "Guard all program/KPI nested field reads (e.g., personInCharge.name, team.name) with fallbacks (e.g., 'Unknown') to prevent crashes when items are incomplete. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/program-calendar/DayDetailPanel.tsx",
+          "operation": "modify",
+          "description": "Ensure the day detail list uses safe program field access with fallbacks so selecting a day cannot crash due to malformed program entries. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-32",
-      "summary": "Simplify the filter and control areas above the calendar without removing any controls or legend content.",
+      "id": "REQ-36",
+      "summary": "Add English in-tab error and empty states with a Retry action that refetches calendar range queries.",
       "acceptanceCriteria": [
-        "All existing filters remain available: Unit/Division, Person in Charge, Status, Priority; Reset Filters remains available when filters are active.",
-        "View controls remain available and usable: grid density (Month/Week only), view mode switcher, and reminders toggle.",
-        "The category legend remains present but is visually minimal (e.g., color dots without prominent icons) while keeping labels in English: Programs, Team Agenda, KPI Deadlines."
+        "If a calendar query fails, the calendar shows an English error message (not a blank area) and a Retry button.",
+        "Retry refetches the relevant calendar queries and updates the UI accordingly.",
+        "If there are no programs/agenda items/KPI deadlines in range, the calendar shows an English empty state explaining there is nothing scheduled in the visible range."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/ProgramCalendarTab.tsx",
           "operation": "modify",
-          "description": "Compact the filters and view-control sections: reduce Card padding, remove/avoid heavy shadow classes, tighten spacing, and ensure all existing filters and controls remain present and usable (including Reset Filters, grid density control for Month/Week, view switcher, and reminders toggle). Use shadcn-ui Card/Button/Select/Switch/Label as-is; verify the component's usage instructions before implementing."
+          "description": "Aggregate query errors across programs/agenda/KPIs and render an English error state inside the calendar body with a Retry button that calls the relevant React Query refetch functions; also render an English empty state when all in-range items are empty (respecting current visible range). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/program-calendar/CalendarCategoryLegend.tsx",
+          "path": "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx",
           "operation": "modify",
-          "description": "Make the category legend visually minimal by removing prominent icons and presenting categories as small color dots with English labels (Programs, Team Agenda, KPI Deadlines), using existing category colors as subtle indicators."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/GridDensityControl.tsx",
-          "operation": "modify",
-          "description": "Simplify grid density control styling to a more minimal segmented-control look (less border/rounding emphasis, smaller padding) while preserving the same two options and behavior. Use shadcn-ui Button as-is; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
-          "operation": "modify",
-          "description": "Simplify view switcher styling (reduce icon prominence and visual weight, tighten spacing) while preserving the same view modes (Month/Week/Day/Agenda) and the existing mobile-disabled behavior. Use shadcn-ui Button as-is; verify the component's usage instructions before implementing."
+          "description": "Enhance the error boundary fallback UI to show an English message and expose a Retry/Reset action that can trigger the provided refetch/reset behavior (so even render crashes have an in-UI recovery path). Verify the component's usage instructions before implementing."
         }
       ]
     }

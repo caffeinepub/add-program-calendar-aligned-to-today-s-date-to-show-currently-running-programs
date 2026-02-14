@@ -9,19 +9,25 @@ interface FilterState {
 
 export function applyProgramFilters(programs: Program[], filters: FilterState): Program[] {
   return programs.filter((program) => {
-    if (filters.division && program.unit !== filters.division) {
+    try {
+      // Safe access with fallbacks
+      if (filters.division && program?.unit !== filters.division) {
+        return false;
+      }
+      if (filters.pic && program?.personInCharge?.name !== filters.pic) {
+        return false;
+      }
+      if (filters.status && program?.status !== filters.status) {
+        return false;
+      }
+      if (filters.priority && program?.priority !== filters.priority) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.warn('Error filtering program:', error);
       return false;
     }
-    if (filters.pic && program.personInCharge.name !== filters.pic) {
-      return false;
-    }
-    if (filters.status && program.status !== filters.status) {
-      return false;
-    }
-    if (filters.priority && program.priority !== filters.priority) {
-      return false;
-    }
-    return true;
   });
 }
 
@@ -32,9 +38,14 @@ export function countProgramsByDay(programs: Program[], date: Date): number {
   dayEnd.setHours(23, 59, 59, 999);
 
   return programs.filter((p) => {
-    return (
-      Number(p.endDate) >= dayStart.getTime() &&
-      Number(p.startDate) <= dayEnd.getTime()
-    );
+    try {
+      return (
+        Number(p?.endDate) >= dayStart.getTime() &&
+        Number(p?.startDate) <= dayEnd.getTime()
+      );
+    } catch (error) {
+      console.warn('Error counting programs:', error);
+      return false;
+    }
   }).length;
 }

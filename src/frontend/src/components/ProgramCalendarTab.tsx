@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Loader2, X, Bell, BellOff } from 'lucide-react';
+import { Loader2, X, Bell, BellOff, AlertCircle, RefreshCw } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, addWeeks, format, startOfDay, endOfDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import type { Program, ProgramStatus, ProgramPriority } from '../backend';
@@ -22,6 +22,8 @@ import CalendarCategoryLegend from './program-calendar/CalendarCategoryLegend';
 import { applyProgramFilters } from './program-calendar/programFilterUtils';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useCalendarReminders } from '../hooks/useCalendarReminders';
+import { safeGetJSON, safeSetJSON } from '../utils/safeBrowserStorage';
+import CalendarTabErrorBoundary from './program-calendar/CalendarTabErrorBoundary';
 
 type ViewMode = 'month' | 'week' | 'day' | 'agenda';
 type GridDensity = 'comfortable' | 'compact';
@@ -43,8 +45,7 @@ export default function ProgramCalendarTab() {
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [remindersEnabled, setRemindersEnabled] = useState(() => {
-    const stored = localStorage.getItem('calendarRemindersEnabled');
-    return stored ? JSON.parse(stored) : true;
+    return safeGetJSON('calendarRemindersEnabled', true);
   });
 
   const [filters, setFilters] = useState<FilterState>({
@@ -59,7 +60,7 @@ export default function ProgramCalendarTab() {
     if (isMobile && viewMode !== 'agenda') {
       setViewMode('agenda');
     }
-  }, [isMobile]);
+  }, [isMobile, viewMode]);
 
   // Calculate visible range based on view mode
   const visibleRange = useMemo(() => {
@@ -88,14 +89,32 @@ export default function ProgramCalendarTab() {
     };
   }, [currentDate, viewMode]);
 
-  const { data: programs = [], isLoading: programsLoading, error: programsError } = useGetProgramsActiveInRange(visibleRange);
-  const { data: agendaItems = [], isLoading: agendaLoading } = useGetTeamAgendaItemsByRange(visibleRange);
-  const { data: kpiDeadlines = [], isLoading: kpisLoading } = useGetKPIsWithDeadlinesInRange(visibleRange);
+  const { 
+    data: programs = [], 
+    isLoading: programsLoading, 
+    error: programsError,
+    refetch: refetchPrograms 
+  } = useGetProgramsActiveInRange(visibleRange);
+  
+  const { 
+    data: agendaItems = [], 
+    isLoading: agendaLoading,
+    error: agendaError,
+    refetch: refetchAgenda 
+  } = useGetTeamAgendaItemsByRange(visibleRange);
+  
+  const { 
+    data: kpiDeadlines = [], 
+    isLoading: kpisLoading,
+    error: kpisError,
+    refetch: refetchKpis 
+  } = useGetKPIsWithDeadlinesInRange(visibleRange);
+  
   const { data: divisions = [] } = useGetUniqueDivisions();
   const { data: teamMembers = [] } = useGetAllTeamMembers();
 
   const isLoading = programsLoading || agendaLoading || kpisLoading;
-  const error = programsError;
+  const hasError = programsError || agendaError || kpisError;
 
   // Initialize reminders
   useCalendarReminders({
@@ -105,9 +124,13 @@ export default function ProgramCalendarTab() {
     enabled: remindersEnabled,
   });
 
-  // Get unique PICs and priorities from programs
+  // Get unique PICs and priorities from programs with safe access
   const uniquePICs = useMemo(() => {
-    const pics = new Set(programs.map(p => p.personInCharge.name));
+    const pics = new Set(
+      programs
+        .filter(p => p?.personInCharge?.name)
+        .map(p => p.personInCharge.name)
+    );
     return Array.from(pics).sort();
   }, [programs]);
 
@@ -119,10 +142,13 @@ export default function ProgramCalendarTab() {
     return ['planning', 'ongoing', 'completed'];
   }, []);
 
-  // Apply filters
+  // Apply filters with safe access
   const filteredPrograms = useMemo(() => {
     return applyProgramFilters(programs, filters);
   }, [programs, filters]);
+
+  // Check if there's any data in the visible range
+  const hasData = filteredPrograms.length > 0 || agendaItems.length > 0 || kpiDeadlines.length > 0;
 
   const handlePrevious = () => {
     if (viewMode === 'month') {
@@ -181,10 +207,26 @@ export default function ProgramCalendarTab() {
 
   const handleToggleReminders = (enabled: boolean) => {
     setRemindersEnabled(enabled);
-    localStorage.setItem('calendarRemindersEnabled', JSON.stringify(enabled));
-    if (enabled && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
+    safeSetJSON('calendarRemindersEnabled', enabled);
+    
+    // Request notification permission if enabling and supported
+    if (enabled && typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().catch(err => {
+            console.warn('Notification permission request failed:', err);
+          });
+        }
+      } catch (error) {
+        console.warn('Notification API not supported:', error);
+      }
     }
+  };
+
+  const handleRetry = () => {
+    refetchPrograms();
+    refetchAgenda();
+    refetchKpis();
   };
 
   const hasActiveFilters = filters.division || filters.pic || filters.status || filters.priority;
@@ -205,7 +247,7 @@ export default function ProgramCalendarTab() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* Header - Always visible */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
@@ -217,7 +259,7 @@ export default function ProgramCalendarTab() {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters - Always visible */}
       <Card>
         <CardContent className="pt-4 pb-4 px-4">
           <div className="space-y-3">
@@ -304,7 +346,7 @@ export default function ProgramCalendarTab() {
         </CardContent>
       </Card>
 
-      {/* View Controls */}
+      {/* View Controls - Always visible */}
       <Card>
         <CardContent className="pt-4 pb-4 px-4">
           <div className="flex flex-col gap-3">
@@ -361,61 +403,80 @@ export default function ProgramCalendarTab() {
         </CardContent>
       </Card>
 
-      {/* Calendar View */}
+      {/* Calendar View - Wrapped in error boundary */}
       <Card>
         <CardContent className="p-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            </div>
-          ) : error ? (
-            <div className="text-center py-20">
-              <p className="text-destructive">Error: {(error as Error).message}</p>
-            </div>
-          ) : (
-            <>
-              {viewMode === 'month' && (
-                <MonthGridView
-                  currentDate={currentDate}
-                  programs={filteredPrograms}
-                  agendaItems={agendaItems}
-                  kpiDeadlines={kpiDeadlines}
-                  onDayClick={handleDayClick}
-                  onProgramClick={handleProgramClick}
-                  gridDensity={gridDensity}
-                />
-              )}
-              {viewMode === 'week' && (
-                <WeekGridView
-                  currentDate={currentDate}
-                  programs={filteredPrograms}
-                  agendaItems={agendaItems}
-                  kpiDeadlines={kpiDeadlines}
-                  onDayClick={handleDayClick}
-                  onProgramClick={handleProgramClick}
-                  gridDensity={gridDensity}
-                />
-              )}
-              {viewMode === 'day' && (
-                <DayListView
-                  currentDate={currentDate}
-                  programs={filteredPrograms}
-                  agendaItems={agendaItems}
-                  kpiDeadlines={kpiDeadlines}
-                  onProgramClick={handleProgramClick}
-                />
-              )}
-              {viewMode === 'agenda' && (
-                <AgendaListView
-                  currentDate={currentDate}
-                  programs={filteredPrograms}
-                  agendaItems={agendaItems}
-                  kpiDeadlines={kpiDeadlines}
-                  onProgramClick={handleProgramClick}
-                />
-              )}
-            </>
-          )}
+          <CalendarTabErrorBoundary onReset={handleRetry}>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              </div>
+            ) : hasError ? (
+              <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                <AlertCircle className="h-12 w-12 text-destructive" />
+                <div className="text-center space-y-2">
+                  <p className="text-lg font-semibold">Failed to load calendar data</p>
+                  <p className="text-sm text-muted-foreground">
+                    {(hasError as Error)?.message || 'An error occurred while fetching calendar data'}
+                  </p>
+                </div>
+                <Button onClick={handleRetry} variant="outline" size="sm">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+              </div>
+            ) : !hasData ? (
+              <div className="flex flex-col items-center justify-center py-20 space-y-2">
+                <p className="text-lg font-semibold">No items scheduled</p>
+                <p className="text-sm text-muted-foreground">
+                  There are no programs, agenda items, or KPI deadlines in the visible range
+                </p>
+              </div>
+            ) : (
+              <>
+                {viewMode === 'month' && (
+                  <MonthGridView
+                    currentDate={currentDate}
+                    programs={filteredPrograms}
+                    agendaItems={agendaItems}
+                    kpiDeadlines={kpiDeadlines}
+                    onDayClick={handleDayClick}
+                    onProgramClick={handleProgramClick}
+                    gridDensity={gridDensity}
+                  />
+                )}
+                {viewMode === 'week' && (
+                  <WeekGridView
+                    currentDate={currentDate}
+                    programs={filteredPrograms}
+                    agendaItems={agendaItems}
+                    kpiDeadlines={kpiDeadlines}
+                    onDayClick={handleDayClick}
+                    onProgramClick={handleProgramClick}
+                    gridDensity={gridDensity}
+                  />
+                )}
+                {viewMode === 'day' && (
+                  <DayListView
+                    currentDate={currentDate}
+                    programs={filteredPrograms}
+                    agendaItems={agendaItems}
+                    kpiDeadlines={kpiDeadlines}
+                    onProgramClick={handleProgramClick}
+                  />
+                )}
+                {viewMode === 'agenda' && (
+                  <AgendaListView
+                    currentDate={currentDate}
+                    programs={filteredPrograms}
+                    agendaItems={agendaItems}
+                    kpiDeadlines={kpiDeadlines}
+                    onProgramClick={handleProgramClick}
+                  />
+                )}
+              </>
+            )}
+          </CalendarTabErrorBoundary>
         </CardContent>
       </Card>
 

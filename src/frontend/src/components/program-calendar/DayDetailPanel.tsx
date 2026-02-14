@@ -27,14 +27,19 @@ export default function DayDetailPanel({
     if (!date) return [];
     
     return programs.filter((program) => {
-      const programStart = Number(program.startDate);
-      const programEnd = Number(program.endDate);
-      const dayStart = new Date(date);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(date);
-      dayEnd.setHours(23, 59, 59, 999);
+      try {
+        const programStart = Number(program?.startDate);
+        const programEnd = Number(program?.endDate);
+        const dayStart = new Date(date);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(date);
+        dayEnd.setHours(23, 59, 59, 999);
 
-      return programEnd >= dayStart.getTime() && programStart <= dayEnd.getTime();
+        return programEnd >= dayStart.getTime() && programStart <= dayEnd.getTime();
+      } catch (error) {
+        console.warn('Error filtering program in day detail:', error);
+        return false;
+      }
     });
   }, [date, programs]);
 
@@ -57,34 +62,39 @@ export default function DayDetailPanel({
           ) : (
             <div className="space-y-2">
               {dayPrograms.map((program) => {
-                const statusConfig = getStatusConfig(program.status);
-                const priorityConfig = getPriorityConfig(program.priority);
+                try {
+                  const statusConfig = getStatusConfig(program.status);
+                  const priorityConfig = getPriorityConfig(program.priority);
 
-                return (
-                  <div
-                    key={program.id}
-                    onClick={() => {
-                      onProgramClick(program);
-                      onClose();
-                    }}
-                    className="p-3 rounded border bg-card hover:bg-accent/50 cursor-pointer transition-colors"
-                  >
-                    <h4 className="font-medium text-sm mb-2 line-clamp-1">{program.name}</h4>
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      <Badge variant={statusConfig.variant} className="text-xs">
-                        {statusConfig.label}
-                      </Badge>
-                      <Badge className={`${priorityConfig.className} text-xs`}>
-                        {priorityConfig.label}
-                      </Badge>
+                  return (
+                    <div
+                      key={program.id}
+                      onClick={() => {
+                        onProgramClick(program);
+                        onClose();
+                      }}
+                      className="p-3 rounded border bg-card hover:bg-accent/50 cursor-pointer transition-colors"
+                    >
+                      <h4 className="font-medium text-sm mb-2 line-clamp-1">{program.name || 'Untitled'}</h4>
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        <Badge variant={statusConfig.variant} className="text-xs">
+                          {statusConfig.label}
+                        </Badge>
+                        <Badge className={`${priorityConfig.className} text-xs`}>
+                          {priorityConfig.label}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-0.5">
+                        <p><span className="font-medium">Unit:</span> {program?.unit || 'Unknown'}</p>
+                        <p><span className="font-medium">PIC:</span> {program?.personInCharge?.name || 'Unknown'}</p>
+                        <p><span className="font-medium">Progress:</span> {Number(program?.progress || 0)}%</p>
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground space-y-0.5">
-                      <p><span className="font-medium">Unit:</span> {program.unit}</p>
-                      <p><span className="font-medium">PIC:</span> {program.personInCharge.name}</p>
-                      <p><span className="font-medium">Progress:</span> {Number(program.progress)}%</p>
-                    </div>
-                  </div>
-                );
+                  );
+                } catch (error) {
+                  console.warn('Error rendering program in day detail:', error);
+                  return null;
+                }
               })}
             </div>
           )}

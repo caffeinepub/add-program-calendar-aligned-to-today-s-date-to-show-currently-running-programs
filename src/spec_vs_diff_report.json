@@ -1,58 +1,32 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T07:22:45.623Z",
-  "summary": "Diff implements several UI simplifications for the Program Calendar (minimal category legend, simplified DayCell used by Month/Week grids, compact-looking controls for view switching and grid density, and refreshed Day detail panel / program detail drawer). However, evidence suggests Day/Agenda list rows may still use prominent icons and a thick colored left bar, which conflicts with the requested “minimal decoration” requirement for those views.",
+  "generatedAt": "2026-02-14T06:37:12.086Z",
+  "summary": "Diff adds a Calendar tab error boundary, safe localStorage utilities, and multiple defensive guards/fallbacks in calendar views and filtering to prevent crashes and blank renders. It also adds some empty-state UI text. However, the diff evidence does not clearly show the required in-tab React Query failure handling with an explicit Retry action that triggers refetch for the range queries.",
   "missing_requirements": [
     {
-      "id": "REQ-31",
-      "requirement": "Make the Day and Agenda views more compact and consistent by simplifying list items (reduce padding, reduce icon prominence, remove unnecessary visual decoration) while preserving essential information and click-to-open Program Detail behavior.",
-      "reason": "DayListView/AgendaListView still appear to use prominent lucide icons and a thick left colored indicator bar (w-1 with full-height/rounded) and relatively large padding (p-3), which conflicts with the AC guidance to avoid large icons and thick left borders and to reduce decoration.",
+      "id": "REQ-36",
+      "requirement": "Add a user-visible, English error/empty-state UI within the Calendar tab when data queries fail, including a clear 'Retry' action that triggers React Query refetch for the calendar range queries.",
+      "reason": "While an error boundary with a 'Try Again' button was added, the diff summary does not show query-error handling tied to React Query failures nor a Retry that calls the relevant React Query refetch functions for the calendar range queries. The ProgramCalendarTab changes are truncated before any query error UI/refetch wiring is visible.",
       "evidence": [
-        "frontend/src/components/program-calendar/views/DayListView.tsx",
-        "frontend/src/components/program-calendar/views/AgendaListView.tsx"
-      ]
-    },
-    {
-      "id": "REQ-29",
-      "requirement": "Simplify the overall visual presentation of the Program Calendar tab header and surrounding layout to a minimal, distraction-free style while keeping all existing functionality unchanged.",
-      "reason": "ProgramCalendarTab.tsx is truncated in the diff summary, so it’s not possible to verify from provided evidence that the header/surrounding layout removed visually loud styling (e.g., gradients/heavy shadows) and moved to subtle borders/typography, while preserving all interactions.",
-      "evidence": [
-        "frontend/src/components/ProgramCalendarTab.tsx (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-32",
-      "requirement": "Simplify the filter and control areas above the calendar to reduce perceived complexity (compact layout, fewer heavy card/shadow treatments), without removing any filter fields or controls.",
-      "reason": "ProgramCalendarTab.tsx (where filters/controls live) is truncated, so the diff summary does not provide enough evidence to confirm that Unit/Division, PIC, Status, Priority, Reset Filters, grid density (Month/Week), view mode switcher, reminders toggle, and the (now minimal) legend are all still present and that the area’s visual chrome was reduced.",
-      "evidence": [
+        "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx",
         "frontend/src/components/ProgramCalendarTab.tsx (truncated)"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Added a 'Categories:' prefix label in the category legend UI.",
-      "reason": "REQ-32 specifies keeping legend labels in English for Programs/Team Agenda/KPI Deadlines, but does not request an additional 'Categories:' label; this is extra user-facing text (though still English).",
-      "evidence": [
-        "frontend/src/components/program-calendar/CalendarCategoryLegend.tsx"
-      ]
-    }
-  ],
-  "confidence": 0.58,
+  "hallucinated_features": [],
+  "confidence": 0.56,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/components/ProgramCalendarTab.tsx",
-    "frontend/src/components/program-calendar/CalendarCategoryLegend.tsx",
-    "frontend/src/components/program-calendar/DayCell.tsx",
+    "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx",
     "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-    "frontend/src/components/program-calendar/GridDensityControl.tsx",
-    "frontend/src/components/program-calendar/ProgramCalendarViewSwitcher.tsx",
-    "frontend/src/components/program-calendar/ProgramDetailDrawer.tsx",
+    "frontend/src/components/program-calendar/programFilterUtils.ts",
     "frontend/src/components/program-calendar/views/AgendaListView.tsx",
     "frontend/src/components/program-calendar/views/DayListView.tsx",
-    "frontend/src/components/program-calendar/views/MonthGridView.tsx",
-    "frontend/src/components/program-calendar/views/WeekGridView.tsx",
+    "frontend/src/hooks/useCalendarReminders.ts",
+    "frontend/src/utils/reminderDedup.ts",
+    "frontend/src/utils/safeBrowserStorage.ts",
     "project_state.json"
   ]
 }

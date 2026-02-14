@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 19,
+  "projectStateVersion": 21,
   "summary": "Redesign the Program Calendar dashboard view for SHQ AQL tracking web app with a full-width, highly readable, modern UX, now with a simplified/minimal visual style applied consistently across all calendar modes (Month/Week/Daily/Agenda).",
   "architectural_notes": [
     "Program Calendar UI must be full-width and dominant (not sidebar), with responsive design: desktop calendar grid + mobile agenda list view.",
@@ -17,9 +17,10 @@
   "known_issues": [
     "KPI program dropdown is hard to use: scrolling/searching for a program is not smooth/doesn't work well.",
     "KPI “Related Program” dropdown still does not scroll smoothly (issue persists after latest deploy/build).",
-    "Users need to scroll/shift to the right to see program details; overall scrolling feels cumbersome/not smooth when browsing programs."
+    "Users need to scroll/shift to the right to see program details; overall scrolling feels cumbersome/not smooth when browsing programs.",
+    "Program Calendar tab renders blank/empty (no UI shown at all) when clicked, while other features work normally."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-add-a-new-program-calendar-view-in-the-dashboard-that-defaults-to-today-highlights-today-on-a-calendar-ui-and-clearly-shows-which-programs-are-running-today",
@@ -250,6 +251,38 @@
       "title": "Simplify the filter and control areas above the calendar to reduce perceived complexity (more compact layout, fewer heavy card/shadow treatments), without removing any filter fields or controls.",
       "reqIds": [
         "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-program-calendar-dashboard-tab-so-it-always-renders-visible-ui-header-filters-view-controls-and-a-calendar-body-when-the-user-clicks-the-calendar-tab-instead-of-showing-a-completely-blank-empty-screen",
+      "title": "Fix the Program Calendar dashboard tab so it always renders visible UI (header, filters, view controls, and a calendar body) when the user clicks the Calendar tab, instead of showing a completely blank/empty screen.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-defensive-runtime-guards-in-programcalendartab-frontend-src-components-programcalendartab-tsx-so-browser-api-usage-cannot-crash-rendering-including-safe-handling-for-localstorage-reads-writes-e-g-blocked-storage-and-notification-permission-requests",
+      "title": "Add defensive runtime guards in ProgramCalendarTab (frontend/src/components/ProgramCalendarTab.tsx) so browser-API usage cannot crash rendering, including safe handling for localStorage reads/writes (e.g., blocked storage) and Notification permission requests.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-programcalendartab-gracefully-handles-data-shape-edge-cases-so-calendar-rendering-cannot-crash-when-program-fields-are-unexpected-e-g-missing-undefined-nested-fields-by-adding-safe-access-patterns-and-fallback-display-values-where-needed",
+      "title": "Ensure ProgramCalendarTab gracefully handles data-shape edge cases so calendar rendering cannot crash when program fields are unexpected (e.g., missing/undefined nested fields) by adding safe access patterns and fallback display values where needed.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-user-visible-english-error-empty-state-ui-within-the-calendar-tab-when-data-queries-fail-or-return-no-items-including-a-clear-retry-action-that-triggers-react-query-refetch-for-the-calendar-range-queries",
+      "title": "Add a user-visible, English error/empty-state UI within the Calendar tab when data queries fail or return no items, including a clear 'Retry' action that triggers React Query refetch for the calendar range queries.",
+      "reqIds": [
+        "REQ-36"
       ],
       "version": 1
     }

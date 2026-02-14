@@ -1,3 +1,5 @@
+import { safeGetJSON, safeSetJSON } from './safeBrowserStorage';
+
 const REMINDER_STORAGE_KEY = 'calendarRemindersShown';
 const EXPIRY_TIME = 48 * 60 * 60 * 1000; // 48 hours
 
@@ -11,10 +13,7 @@ export function getReminderKey(category: string, itemId: string, leadTime: strin
 
 export function isReminderShown(key: string): boolean {
   try {
-    const stored = localStorage.getItem(REMINDER_STORAGE_KEY);
-    if (!stored) return false;
-
-    const records: Record<string, ReminderRecord> = JSON.parse(stored);
+    const records = safeGetJSON<Record<string, ReminderRecord>>(REMINDER_STORAGE_KEY, {});
     const record = records[key];
 
     if (!record) return false;
@@ -24,7 +23,7 @@ export function isReminderShown(key: string): boolean {
     if (now - record.timestamp > EXPIRY_TIME) {
       // Clean up expired record
       delete records[key];
-      localStorage.setItem(REMINDER_STORAGE_KEY, JSON.stringify(records));
+      safeSetJSON(REMINDER_STORAGE_KEY, records);
       return false;
     }
 
@@ -37,9 +36,7 @@ export function isReminderShown(key: string): boolean {
 
 export function markReminderShown(key: string): void {
   try {
-    const stored = localStorage.getItem(REMINDER_STORAGE_KEY);
-    const records: Record<string, ReminderRecord> = stored ? JSON.parse(stored) : {};
-
+    const records = safeGetJSON<Record<string, ReminderRecord>>(REMINDER_STORAGE_KEY, {});
     records[key] = { timestamp: Date.now() };
 
     // Clean up old records
@@ -50,7 +47,7 @@ export function markReminderShown(key: string): void {
       }
     });
 
-    localStorage.setItem(REMINDER_STORAGE_KEY, JSON.stringify(records));
+    safeSetJSON(REMINDER_STORAGE_KEY, records);
   } catch (error) {
     console.error('Error marking reminder:', error);
   }
