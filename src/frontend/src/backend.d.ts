@@ -49,6 +49,8 @@ export interface TeamMember {
     name: string;
     role: string;
     division: string;
+    managerId?: bigint;
+    avatar?: string;
 }
 export interface PersonInCharge {
     id: bigint;

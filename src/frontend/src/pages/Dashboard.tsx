@@ -9,7 +9,7 @@ import KPIsTab from '../components/KPIsTab';
 import ReportsTab from '../components/ReportsTab';
 import TeamMembersTab from '../components/TeamMembersTab';
 import UserProfilesTab from '../components/UserProfilesTab';
-import ProgramCalendarTab from '../components/ProgramCalendarTab';
+import ProgramCalendarTabBoundary from '../components/ProgramCalendarTabBoundary';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -50,7 +50,7 @@ export default function Dashboard() {
                 value="team"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all duration-300"
               >
-                Tim
+                Team
               </TabsTrigger>
               <TabsTrigger 
                 value="reports"
@@ -73,7 +73,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="calendar" className="space-y-8 slide-in">
-              <ProgramCalendarTab />
+              <ProgramCalendarTabBoundary />
             </TabsContent>
 
             <TabsContent value="programs" className="space-y-8 slide-in">

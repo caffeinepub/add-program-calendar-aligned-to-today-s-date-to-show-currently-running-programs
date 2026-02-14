@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
-  "summary": "Redesign the Program Calendar dashboard view for SHQ AQL tracking web app with a full-width, highly readable, modern UX, now with a simplified/minimal visual style applied consistently across all calendar modes (Month/Week/Daily/Agenda).",
+  "projectStateVersion": 31,
+  "summary": "Team member photo workflow should be file-upload-only: remove manual photo URL input option from Team Member create/edit; keep preview driven by the uploaded image URL stored in `avatar`.",
   "architectural_notes": [
     "Program Calendar UI must be full-width and dominant (not sidebar), with responsive design: desktop calendar grid + mobile agenda list view.",
     "Calendar supports switchable views: Monthly / Weekly / Agenda.",
@@ -18,9 +18,10 @@
     "KPI program dropdown is hard to use: scrolling/searching for a program is not smooth/doesn't work well.",
     "KPI “Related Program” dropdown still does not scroll smoothly (issue persists after latest deploy/build).",
     "Users need to scroll/shift to the right to see program details; overall scrolling feels cumbersome/not smooth when browsing programs.",
-    "Program Calendar tab renders blank/empty (no UI shown at all) when clicked, while other features work normally."
+    "Program Calendar tab is blank across devices/browsers (entire UI missing: header/filters/view switch/calendar body) while other tabs (e.g., Programs/KPI) render normally.",
+    "Calendar error/crash disebabkan Select.Item/SelectItem memiliki value string kosong (value=\"\"), termasuk kemungkinan dari mapping data API; perlu dihapus/diganti agar Calendar tidak error."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-add-a-new-program-calendar-view-in-the-dashboard-that-defaults-to-today-highlights-today-on-a-calendar-ui-and-clearly-shows-which-programs-are-running-today",
@@ -285,6 +286,134 @@
         "REQ-36"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-diagnose-and-fix-the-issue-where-the-dashboard-calendar-tab-renders-as-a-fully-blank-empty-screen-no-header-filters-controls-or-calendar-body-while-other-tabs-render-normally-as-shown-in-the-uploaded-screenshot-img-0091-jpeg-the-calendar-tab-must-always-render-visible-ui-and-must-never-fail-silently",
+      "title": "Diagnose and fix the issue where the Dashboard \"Calendar\" tab renders as a fully blank/empty screen (no header, filters, controls, or calendar body) while other tabs render normally, as shown in the uploaded screenshot (IMG_0091.jpeg). The Calendar tab must always render visible UI and must never fail silently.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-top-level-defensive-error-boundary-around-the-entire-program-calendar-tab-content-not-only-the-calendar-body-card-so-that-crashes-occurring-before-the-internal-calendartaberrorboundary-renders-e-g-during-hook-initialization-state-initialization-or-view-range-calculations-still-show-a-visible-fallback-ui-inside-the-calendar-tab",
+      "title": "Add a top-level defensive error boundary around the entire Program Calendar tab content (not only the calendar body card), so that crashes occurring before the internal CalendarTabErrorBoundary renders (e.g., during hook initialization, state initialization, or view-range calculations) still show a visible fallback UI inside the Calendar tab.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-user-facing-text-involved-in-the-calendar-tab-blank-screen-fix-and-any-new-fallback-ui-is-in-english-including-headings-buttons-and-descriptions",
+      "title": "Ensure all user-facing text involved in the Calendar-tab blank-screen fix and any new fallback UI is in English (including headings, buttons, and descriptions).",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-program-calendar-tab-crash-by-removing-any-selectitem-value-usage-in-program-calendar-filters-and-ensuring-no-selectitem-uses-an-empty-string-value",
+      "title": "Fix the Program Calendar tab crash by removing any <SelectItem value=\"\"> usage in Program Calendar filters and ensuring no SelectItem uses an empty-string value.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-dynamically-generated-selectitem-values-used-in-the-program-calendar-tab-are-non-empty-strings-filter-out-or-normalize-any-empty-whitespace-values-coming-from-api-derived-lists-e-g-divisions-pic-names-so-the-select-component-cannot-crash",
+      "title": "Ensure all dynamically generated SelectItem values used in the Program Calendar tab are non-empty strings; filter out or normalize any empty/whitespace values coming from API-derived lists (e.g., divisions, PIC names) so the Select component cannot crash.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-extend-the-team-member-data-model-to-support-profile-photos-external-url-and-single-manager-hierarchy-for-org-chart-rendering-by-adding-1-an-optional-avatar-photo-url-field-and-2-an-optional-manager-reference-direct-manager-field-where-the-director-root-has-no-manager",
+      "title": "Extend the Team Member data model to support profile photos (external URL) and single-manager hierarchy for org-chart rendering by adding: (1) an optional avatar/photo URL field and (2) an optional manager reference (direct manager) field where the director/root has no manager.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-team-screen-frontend-src-components-teammemberstab-tsx-from-a-table-based-layout-into-a-professional-card-view-that-shows-for-each-member-avatar-from-external-url-name-job-title-existing-role-field-and-a-division-badge",
+      "title": "Redesign the Team screen (frontend/src/components/TeamMembersTab.tsx) from a table-based layout into a professional card view that shows for each member: avatar (from external URL), name, job title (existing role field), and a division badge.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-profile-photo-url-capture-and-update-to-the-team-member-create-edit-flow-frontend-src-components-teammemberformdialog-tsx-including-live-preview-and-basic-url-validation-while-storing-only-the-url-no-blob-storage",
+      "title": "Add profile photo URL capture and update to the Team member create/edit flow (frontend/src/components/TeamMemberFormDialog.tsx), including live preview and basic URL validation, while storing only the URL (no blob storage).",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-second-mode-on-the-team-screen-called-structure-view-that-renders-an-org-chart-based-on-the-single-manager-hierarchy-with-the-director-root-at-the-top-and-direct-reports-beneath",
+      "title": "Add a second mode on the Team screen called 'Structure View' that renders an org chart based on the single-manager hierarchy, with the director/root at the top and direct reports beneath.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-manager-assignment-controls-to-the-team-member-create-edit-flow-so-users-can-set-each-member-s-direct-manager-single-manager-with-the-ability-to-set-no-manager-director-root",
+      "title": "Add manager assignment controls to the Team member create/edit flow so users can set each member’s direct manager (single manager), with the ability to set 'No manager (Director/root)'.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-all-user-facing-text-added-modified-for-the-team-upgrade-team-tab-labels-buttons-placeholders-empty-states-dialogs-toasts-to-english-including-existing-team-tab-ui-strings-that-are-currently-in-indonesian",
+      "title": "Update all user-facing text added/modified for the Team upgrade (Team tab labels, buttons, placeholders, empty states, dialogs, toasts) to English, including existing Team tab UI strings that are currently in Indonesian.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-team-member-create-edit-dialog-frontend-src-components-teammemberformdialog-tsx-to-support-selecting-a-photo-file-directly-from-the-user-s-device-mobile-desktop-and-automatically-uploading-it-to-an-external-image-hosting-service-then-storing-only-the-resulting-url-in-the-existing-avatar-field-for-create-edit-flows",
+      "title": "Update the Team Member create/edit dialog (frontend/src/components/TeamMemberFormDialog.tsx) to support selecting a photo file directly from the user’s device (mobile/desktop) and automatically uploading it to an external image hosting service, then storing only the resulting URL in the existing `avatar` field for create + edit flows.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-frontend-only-image-upload-utility-that-performs-the-external-upload-and-returns-the-hosted-image-url-with-clear-english-error-handling-and-a-safe-fallback-when-upload-configuration-is-missing-or-the-upload-fails",
+      "title": "Implement a frontend-only image upload utility that performs the external upload and returns the hosted image URL, with clear, English error handling and a safe fallback when upload configuration is missing or the upload fails.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-team-member-form-ux-around-photo-upload-to-include-uploading-state-progress-feedback-and-prevent-accidental-submission-while-an-upload-is-in-progress-while-keeping-all-user-facing-strings-in-english",
+      "title": "Enhance the Team Member form UX around photo upload to include uploading state/progress feedback and prevent accidental submission while an upload is in progress, while keeping all user-facing strings in English.",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-team-member-create-edit-dialog-frontend-src-components-teammemberformdialog-tsx-to-remove-the-manual-photo-url-input-option-so-photos-can-only-be-added-via-device-file-upload-while-still-storing-only-the-hosted-image-url-in-the-existing-avatar-field-for-both-create-and-edit-flows",
+      "title": "Update the Team Member create/edit dialog (frontend/src/components/TeamMemberFormDialog.tsx) to remove the manual photo URL input option so photos can only be added via device file upload, while still storing only the hosted image URL in the existing `avatar` field for both create and edit flows.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-now-unused-manual-url-related-logic-from-the-team-member-form-implementation-while-keeping-image-upload-error-handling-upload-progress-ui-and-preview-behavior-intact",
+      "title": "Remove now-unused manual-URL related logic from the Team Member form implementation, while keeping image upload error handling, upload progress UI, and preview behavior intact.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -365,6 +494,52 @@
       "summary": "Simplify the Program Calendar UI across all modes (Month/Week/Daily/Agenda) by reducing visual clutter (colors/borders/icons/shadows), using a more minimal grid, and making Day/Agenda lists more compact and consistent.",
       "reqIds": [],
       "status": "in_progress"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Upgrade existing Team (Tim) feature UI to a professional card view showing avatar/profile photo, name, job title, and division badge for each member",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add Team member profile photo upload/update feature that stores photos as external URLs (not stored as blobs)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add a Structure View mode (org chart) for the Team feature using a single-manager hierarchy, with the director as the root/top node",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Update backend Team Member CRUD APIs to persist and return the new Team Member fields (avatar URL + manager reference) and validate that the hierarchy is single-manager (at most one manager per member) while allowing a single root member with no manager.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "If adding new fields to TeamMember affects stable state across upgrades, implement a conditional state migration so existing deployed data is preserved and new fields default safely (e.g., avatar URL empty/none; manager none) for existing members.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Update Team member photo workflow so users can pick an image file from their device (HP/laptop) in create+edit, automatically upload it to an external image hosting service, and store only the returned URL (no blob storage in backend).",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Remove the manual photo URL input option from the Team Member create/edit form so photos can only be added via device file upload (while still storing only the resulting hosted URL and keeping preview).",
+      "reqIds": [],
+      "status": "pending"
     }
   ],
   "projectName": "Add program calendar aligned to today's date to show currently running programs",

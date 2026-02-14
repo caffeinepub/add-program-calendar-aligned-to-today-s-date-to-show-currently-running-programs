@@ -1,95 +1,71 @@
 {
   "kind": "build_request",
-  "title": "Fix Program Calendar tab rendering blank (no UI visible)",
+  "title": "Remove manual photo URL option from Team Member create/edit (file-upload only)",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-33",
-      "text": "Fix the Program Calendar dashboard tab so it always renders visible UI (header, filters, view controls, and a calendar body) when the user clicks the Calendar tab, instead of showing a completely blank/empty screen.",
+      "id": "REQ-53",
+      "text": "Update the Team Member create/edit dialog (frontend/src/components/TeamMemberFormDialog.tsx) to remove the manual photo URL input option so photos can only be added via device file upload, while still storing only the hosted image URL in the existing `avatar` field for both create and edit flows.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-1"
         ],
         "quotes": [
-          "Tampilan tidak muncul sama sekali... tidak muncul apa-apa",
-          "Kosong total tidak ada apa-apa. Tidak ada tampilan... hanya fitur kalender yang tidak muncul apa-apa ketika diklik."
+          "Hapus pilihan URL photo",
+          "Iya. Iya. Iya berlaku.\n\nKerjakan sekarang"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking the Calendar tab shows the Program Calendar header and controls immediately (even while data is loading).",
-        "The Calendar tab never results in a totally blank screen; if something fails, an in-UI error state is displayed instead.",
-        "The behavior is consistent across Month/Week/Day/Agenda modes on both desktop and mobile."
+        "The 'Or enter photo URL manually' label and the avatar URL <Input> field are removed from the Team Member form UI.",
+        "Users can only add/update a photo by selecting an image file from their device (the existing file picker + upload flow remains).",
+        "Create flow: after successful upload, the resulting hosted URL is stored into `avatar` and submitted to the backend when the form is saved.",
+        "Edit flow: existing `member.avatar` (if present) is shown via the preview; user can replace it by uploading a new file or clear it using the existing clear action.",
+        "No URL validation is performed during submit (do not block submission based on `isValidUrl`), since manual URL entry is no longer possible.",
+        "All user-facing text introduced/modified by this change remains in English."
       ]
     },
     {
-      "id": "REQ-34",
-      "text": "Add defensive runtime guards in ProgramCalendarTab (frontend/src/components/ProgramCalendarTab.tsx) so browser-API usage cannot crash rendering, including safe handling for localStorage reads/writes (e.g., blocked storage) and Notification permission requests.",
+      "id": "REQ-54",
+      "text": "Remove now-unused manual-URL related logic from the Team Member form implementation, while keeping image upload error handling, upload progress UI, and preview behavior intact.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-1"
         ],
         "quotes": [
-          "Tampilan tidak muncul sama sekali. Sepertinya perilaku UI yang tidak sesuai."
+          "Hapus pilihan URL photo"
         ]
       },
       "acceptanceCriteria": [
-        "If localStorage is unavailable or throws, the calendar still renders and reminders default to enabled (or a safe default) without crashing.",
-        "Toggling reminders does not throw even when Notifications are unsupported/blocked; the UI remains usable.",
-        "No uncaught exceptions occur from localStorage/Notification access when opening the Calendar tab."
-      ]
-    },
-    {
-      "id": "REQ-35",
-      "text": "Ensure ProgramCalendarTab gracefully handles data-shape edge cases so calendar rendering cannot crash when program fields are unexpected (e.g., missing/undefined nested fields) by adding safe access patterns and fallback display values where needed.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Kosong total tidak ada apa-apa. Tidak ada tampilan."
-        ]
-      },
-      "acceptanceCriteria": [
-        "If any program item is missing a nested field (e.g., personInCharge), the Calendar tab still renders and the item is either shown with fallbacks (e.g., 'Unknown') or skipped without crashing.",
-        "Filters (PIC, Division, Status, Priority) do not throw when program data is incomplete.",
-        "No uncaught exceptions occur during render when programs/agenda/KPI arrays contain malformed entries."
-      ]
-    },
-    {
-      "id": "REQ-36",
-      "text": "Add a user-visible, English error/empty-state UI within the Calendar tab when data queries fail or return no items, including a clear 'Retry' action that triggers React Query refetch for the calendar range queries.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Saat ini tidak berfungsi",
-          "Tampilan tidak muncul sama sekali."
-        ]
-      },
-      "acceptanceCriteria": [
-        "If a calendar query fails, the calendar shows an English error message (not a blank area) and a Retry button.",
-        "Retry refetches the relevant calendar queries and updates the UI accordingly.",
-        "If there are no programs/agenda items/KPI deadlines in range, the calendar shows an English empty state explaining there is nothing scheduled in the visible range."
+        "Any dead code paths tied to manual URL entry (e.g., `handleAvatarChange`, avatar URL validation errors meant for manual entry, and any now-unused imports such as `isValidUrl` if no longer needed) are removed.",
+        "The preview component (frontend/src/components/team/PhotoUrlPreview.tsx) is still used to preview the currently stored/uploaded `avatar` URL and shows appropriate error state if the hosted image fails to load.",
+        "The upload button remains disabled during upload; submit remains disabled during upload (no regressions to the existing protections).",
+        "Successful upload still shows an English success toast; failures still show an English error toast and inline error text."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files in frontend immutablePaths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui (compose instead of modifying).",
-    "Keep the backend as a single Motoko actor in backend/main.mo; only add backend changes if strictly required to fix the calendar rendering issue.",
-    "Use English for any new/updated user-facing text introduced as part of these fixes."
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Do not change backend schema/APIs for this request; the backend continues to store only the hosted image URL in the existing TeamMember.avatar field."
   ],
   "nonGoals": [
-    "Do not redesign the overall calendar UI/UX beyond what is necessary to stop it rendering blank.",
-    "Do not add new calendar features (new filters, new modes, new entities) as part of this fix.",
-    "Do not change authentication behavior or Internet Identity integration."
+    "Do not add image cropping or any additional photo editing features.",
+    "Do not add alternative photo sources (camera capture, third-party providers, or URL-based input).",
+    "Do not change the external image hosting provider or upload endpoint behavior beyond what is necessary to support file-upload-only UI."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

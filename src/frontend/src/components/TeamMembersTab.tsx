@@ -3,12 +3,13 @@ import { useGetAllTeamMembers, useDeleteTeamMember, useGetCallerUserProfile } fr
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Pencil, Trash2, Users, Loader2 } from 'lucide-react';
+import { Plus, Search, Users, Loader2, LayoutGrid, Network } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TeamMemberFormDialog from './TeamMemberFormDialog';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
+import TeamMemberCard from './team/TeamMemberCard';
+import TeamStructureView from './team/TeamStructureView';
 import type { TeamMember } from '../backend';
 
 export default function TeamMembersTab() {
@@ -21,6 +22,7 @@ export default function TeamMembersTab() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [deletingMember, setDeletingMember] = useState<TeamMember | null>(null);
+  const [viewMode, setViewMode] = useState<'cards' | 'structure'>('cards');
 
   const isReadOnly = userProfile?.role === 'viewer';
 
@@ -67,123 +69,122 @@ export default function TeamMembersTab() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              <CardTitle>Manajemen Tim</CardTitle>
+              <CardTitle>Team Management</CardTitle>
             </div>
             {!isReadOnly && (
               <Button onClick={() => setIsFormOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Tambah Anggota Tim
+                Add Team Member
               </Button>
             )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Search and Filter */}
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Cari nama, divisi, atau peran..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={divisionFilter} onValueChange={setDivisionFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter Divisi" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Divisi</SelectItem>
-                {divisions.map(division => (
-                  <SelectItem key={division} value={division}>
-                    {division}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* View Mode Toggle */}
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'cards' | 'structure')}>
+            <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+              <TabsTrigger value="cards" className="flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                Cards
+              </TabsTrigger>
+              <TabsTrigger value="structure" className="flex items-center gap-2">
+                <Network className="h-4 w-4" />
+                Structure View
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Team Members Table */}
-          {isLoading ? (
-            <div className="flex h-64 items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : filteredMembers.length === 0 ? (
-            <div className="flex h-64 flex-col items-center justify-center text-center">
-              <Users className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">Tidak ada anggota tim</h3>
-              <p className="mb-4 text-sm text-muted-foreground">
-                {searchQuery || divisionFilter !== 'all'
-                  ? 'Tidak ada anggota tim yang sesuai dengan filter'
-                  : 'Mulai dengan menambahkan anggota tim pertama'}
-              </p>
-              {!isReadOnly && !searchQuery && divisionFilter === 'all' && (
-                <Button onClick={() => setIsFormOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Tambah Anggota Tim
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nama</TableHead>
-                    <TableHead>Divisi</TableHead>
-                    <TableHead>Peran</TableHead>
-                    {!isReadOnly && <TableHead className="text-right">Aksi</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredMembers.map((member) => (
-                    <TableRow key={member.id.toString()}>
-                      <TableCell className="font-medium">{member.name}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{member.division}</Badge>
-                      </TableCell>
-                      <TableCell>{member.role}</TableCell>
-                      {!isReadOnly && (
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEdit(member)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setDeletingMember(member)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+            {/* Search and Filter - only show in cards view */}
+            {viewMode === 'cards' && (
+              <div className="flex flex-col gap-3 sm:flex-row mt-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search name, division, or role..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <Select value={divisionFilter} onValueChange={setDivisionFilter}>
+                  <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectValue placeholder="Filter Division" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Divisions</SelectItem>
+                    {divisions.map(division => (
+                      <SelectItem key={division} value={division}>
+                        {division}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-          {/* Summary */}
-          {!isLoading && filteredMembers.length > 0 && (
-            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3 text-sm">
-              <span className="text-muted-foreground">
-                Menampilkan {filteredMembers.length} dari {teamMembers.length} anggota tim
-              </span>
-              {divisions.length > 0 && (
-                <span className="text-muted-foreground">
-                  {divisions.length} divisi
-                </span>
+            {/* Cards View */}
+            <TabsContent value="cards" className="mt-4">
+              {isLoading ? (
+                <div className="flex h-64 items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : filteredMembers.length === 0 ? (
+                <div className="flex h-64 flex-col items-center justify-center text-center">
+                  <Users className="mb-4 h-12 w-12 text-muted-foreground" />
+                  <h3 className="mb-2 text-lg font-semibold">No team members</h3>
+                  <p className="mb-4 text-sm text-muted-foreground">
+                    {searchQuery || divisionFilter !== 'all'
+                      ? 'No team members match the current filters'
+                      : 'Start by adding your first team member'}
+                  </p>
+                  {!isReadOnly && !searchQuery && divisionFilter === 'all' && (
+                    <Button onClick={() => setIsFormOpen(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Team Member
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {filteredMembers.map((member) => (
+                      <TeamMemberCard
+                        key={member.id.toString()}
+                        member={member}
+                        onEdit={!isReadOnly ? handleEdit : undefined}
+                        onDelete={!isReadOnly ? setDeletingMember : undefined}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Summary */}
+                  <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3 text-sm mt-4">
+                    <span className="text-muted-foreground">
+                      Showing {filteredMembers.length} of {teamMembers.length} team members
+                    </span>
+                    {divisions.length > 0 && (
+                      <span className="text-muted-foreground">
+                        {divisions.length} divisions
+                      </span>
+                    )}
+                  </div>
+                </>
               )}
-            </div>
-          )}
+            </TabsContent>
+
+            {/* Structure View */}
+            <TabsContent value="structure" className="mt-4">
+              {isLoading ? (
+                <div className="flex h-64 items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <TeamStructureView
+                  members={teamMembers}
+                  onEdit={!isReadOnly ? handleEdit : undefined}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -199,8 +200,8 @@ export default function TeamMembersTab() {
         open={!!deletingMember}
         onClose={() => setDeletingMember(null)}
         onConfirm={handleDelete}
-        title="Hapus Anggota Tim"
-        description={`Apakah Anda yakin ingin menghapus ${deletingMember?.name}? Tindakan ini tidak dapat dibatalkan.`}
+        title="Delete Team Member"
+        description={`Are you sure you want to delete ${deletingMember?.name}? This action cannot be undone.`}
       />
     </div>
   );

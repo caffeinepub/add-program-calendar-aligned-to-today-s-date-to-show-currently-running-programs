@@ -69,6 +69,8 @@ export interface TeamMember {
   'name' : string,
   'role' : string,
   'division' : string,
+  'managerId' : [] | [bigint],
+  'avatar' : [] | [string],
 }
 export type Time = bigint;
 export interface TimeRange { 'end' : Time, 'start' : Time }

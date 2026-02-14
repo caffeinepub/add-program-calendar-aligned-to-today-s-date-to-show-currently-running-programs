@@ -11,6 +11,7 @@ import Time "mo:core/Time";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Nat "mo:core/Nat";
 
 
 actor {
@@ -61,6 +62,8 @@ actor {
     name : Text;
     division : Text;
     role : Text;
+    avatar : ?Text;
+    managerId : ?Nat;
   };
 
   type TeamAgendaItem = {
@@ -299,6 +302,54 @@ actor {
     };
   };
 
+  // Helper function to validate manager hierarchy
+  func validateManagerHierarchy(memberId : Nat, managerId : ?Nat) {
+    switch (managerId) {
+      case (null) {
+        // No manager is valid (root of hierarchy)
+      };
+      case (?mgrId) {
+        // Manager must exist
+        if (not teamMembers.containsKey(mgrId)) {
+          Runtime.trap("Manager not found");
+        };
+
+        // Cannot be own manager
+        if (mgrId == memberId) {
+          Runtime.trap("A team member cannot be their own manager");
+        };
+
+        // Check for circular reference by traversing up the hierarchy
+        var currentManagerId = ?mgrId;
+        var visited = Set.empty<Nat>();
+        visited.add(memberId);
+
+        label hierarchyCheck loop {
+          switch (currentManagerId) {
+            case (null) {
+              break hierarchyCheck;
+            };
+            case (?currentId) {
+              if (visited.contains(currentId)) {
+                Runtime.trap("Circular manager reference detected");
+              };
+              visited.add(currentId);
+
+              switch (teamMembers.get(currentId)) {
+                case (null) {
+                  break hierarchyCheck;
+                };
+                case (?manager) {
+                  currentManagerId := manager.managerId;
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+
   // Team Member Management
   public shared ({ caller }) func createTeamMember(newMember : TeamMember) : async () {
     if (not canWrite(caller)) {
@@ -310,11 +361,16 @@ actor {
     let teamMemberId = nextTeamMemberId;
     nextTeamMemberId += 1;
 
+    // Validate manager hierarchy before creating
+    validateManagerHierarchy(teamMemberId, newMember.managerId);
+
     let member : TeamMember = {
       id = teamMemberId;
       name = newMember.name;
       division = newMember.division;
       role = newMember.role;
+      avatar = newMember.avatar;
+      managerId = newMember.managerId;
     };
     teamMembers.add(teamMemberId, member);
   };
@@ -330,11 +386,16 @@ actor {
 
     newMemberValidators(updatedMember);
 
+    // Validate manager hierarchy before updating
+    validateManagerHierarchy(id, updatedMember.managerId);
+
     let member : TeamMember = {
       id = id;
       name = updatedMember.name;
       division = updatedMember.division;
       role = updatedMember.role;
+      avatar = updatedMember.avatar;
+      managerId = updatedMember.managerId;
     };
     teamMembers.add(id, member);
   };
@@ -346,6 +407,20 @@ actor {
 
     if (not teamMembers.containsKey(id)) {
       Runtime.trap("Team member not found");
+    };
+
+    // Check if any other team members have this member as their manager
+    let hasSubordinates = teamMembers.values().toArray().filter(
+      func(member) {
+        switch (member.managerId) {
+          case (?mgrId) { mgrId == id };
+          case (null) { false };
+        };
+      }
+    ).size() > 0;
+
+    if (hasSubordinates) {
+      Runtime.trap("Cannot delete team member who is a manager of other members");
     };
 
     teamMembers.remove(id);
@@ -764,34 +839,29 @@ actor {
     if (not isAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Authentication required to save profiles");
     };
-    
-    // Sync the role with AccessControl
-    let accessControlRole = switch (profile.role) {
-      case (#admin) { #admin };
-      case (#coordinator) { #user };
-      case (#viewer) { #guest };
-    };
-    
-    // Check if this is a role change and if user has permission
+
+    // Check existing profile to determine if this is a role change
     switch (userProfiles.get(caller)) {
       case (?existingProfile) {
-        // User is updating their profile
+        // Existing user updating profile
         if (existingProfile.role != profile.role) {
-          // Role change - only admins can change roles
-          if (not AccessControl.isAdmin(accessControlState, caller)) {
-            Runtime.trap("Unauthorized: Only admins can change user roles");
-          };
+          // Role change attempt - only admins can change roles
+          Runtime.trap("Unauthorized: Only admins can change user roles. Use updateUserProfileRole function");
         };
+        // Allow profile update if role unchanged
+        userProfiles.add(caller, profile);
       };
       case (null) {
-        // New profile - default to viewer role for safety
-        if (profile.role != #viewer and not AccessControl.isAdmin(accessControlState, caller)) {
+        // New user creating profile - must start as viewer
+        if (profile.role != #viewer) {
           Runtime.trap("Unauthorized: New users must start as viewers. Contact an admin for role assignment");
         };
+        // Create new profile with viewer role
+        userProfiles.add(caller, profile);
+        // Set AccessControl role to guest for new viewers
+        AccessControl.assignRole(accessControlState, caller, caller, #guest);
       };
     };
-    
-    userProfiles.add(caller, profile);
   };
 
   // Admin function to update user profile role
@@ -830,4 +900,3 @@ actor {
     userProfiles.entries().toArray();
   };
 };
-

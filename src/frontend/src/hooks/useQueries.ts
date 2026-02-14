@@ -36,10 +36,10 @@ export function useSaveCallerUserProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      toast.success('Profil berhasil disimpan');
+      toast.success('Profile saved successfully');
     },
     onError: (error: Error) => {
-      toast.error('Gagal menyimpan profil: ' + error.message);
+      toast.error('Failed to save profile: ' + error.message);
     },
   });
 }
@@ -70,10 +70,10 @@ export function useUpdateUserProfileRole() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUserProfiles'] });
-      toast.success('Peran pengguna berhasil diperbarui');
+      toast.success('User role updated successfully');
     },
     onError: (error: Error) => {
-      toast.error('Gagal memperbarui peran pengguna: ' + error.message);
+      toast.error('Failed to update user role: ' + error.message);
     },
   });
 }
@@ -186,78 +186,13 @@ export function useGetKPIsWithDeadlinesInRange(range: TimeRange) {
       // Filter KPIs that have deadlines within the range
       return allKpis.filter(kpi => {
         if (!kpi.deadline) return false;
-        const deadline = Number(kpi.deadline);
-        return deadline >= Number(range.start) && deadline <= Number(range.end);
+        return kpi.deadline >= range.start && kpi.deadline <= range.end;
       });
     },
     enabled: !!actor && !isFetching,
   });
 }
 
-export function useCreateProgram() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (newProgram: Program) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.createProgram(newProgram);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['programs'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
-      toast.success('Program berhasil dibuat');
-    },
-    onError: (error: Error) => {
-      toast.error('Gagal membuat program: ' + error.message);
-    },
-  });
-}
-
-export function useUpdateProgram() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ id, program }: { id: bigint; program: Program }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.updateProgram(id, program);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['programs'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
-      toast.success('Program berhasil diperbarui');
-    },
-    onError: (error: Error) => {
-      toast.error('Gagal memperbarui program: ' + error.message);
-    },
-  });
-}
-
-export function useDeleteProgram() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: bigint) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deleteProgram(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['programs'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
-      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
-      toast.success('Program berhasil dihapus');
-    },
-    onError: (error: Error) => {
-      toast.error('Gagal menghapus program: ' + error.message);
-    },
-  });
-}
-
-// KPI Queries
 export function useGetAllKPIs() {
   const { actor, isFetching } = useActor();
 
@@ -284,63 +219,17 @@ export function useGetUniquePICNames() {
   });
 }
 
-export function useCreateKpi() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
+// Get unique divisions from team members
+export function useGetUniqueDivisions() {
+  const { actor, isFetching } = useActor();
 
-  return useMutation({
-    mutationFn: async (newKpi: Kpi) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.createKpi(newKpi);
+  return useQuery<string[]>({
+    queryKey: ['uniqueDivisions'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getUniqueDivisions();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
-      toast.success('KPI berhasil dibuat');
-    },
-    onError: (error: Error) => {
-      toast.error('Gagal membuat KPI: ' + error.message);
-    },
-  });
-}
-
-export function useUpdateKpi() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ id, kpi }: { id: bigint; kpi: Kpi }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.updateKpi(id, kpi);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
-      toast.success('KPI berhasil diperbarui');
-    },
-    onError: (error: Error) => {
-      toast.error('Gagal memperbarui KPI: ' + error.message);
-    },
-  });
-}
-
-export function useDeleteKpi() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: bigint) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deleteKpi(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
-      toast.success('KPI berhasil dihapus');
-    },
-    onError: (error: Error) => {
-      toast.error('Gagal menghapus KPI: ' + error.message);
-    },
+    enabled: !!actor && !isFetching,
   });
 }
 
@@ -358,49 +247,162 @@ export function useGetAllTeamMembers() {
   });
 }
 
-export function useGetUniqueDivisions() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<string[]>({
-    queryKey: ['uniqueDivisions'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getUniqueDivisions();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
 export function useGetTeamMembersByDivision(division: string) {
   const { actor, isFetching } = useActor();
 
   return useQuery<TeamMember[]>({
     queryKey: ['teamMembersByDivision', division],
     queryFn: async () => {
-      if (!actor || !division) return [];
+      if (!actor) return [];
       return actor.getTeamMembersByDivision(division);
     },
     enabled: !!actor && !isFetching && !!division,
   });
 }
 
+// Program Mutations
+export function useCreateProgram() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (program: Program) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.createProgram(program);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
+      toast.success('Program created successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to create program: ' + error.message);
+    },
+  });
+}
+
+export function useUpdateProgram() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, program }: { id: bigint; program: Program }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateProgram(id, program);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
+      toast.success('Program updated successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to update program: ' + error.message);
+    },
+  });
+}
+
+export function useDeleteProgram() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteProgram(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['programs'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveInRange'] });
+      queryClient.invalidateQueries({ queryKey: ['programsActiveOnDate'] });
+      toast.success('Program deleted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to delete program: ' + error.message);
+    },
+  });
+}
+
+// KPI Mutations
+export function useCreateKpi() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (kpi: Kpi) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.createKpi(kpi);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kpis'] });
+      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
+      toast.success('KPI created successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to create KPI: ' + error.message);
+    },
+  });
+}
+
+export function useUpdateKpi() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, kpi }: { id: bigint; kpi: Kpi }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateKpi(id, kpi);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kpis'] });
+      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
+      toast.success('KPI updated successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to update KPI: ' + error.message);
+    },
+  });
+}
+
+export function useDeleteKpi() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteKpi(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['kpis'] });
+      queryClient.invalidateQueries({ queryKey: ['kpisWithDeadlines'] });
+      toast.success('KPI deleted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to delete KPI: ' + error.message);
+    },
+  });
+}
+
+// Team Member Mutations
 export function useCreateTeamMember() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newMember: TeamMember) => {
+    mutationFn: async (member: TeamMember) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createTeamMember(newMember);
+      return actor.createTeamMember(member);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
-      queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
       queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
-      toast.success('Anggota tim berhasil ditambahkan');
+      queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
+      toast.success('Team member created successfully');
     },
     onError: (error: Error) => {
-      toast.error('Gagal menambahkan anggota tim: ' + error.message);
+      toast.error('Failed to create team member: ' + error.message);
     },
   });
 }
@@ -416,12 +418,12 @@ export function useUpdateTeamMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
-      queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
       queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
-      toast.success('Anggota tim berhasil diperbarui');
+      queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
+      toast.success('Team member updated successfully');
     },
     onError: (error: Error) => {
-      toast.error('Gagal memperbarui anggota tim: ' + error.message);
+      toast.error('Failed to update team member: ' + error.message);
     },
   });
 }
@@ -437,12 +439,73 @@ export function useDeleteTeamMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
-      queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
       queryClient.invalidateQueries({ queryKey: ['teamMembersByDivision'] });
-      toast.success('Anggota tim berhasil dihapus');
+      queryClient.invalidateQueries({ queryKey: ['uniqueDivisions'] });
+      toast.success('Team member deleted successfully');
     },
     onError: (error: Error) => {
-      toast.error('Gagal menghapus anggota tim: ' + error.message);
+      toast.error('Failed to delete team member: ' + error.message);
+    },
+  });
+}
+
+// Team Agenda Mutations
+export function useCreateTeamAgendaItem() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (item: TeamAgendaItem) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.createTeamAgendaItem(item);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teamAgendaItems'] });
+      queryClient.invalidateQueries({ queryKey: ['teamAgendaItemsByRange'] });
+      toast.success('Agenda item created successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to create agenda item: ' + error.message);
+    },
+  });
+}
+
+export function useUpdateTeamAgendaItem() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, item }: { id: bigint; item: TeamAgendaItem }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateTeamAgendaItem(id, item);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teamAgendaItems'] });
+      queryClient.invalidateQueries({ queryKey: ['teamAgendaItemsByRange'] });
+      toast.success('Agenda item updated successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to update agenda item: ' + error.message);
+    },
+  });
+}
+
+export function useDeleteTeamAgendaItem() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteTeamAgendaItem(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teamAgendaItems'] });
+      queryClient.invalidateQueries({ queryKey: ['teamAgendaItemsByRange'] });
+      toast.success('Agenda item deleted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to delete agenda item: ' + error.message);
     },
   });
 }

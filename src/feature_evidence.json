@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-program-calendar-dashboard-tab-so-it-always-renders-visible-ui-header-filters-view-controls-and-a-calendar-body-when-the-user-clicks-the-calendar-tab-instead-of-showing-a-completely-blank-empty-screen",
-      "featureTitle": "Fix the Program Calendar dashboard tab so it always renders visible UI (header, filters, view controls, and a calendar body) when the user clicks the Calendar tab, instead of showing a completely blank/empty screen.",
+      "featureId": "feature-update-the-team-member-create-edit-dialog-frontend-src-components-teammemberformdialog-tsx-to-remove-the-manual-photo-url-input-option-so-photos-can-only-be-added-via-device-file-upload-while-still-storing-only-the-hosted-image-url-in-the-existing-avatar-field-for-both-create-and-edit-flows",
+      "featureTitle": "Update the Team Member create/edit dialog (frontend/src/components/TeamMemberFormDialog.tsx) to remove the manual photo URL input option so photos can only be added via device file upload, while still storing only the hosted image URL in the existing `avatar` field for both create and edit flows.",
       "files": [
-        "frontend/src/components/ProgramCalendarTab.tsx",
-        "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx"
+        "frontend/src/components/TeamMemberFormDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,18 +16,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-33"
+        "REQ-53"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-defensive-runtime-guards-in-programcalendartab-frontend-src-components-programcalendartab-tsx-so-browser-api-usage-cannot-crash-rendering-including-safe-handling-for-localstorage-reads-writes-e-g-blocked-storage-and-notification-permission-requests",
-      "featureTitle": "Add defensive runtime guards in ProgramCalendarTab (frontend/src/components/ProgramCalendarTab.tsx) so browser-API usage cannot crash rendering, including safe handling for localStorage reads/writes (e.g., blocked storage) and Notification permission requests.",
+      "featureId": "feature-remove-now-unused-manual-url-related-logic-from-the-team-member-form-implementation-while-keeping-image-upload-error-handling-upload-progress-ui-and-preview-behavior-intact",
+      "featureTitle": "Remove now-unused manual-URL related logic from the Team Member form implementation, while keeping image upload error handling, upload progress UI, and preview behavior intact.",
       "files": [
-        "frontend/src/components/ProgramCalendarTab.tsx",
-        "frontend/src/hooks/useCalendarReminders.ts",
-        "frontend/src/utils/reminderDedup.ts",
-        "frontend/src/utils/safeBrowserStorage.ts"
+        "frontend/src/components/TeamMemberFormDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -39,50 +35,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-34"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-programcalendartab-gracefully-handles-data-shape-edge-cases-so-calendar-rendering-cannot-crash-when-program-fields-are-unexpected-e-g-missing-undefined-nested-fields-by-adding-safe-access-patterns-and-fallback-display-values-where-needed",
-      "featureTitle": "Ensure ProgramCalendarTab gracefully handles data-shape edge cases so calendar rendering cannot crash when program fields are unexpected (e.g., missing/undefined nested fields) by adding safe access patterns and fallback display values where needed.",
-      "files": [
-        "frontend/src/components/ProgramCalendarTab.tsx",
-        "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-        "frontend/src/components/program-calendar/programFilterUtils.ts",
-        "frontend/src/components/program-calendar/views/AgendaListView.tsx",
-        "frontend/src/components/program-calendar/views/DayListView.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-35"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-user-visible-english-error-empty-state-ui-within-the-calendar-tab-when-data-queries-fail-or-return-no-items-including-a-clear-retry-action-that-triggers-react-query-refetch-for-the-calendar-range-queries",
-      "featureTitle": "Add a user-visible, English error/empty-state UI within the Calendar tab when data queries fail or return no items, including a clear 'Retry' action that triggers React Query refetch for the calendar range queries.",
-      "files": [
-        "frontend/src/components/ProgramCalendarTab.tsx",
-        "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-36"
+        "REQ-54"
       ],
       "confidence": "high"
     }

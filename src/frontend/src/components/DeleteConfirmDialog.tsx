@@ -17,9 +17,9 @@ export default function DeleteConfirmDialog({ open, onClose, onConfirm, title, d
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Batal</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            Hapus
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

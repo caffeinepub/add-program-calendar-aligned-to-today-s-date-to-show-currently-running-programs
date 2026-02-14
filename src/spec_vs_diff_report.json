@@ -1,32 +1,56 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T06:37:12.086Z",
-  "summary": "Diff adds a Calendar tab error boundary, safe localStorage utilities, and multiple defensive guards/fallbacks in calendar views and filtering to prevent crashes and blank renders. It also adds some empty-state UI text. However, the diff evidence does not clearly show the required in-tab React Query failure handling with an explicit Retry action that triggers refetch for the range queries.",
+  "generatedAt": "2026-02-14T16:35:52.212Z",
+  "summary": "The diff shows work toward a file-upload-only avatar flow in TeamMemberFormDialog (uploadImage -> hosted URL stored in formData.avatar with success/error toasts). However, due to truncation, it’s not verifiable that the manual URL input UI and all manual-URL-related logic/validation were fully removed, nor that upload/submit disable protections remain intact. Two non-requested metadata/docs files were also modified with broader/unrelated product descriptions.",
   "missing_requirements": [
     {
-      "id": "REQ-36",
-      "requirement": "Add a user-visible, English error/empty-state UI within the Calendar tab when data queries fail, including a clear 'Retry' action that triggers React Query refetch for the calendar range queries.",
-      "reason": "While an error boundary with a 'Try Again' button was added, the diff summary does not show query-error handling tied to React Query failures nor a Retry that calls the relevant React Query refetch functions for the calendar range queries. The ProgramCalendarTab changes are truncated before any query error UI/refetch wiring is visible.",
+      "id": "REQ-53",
+      "requirement": "Remove the manual photo URL input option (the 'Or enter photo URL manually' label and the avatar URL <Input>) from the Team Member create/edit dialog UI.",
+      "reason": "The provided diff excerpt for TeamMemberFormDialog.tsx does not show the form JSX where the label/input would be removed; thus removal cannot be confirmed from the truncated content.",
       "evidence": [
-        "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx",
-        "frontend/src/components/ProgramCalendarTab.tsx (truncated)"
+        "frontend/src/components/TeamMemberFormDialog.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-53",
+      "requirement": "No URL validation is performed during submit (do not block submission based on isValidUrl) since manual URL entry is no longer possible.",
+      "reason": "The diff excerpt does not show the full submit validation logic, nor does it show whether isValidUrl usage (or equivalent URL validation) was removed; cannot confirm from truncated content.",
+      "evidence": [
+        "frontend/src/components/TeamMemberFormDialog.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-54",
+      "requirement": "Remove now-unused manual-URL related logic/imports (e.g., handleAvatarChange, URL validation errors for manual entry, isValidUrl import) while keeping upload error handling/progress/preview intact.",
+      "reason": "The excerpt shows the new file upload handler, but does not include enough of the file to verify that all manual-URL code paths and imports were removed (and whether any URL-specific validation/error state remains).",
+      "evidence": [
+        "frontend/src/components/TeamMemberFormDialog.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-54",
+      "requirement": "Upload button remains disabled during upload; submit remains disabled during upload (no regressions).",
+      "reason": "The diff excerpt defines uploadState.isUploading but does not show the rendered Button components or disabled props; cannot verify behavior due to truncation.",
+      "evidence": [
+        "frontend/src/components/TeamMemberFormDialog.tsx (truncated)"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.56,
+  "hallucinated_features": [
+    {
+      "description": "Updated/introduced broad project summaries and unrelated feature descriptions in metadata files (e.g., dashboard language, many component descriptions) not requested by REQ-53/REQ-54.",
+      "reason": "REQ-53/REQ-54 only request removing manual photo URL UI and cleaning up related logic in TeamMemberFormDialog; changes to repository summary/state files containing unrelated feature narratives are not part of the request.",
+      "evidence": [
+        "frontend-file-summaries.txt (truncated)",
+        "project_state.json (truncated)"
+      ]
+    }
+  ],
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/ProgramCalendarTab.tsx",
-    "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx",
-    "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-    "frontend/src/components/program-calendar/programFilterUtils.ts",
-    "frontend/src/components/program-calendar/views/AgendaListView.tsx",
-    "frontend/src/components/program-calendar/views/DayListView.tsx",
-    "frontend/src/hooks/useCalendarReminders.ts",
-    "frontend/src/utils/reminderDedup.ts",
-    "frontend/src/utils/safeBrowserStorage.ts",
+    "frontend/src/components/TeamMemberFormDialog.tsx",
     "project_state.json"
   ]
 }

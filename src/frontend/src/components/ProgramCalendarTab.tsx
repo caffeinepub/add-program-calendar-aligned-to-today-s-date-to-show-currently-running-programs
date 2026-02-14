@@ -142,6 +142,20 @@ export default function ProgramCalendarTab() {
     return ['planning', 'ongoing', 'completed'];
   }, []);
 
+  // Sanitize divisions list: filter out empty/whitespace-only strings
+  const sanitizedDivisions = useMemo(() => {
+    return divisions
+      .map(d => (d || '').trim())
+      .filter(d => d.length > 0);
+  }, [divisions]);
+
+  // Sanitize PICs list: filter out empty/whitespace-only strings
+  const sanitizedPICs = useMemo(() => {
+    return uniquePICs
+      .map(p => (p || '').trim())
+      .filter(p => p.length > 0);
+  }, [uniquePICs]);
+
   // Apply filters with safe access
   const filteredPrograms = useMemo(() => {
     return applyProgramFilters(programs, filters);
@@ -285,8 +299,7 @@ export default function ProgramCalendarTab() {
                     <SelectValue placeholder="All divisions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All divisions</SelectItem>
-                    {divisions.map((div) => (
+                    {sanitizedDivisions.map((div) => (
                       <SelectItem key={div} value={div}>
                         {div}
                       </SelectItem>
@@ -302,8 +315,7 @@ export default function ProgramCalendarTab() {
                     <SelectValue placeholder="All PICs" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All PICs</SelectItem>
-                    {uniquePICs.map((pic) => (
+                    {sanitizedPICs.map((pic) => (
                       <SelectItem key={pic} value={pic}>
                         {pic}
                       </SelectItem>
@@ -319,7 +331,6 @@ export default function ProgramCalendarTab() {
                     <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All statuses</SelectItem>
                     <SelectItem value="planning">Planning</SelectItem>
                     <SelectItem value="ongoing">Ongoing</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
@@ -334,7 +345,6 @@ export default function ProgramCalendarTab() {
                     <SelectValue placeholder="All priorities" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All priorities</SelectItem>
                     <SelectItem value="high">High</SelectItem>
                     <SelectItem value="middle">Medium</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
@@ -481,29 +491,34 @@ export default function ProgramCalendarTab() {
       </Card>
 
       {/* Day Detail Panel */}
-      <DayDetailPanel
-        date={selectedDate}
-        programs={filteredPrograms}
-        onClose={() => setSelectedDate(null)}
-        onProgramClick={handleProgramClick}
-      />
+      {selectedDate && (
+        <DayDetailPanel
+          date={selectedDate}
+          programs={filteredPrograms}
+          onClose={() => setSelectedDate(null)}
+          onProgramClick={handleProgramClick}
+        />
+      )}
 
       {/* Program Detail Drawer */}
       <ProgramDetailDrawer
         program={selectedProgram}
         onClose={() => setSelectedProgram(null)}
         onEdit={handleEditProgram}
+        canEdit={true}
       />
 
       {/* Edit Program Dialog */}
-      <ProgramFormDialog
-        open={isEditDialogOpen}
-        onClose={() => {
-          setIsEditDialogOpen(false);
-          setEditingProgram(null);
-        }}
-        program={editingProgram}
-      />
+      {editingProgram && (
+        <ProgramFormDialog
+          open={isEditDialogOpen}
+          onClose={() => {
+            setIsEditDialogOpen(false);
+            setEditingProgram(null);
+          }}
+          program={editingProgram}
+        />
+      )}
     </div>
   );
 }

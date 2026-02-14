@@ -82,6 +82,8 @@ export const TeamMember = IDL.Record({
   'name' : IDL.Text,
   'role' : IDL.Text,
   'division' : IDL.Text,
+  'managerId' : IDL.Opt(IDL.Nat),
+  'avatar' : IDL.Opt(IDL.Text),
 });
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
@@ -273,6 +275,8 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'role' : IDL.Text,
     'division' : IDL.Text,
+    'managerId' : IDL.Opt(IDL.Nat),
+    'avatar' : IDL.Opt(IDL.Text),
   });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,

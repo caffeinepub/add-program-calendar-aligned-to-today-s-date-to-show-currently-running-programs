@@ -1,114 +1,41 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Program Calendar tab blank rendering with runtime guards and resilient states",
+  "title": "Remove manual photo URL entry from Team Member form (file-upload only)",
   "requirements": [
     {
-      "id": "REQ-33",
-      "summary": "Ensure the Calendar tab always renders visible UI and cannot go blank on open across all view modes and devices.",
+      "id": "REQ-53",
+      "summary": "Update TeamMemberFormDialog UI to remove manual avatar URL entry and enforce device file upload as the only way to add/update photos while still storing hosted URL in `avatar` for create/edit.",
       "acceptanceCriteria": [
-        "Clicking the Calendar tab shows the Program Calendar header and controls immediately (even while data is loading).",
-        "The Calendar tab never results in a totally blank screen; if something fails, an in-UI error state is displayed instead.",
-        "The behavior is consistent across Month/Week/Day/Agenda modes on both desktop and mobile."
+        "The 'Or enter photo URL manually' label and the avatar URL <Input> field are removed from the Team Member form UI.",
+        "Users can only add/update a photo by selecting an image file from their device (the existing file picker + upload flow remains).",
+        "Create flow: after successful upload, the resulting hosted URL is stored into `avatar` and submitted to the backend when the form is saved.",
+        "Edit flow: existing `member.avatar` (if present) is shown via the preview; user can replace it by uploading a new file or clear it using the existing clear action.",
+        "No URL validation is performed during submit (do not block submission based on `isValidUrl`), since manual URL entry is no longer possible.",
+        "All user-facing text introduced/modified by this change remains in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ProgramCalendarTab.tsx",
+          "path": "frontend/src/components/TeamMemberFormDialog.tsx",
           "operation": "modify",
-          "description": "Harden Calendar tab render flow so header/filters/view controls always render; wrap the calendar body (views + panels/drawers) in a local error boundary and ensure loading/error/empty states render inside the tab instead of allowing a blank screen. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx",
-          "operation": "create",
-          "description": "Add a React Error Boundary (class component) dedicated to Program Calendar tab content to catch render-time crashes and display an in-UI fallback with a reset action. Verify the component's usage instructions before implementing."
+          "description": "Remove the manual avatar URL entry section (label + input) from the Photo area, leaving only the existing file picker/upload flow and clear action; keep storing the hosted URL into formData.avatar after upload and submitting it via the existing avatar field for both create and edit."
         }
       ]
     },
     {
-      "id": "REQ-34",
-      "summary": "Add defensive runtime guards so localStorage and Notification API usage cannot crash ProgramCalendarTab rendering or reminder toggling.",
+      "id": "REQ-54",
+      "summary": "Clean up manual-URL-related code paths in the Team Member form while preserving upload progress/disabled states, toast + inline error handling, and PhotoUrlPreview behavior.",
       "acceptanceCriteria": [
-        "If localStorage is unavailable or throws, the calendar still renders and reminders default to enabled (or a safe default) without crashing.",
-        "Toggling reminders does not throw even when Notifications are unsupported/blocked; the UI remains usable.",
-        "No uncaught exceptions occur from localStorage/Notification access when opening the Calendar tab."
+        "Any dead code paths tied to manual URL entry (e.g., `handleAvatarChange`, avatar URL validation errors meant for manual entry, and any now-unused imports such as `isValidUrl` if no longer needed) are removed.",
+        "The preview component (frontend/src/components/team/PhotoUrlPreview.tsx) is still used to preview the currently stored/uploaded `avatar` URL and shows appropriate error state if the hosted image fails to load.",
+        "The upload button remains disabled during upload; submit remains disabled during upload (no regressions to the existing protections).",
+        "Successful upload still shows an English success toast; failures still show an English error toast and inline error text."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ProgramCalendarTab.tsx",
+          "path": "frontend/src/components/TeamMemberFormDialog.tsx",
           "operation": "modify",
-          "description": "Replace direct localStorage reads/writes with safe guarded helpers (try/catch, feature detection) and protect Notification permission requests (feature detection + try/catch) so state initialization and toggling cannot crash render. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/safeBrowserStorage.ts",
-          "operation": "create",
-          "description": "Introduce small utility helpers for safe get/set JSON to localStorage (returns defaults on failure) to centralize defensive behavior for blocked/unsupported storage. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/reminderDedup.ts",
-          "operation": "modify",
-          "description": "Refactor reminder dedup localStorage access to use the shared safe storage helpers to further reduce runtime risk in restricted browser environments. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useCalendarReminders.ts",
-          "operation": "modify",
-          "description": "Add defensive guards around Notification feature detection and permission checks to ensure reminder processing never throws and cannot interrupt rendering. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-35",
-      "summary": "Make ProgramCalendarTab resilient to malformed/incomplete program and calendar item shapes so rendering and filtering never crash.",
-      "acceptanceCriteria": [
-        "If any program item is missing a nested field (e.g., personInCharge), the Calendar tab still renders and the item is either shown with fallbacks (e.g., 'Unknown') or skipped without crashing.",
-        "Filters (PIC, Division, Status, Priority) do not throw when program data is incomplete.",
-        "No uncaught exceptions occur during render when programs/agenda/KPI arrays contain malformed entries."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ProgramCalendarTab.tsx",
-          "operation": "modify",
-          "description": "Harden derived data (unique PIC list, filter options, labels) with safe access patterns (optional chaining / fallbacks) so unexpected/malformed items cannot throw during memoization or render. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/programFilterUtils.ts",
-          "operation": "modify",
-          "description": "Update filtering logic to safely read program fields (unit/status/priority/personInCharge) with fallbacks and skip malformed entries without throwing. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/views/AgendaListView.tsx",
-          "operation": "modify",
-          "description": "Guard all program/KPI nested field reads (e.g., personInCharge.name, team.name) with fallbacks (e.g., 'Unknown') to prevent crashes when items are incomplete. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/views/DayListView.tsx",
-          "operation": "modify",
-          "description": "Guard all program/KPI nested field reads (e.g., personInCharge.name, team.name) with fallbacks (e.g., 'Unknown') to prevent crashes when items are incomplete. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/DayDetailPanel.tsx",
-          "operation": "modify",
-          "description": "Ensure the day detail list uses safe program field access with fallbacks so selecting a day cannot crash due to malformed program entries. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-36",
-      "summary": "Add English in-tab error and empty states with a Retry action that refetches calendar range queries.",
-      "acceptanceCriteria": [
-        "If a calendar query fails, the calendar shows an English error message (not a blank area) and a Retry button.",
-        "Retry refetches the relevant calendar queries and updates the UI accordingly.",
-        "If there are no programs/agenda items/KPI deadlines in range, the calendar shows an English empty state explaining there is nothing scheduled in the visible range."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ProgramCalendarTab.tsx",
-          "operation": "modify",
-          "description": "Aggregate query errors across programs/agenda/KPIs and render an English error state inside the calendar body with a Retry button that calls the relevant React Query refetch functions; also render an English empty state when all in-range items are empty (respecting current visible range). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/program-calendar/CalendarTabErrorBoundary.tsx",
-          "operation": "modify",
-          "description": "Enhance the error boundary fallback UI to show an English message and expose a Retry/Reset action that can trigger the provided refetch/reset behavior (so even render crashes have an in-UI recovery path). Verify the component's usage instructions before implementing."
+          "description": "Remove manual-URL logic: delete handleAvatarChange, remove `isValidUrl` import and any avatar URL validation on submit, and ensure avatar-related errors are only set by the upload flow; keep upload progress UI, disabling rules during upload, toast messages (English), inline error rendering, and PhotoUrlPreview preview wiring intact."
         }
       ]
     }

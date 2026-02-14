@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the Program Calendar dashboard tab so it never renders as a blank screen and remains stable across modes and devices.
+**Goal:** Make Team Member photo management file-upload only by removing the manual avatar URL input, while continuing to store the hosted image URL in the existing `avatar` field for create and edit flows.
 
 **Planned changes:**
-- Ensure ProgramCalendarTab always renders visible UI scaffolding (header, filters, view controls, and calendar body area) immediately on tab open, including during loading.
-- Add defensive runtime guards in `frontend/src/components/ProgramCalendarTab.tsx` for browser APIs (safe `localStorage` access and safe Notifications permission handling) to prevent render crashes.
-- Add safe data access and fallbacks for incomplete/malformed program data so filters and calendar rendering cannot throw during render.
-- Add an in-tab English error and empty-state UI (no blank areas) with a Retry action that triggers React Query refetch for calendar-range queries.
+- Update `frontend/src/components/TeamMemberFormDialog.tsx` to remove the “Or enter photo URL manually” label and the avatar URL input field, leaving only the existing file picker + upload flow.
+- Ensure create flow sets the uploaded/hosted image URL into `avatar` and submits it on save; ensure edit flow previews existing `member.avatar`, allows replacement via upload, and supports clearing via the existing clear action.
+- Remove now-unused manual-URL code paths and related validation (including submit-time URL validation and any unused imports such as `isValidUrl`), while keeping upload progress/disabled states, error handling, and success/error toasts in English.
+- Keep `frontend/src/components/team/PhotoUrlPreview.tsx` in use for previewing the current `avatar` URL and showing an error state if the hosted image fails to load.
 
-**User-visible outcome:** Clicking the Calendar tab consistently shows the calendar UI (with loading, error, or empty states as needed) across Month/Week/Day/Agenda on desktop and mobile, without uncaught exceptions from storage/notification access or malformed data.
+**User-visible outcome:** Users can no longer paste a photo URL for a Team Member; they can only upload a photo file (or clear an existing photo), and the app saves the resulting hosted URL as the member’s avatar.
