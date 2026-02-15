@@ -9,6 +9,7 @@ import { uploadImage } from '../../utils/imageUpload';
 import { isValidUrl } from '../../utils/urlValidation';
 import { useUpdateTeamMember } from '../../hooks/useQueries';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TeamMemberCardProps {
   member: TeamMember;
@@ -27,8 +28,10 @@ export default function TeamMemberCard({
 }: TeamMemberCardProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isFileInputOpen, setIsFileInputOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const updateMutation = useUpdateTeamMember();
+  const queryClient = useQueryClient();
 
   const initials = member.name
     .split(' ')
@@ -42,8 +45,13 @@ export default function TeamMemberCard({
 
   const handleAvatarClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (canEditPhoto && !isUploading && fileInputRef.current) {
+    
+    // Prevent multiple opens and don't open during upload
+    if (canEditPhoto && !isUploading && !isFileInputOpen && fileInputRef.current) {
+      setIsFileInputOpen(true);
       fileInputRef.current.click();
+      // Reset flag after a short delay to allow the file chooser to open
+      setTimeout(() => setIsFileInputOpen(false), 500);
     }
   };
 
@@ -75,6 +83,14 @@ export default function TeamMemberCard({
         },
       });
 
+      // Manually update the cache to reflect the change immediately
+      queryClient.setQueryData<TeamMember[]>(['teamMembers'], (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.map(m => 
+          m.id === member.id ? { ...m, avatar: uploadedUrl } : m
+        );
+      });
+
       toast.success('Photo updated successfully');
     } catch (error) {
       console.error('Photo upload failed:', error);
@@ -99,34 +115,36 @@ export default function TeamMemberCard({
         <div className="flex items-start gap-4">
           {/* Avatar with click-to-upload */}
           <div className="relative flex-shrink-0">
-            <Avatar 
-              className={`h-20 w-20 rounded-lg ${canEditPhoto && !isUploading ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+            <div
+              className={`relative ${canEditPhoto && !isUploading ? 'cursor-pointer' : ''}`}
               onClick={handleAvatarClick}
             >
-              {hasValidAvatar ? (
-                <AvatarImage src={member.avatar} alt={member.name} className="rounded-lg" />
-              ) : null}
-              <AvatarFallback className="bg-primary/10 text-primary rounded-lg text-lg">
-                {initials || <User className="h-8 w-8" />}
-              </AvatarFallback>
-            </Avatar>
-            
-            {/* Upload indicator overlay */}
-            {isUploading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
-                <div className="text-center text-white">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto mb-1" />
-                  <span className="text-xs font-medium">{uploadProgress}%</span>
+              <Avatar className="h-20 w-20 rounded-lg">
+                {hasValidAvatar ? (
+                  <AvatarImage src={member.avatar} alt={member.name} className="rounded-lg" />
+                ) : null}
+                <AvatarFallback className="bg-primary/10 text-primary rounded-lg text-lg">
+                  {initials || <User className="h-8 w-8" />}
+                </AvatarFallback>
+              </Avatar>
+              
+              {/* Upload indicator overlay */}
+              {isUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg pointer-events-none">
+                  <div className="text-center text-white">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-1" />
+                    <span className="text-xs font-medium">{uploadProgress}%</span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Upload hint icon */}
-            {canEditPhoto && !isUploading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/20 rounded-lg transition-colors opacity-0 hover:opacity-100">
-                <Upload className="h-6 w-6 text-white drop-shadow-lg" />
-              </div>
-            )}
+              {/* Upload hint icon - pointer-events-none to not block clicks */}
+              {canEditPhoto && !isUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/20 rounded-lg transition-colors opacity-0 hover:opacity-100 pointer-events-none">
+                  <Upload className="h-6 w-6 text-white drop-shadow-lg" />
+                </div>
+              )}
+            </div>
 
             {/* Hidden file input */}
             {canEditPhoto && (

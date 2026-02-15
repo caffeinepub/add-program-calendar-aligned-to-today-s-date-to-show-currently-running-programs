@@ -1,40 +1,43 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T09:47:24.938Z",
-  "summary": "Diff updates TeamMemberCard avatar styling to a larger square with rounded corners and adds click-to-upload photo behavior with uploading state, URL validation, and toast messaging. Also introduces a URL validation utility and updates TeamMembersTab to support cards/structure toggle and (per repo summary) enable click-to-upload for non-viewers. One key implementation detail (presence of a hidden file input element wired to the ref) is not visible in the truncated diff, so full compliance for opening the native file picker cannot be confirmed from provided evidence.",
+  "generatedAt": "2026-02-15T11:59:53.051Z",
+  "summary": "Diff implements anti-double-click guards for file chooser triggers in Team member card and form dialog, adds upload-in-progress disabling logic, and manually updates the React Query cache for teamMembers after card uploads. Structure view node now validates avatar URLs before rendering. However, evidence is truncated for the specific overlay pointer-event fix on cards and for the form dialog’s post-save cache refresh behavior required for instant Structure View updates after dialog close.",
   "missing_requirements": [
     {
-      "id": "REQ-63",
-      "requirement": "Clicking/tapping the avatar frame on a TeamMemberCard opens the native file picker on both desktop and mobile.",
-      "reason": "TeamMemberCard triggers `fileInputRef.current.click()` on avatar click, but the diff snippet is truncated before showing an actual `<input type=\"file\">` element bound to `fileInputRef` and `onChange={handleFileChange}`. Without that visible element, the file picker wiring cannot be confirmed from the provided diff summary.",
+      "id": "REQ-65",
+      "requirement": "Ensure the hover upload overlay on the Team Member Card does not intercept pointer events so clicking/tapping the avatar frame reliably opens the OS file picker, even when the overlay is visible.",
+      "reason": "TeamMemberCard.tsx is truncated at the avatar/overlay markup, so there is no visible evidence that overlay elements were changed to avoid intercepting clicks (e.g., pointer-events handling or z-index adjustments).",
       "evidence": [
         "frontend/src/components/team/TeamMemberCard.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-67",
+      "requirement": "After updating a member photo in the edit dialog, both Cards view and Structure View show the updated avatar after the dialog closes (no reload).",
+      "reason": "The form dialog diff shows upload-to-URL and toasts, but the file is truncated before any save/close handler logic; there is no visible evidence of React Query cache update/invalidation after a successful update mutation and dialog close to guarantee immediate refresh across views.",
+      "evidence": [
+        "frontend/src/components/TeamMemberFormDialog.tsx (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added general URL validation utilities (isValidUrl and isValidHttpsUrl) in a new/modified utility file.",
-      "reason": "BuildRequest did not request adding a new URL validation utility module; it only required handling invalid/empty/non-https URLs in the upload/change-photo flow.",
+      "description": "Enforce/require avatar URLs to be HTTPS-only (and validate URL format) before displaying/saving, including throwing errors when upload returns a non-https URL.",
+      "reason": "The BuildRequest focuses on click responsiveness and immediate UI refresh; it does not specify tightening avatar URL constraints to https-only. This is a behavioral change beyond the stated requirements.",
       "evidence": [
-        "frontend/src/utils/urlValidation.ts"
-      ]
-    },
-    {
-      "description": "Introduced upload progress tracking state (`uploadProgress`) and progress callback handling for avatar uploads.",
-      "reason": "BuildRequest required an uploading state/indicator and prevention of double uploads, but did not request tracking or displaying upload progress percentage.",
-      "evidence": [
-        "frontend/src/components/team/TeamMemberCard.tsx (truncated)"
+        "frontend/src/components/team/TeamMemberCard.tsx",
+        "frontend/src/components/TeamMemberFormDialog.tsx (truncated)",
+        "frontend/src/components/team/TeamStructureNode.tsx"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.6,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/TeamMembersTab.tsx",
+    "frontend/src/components/TeamMemberFormDialog.tsx",
     "frontend/src/components/team/TeamMemberCard.tsx",
-    "frontend/src/utils/urlValidation.ts",
+    "frontend/src/components/team/TeamStructureNode.tsx",
     "project_state.json"
   ]
 }

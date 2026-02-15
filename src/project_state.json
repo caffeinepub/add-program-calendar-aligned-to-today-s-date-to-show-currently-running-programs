@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 37,
+  "projectStateVersion": 39,
   "summary": "Team member photo workflow should be file-upload-only: remove manual photo URL input option from Team Member create/edit; keep preview driven by the uploaded image URL stored in `avatar`.",
   "architectural_notes": [
     "Program Calendar UI must be full-width and dominant (not sidebar), with responsive design: desktop calendar grid + mobile agenda list view.",
@@ -21,7 +21,8 @@
     "Program Calendar tab is blank across devices/browsers (entire UI missing: header/filters/view switch/calendar body) while other tabs (e.g., Programs/KPI) render normally.",
     "Calendar error/crash disebabkan Select.Item/SelectItem memiliki value string kosong (value=\"\"), termasuk kemungkinan dari mapping data API; perlu dihapus/diganti agar Calendar tidak error.",
     "Team member photo upload is failing (HTTP 400) when trying to upload a selected photo file.",
-    "Team card photo change flow should work reliably without errors when clicking the avatar frame to open the device file chooser and uploading/replacing the image."
+    "Team card photo change flow should work reliably without errors when clicking the avatar frame to open the device file chooser and uploading/replacing the image.",
+    "Team member photo add/change controls are unresponsive: clicking the add-photo icon/avatar area in both Team Member create/edit form and Team Member card does not open the device file chooser (no click response)."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -494,6 +495,30 @@
       "title": "Make the click-to-change-photo flow robust and error-free: show a clear uploading state on the avatar frame, prevent double-trigger uploads, handle upload failures with English error messaging, and ensure the card does not crash or become unusable if uploadImage throws or returns an invalid URL.",
       "reqIds": [
         "REQ-64"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-team-member-card-photo-change-interaction-so-clicking-tapping-the-avatar-frame-reliably-opens-the-device-file-picker-mobile-desktop-when-the-user-has-edit-permission-and-never-appears-unresponsive-due-to-overlay-elements-intercepting-pointer-events",
+      "title": "Fix the Team Member Card photo change interaction so clicking/tapping the avatar frame reliably opens the device file picker (mobile + desktop) when the user has edit permission, and never appears unresponsive due to overlay elements intercepting pointer events.",
+      "reqIds": [
+        "REQ-65"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-team-member-create-edit-dialog-photo-upload-control-so-clicking-the-choose-from-device-button-reliably-opens-the-device-file-picker-mobile-desktop-and-does-not-silently-fail-due-to-ref-disabled-state-issues",
+      "title": "Fix the Team Member create/edit dialog photo upload control so clicking the “Choose from Device” button reliably opens the device file picker (mobile + desktop) and does not silently fail due to ref/disabled-state issues.",
+      "reqIds": [
+        "REQ-66"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-that-after-a-successful-photo-upload-update-from-the-team-member-card-or-the-team-member-form-the-updated-avatar-url-is-immediately-reflected-across-the-team-ui-including-the-structure-view-without-requiring-a-page-reload",
+      "title": "Ensure that after a successful photo upload/update from the Team Member Card or the Team Member form, the updated avatar URL is immediately reflected across the Team UI, including the Structure View, without requiring a page reload.",
+      "reqIds": [
+        "REQ-67"
       ],
       "version": 1
     }

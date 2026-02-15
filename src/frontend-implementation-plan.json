@@ -1,68 +1,65 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Team Cards: square larger avatar + tap-to-upload photo on card",
+  "title": "Fix Team photo picker click reliability and instant avatar refresh across Cards + Structure View",
   "requirements": [
     {
-      "id": "REQ-62",
-      "summary": "Make TeamMemberCard avatar larger, 1:1 square with slight rounding, preserving centered initials fallback without disturbing existing card layout.",
+      "id": "REQ-65",
+      "summary": "Make Team Member Card avatar frame reliably open the device file picker when editable, without overlay elements intercepting pointer events, and prevent multiple opens during upload.",
       "acceptanceCriteria": [
-        "In the Team cards grid, each member avatar renders as a square (1:1) with slightly rounded corners (not a perfect circle).",
-        "The avatar is visibly larger than the current 48x48 (h-12 w-12) presentation.",
-        "If member.avatar is missing/invalid, the initials (or fallback icon) remain visible and well-centered inside the square frame.",
-        "No other card layout elements (name/role/division badge/edit/delete buttons) regress in alignment or spacing on mobile and desktop."
+        "On the Team tab (Cards view), clicking/tapping a team member’s avatar frame opens the OS file chooser when editing is allowed.",
+        "The click works even when the hover upload overlay is visible (overlay must not block the click).",
+        "While an upload is in progress, the avatar click is disabled and does not trigger multiple file-chooser opens or parallel uploads.",
+        "All user-facing text shown during this flow (errors, toasts, tooltips) is English."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/team/TeamMemberCard.tsx",
           "operation": "modify",
-          "description": "Update the avatar frame sizing (increase beyond h-12 w-12), force a 1:1 square shape, and apply slight rounding (e.g., rounded-md/rounded-lg rather than a circle). Ensure AvatarImage and AvatarFallback inherit the same square + rounding so initials remain centered and visually correct when no valid avatar exists."
+          "description": "Refactor the card avatar upload interaction to be mobile/desktop reliable: ensure the hover overlay does not intercept pointer events (e.g., pointer-events handling), make the clickable target be the avatar frame consistently (not dependent on hover), and add a lightweight guard to prevent repeated file-input clicks while a chooser is already being opened. Keep the existing disabled behavior during isUploading and keep all user-facing strings in English."
         }
       ]
     },
     {
-      "id": "REQ-63",
-      "summary": "Enable click/tap on the TeamMemberCard avatar frame to open device file picker, upload via uploadImage utility, and save hosted URL via existing updateTeamMember mutation flow.",
+      "id": "REQ-66",
+      "summary": "Make the Team Member create/edit dialog “Choose from Device” control reliably open the device file picker, with clear disabled behavior during upload.",
       "acceptanceCriteria": [
-        "Clicking/tapping the avatar frame on a TeamMemberCard opens the native file picker on both desktop and mobile.",
-        "After selecting an image, the app uploads the file using uploadImage(...) from frontend/src/utils/imageUpload.ts and then updates the corresponding TeamMember avatar in backend via the existing update mutation/hook.",
-        "The card updates to show the new avatar after a successful upload + save (including proper React Query cache invalidation/refetch so the list reflects the change).",
-        "The existing edit button continues to open the full edit dialog and is not required for changing the photo anymore.",
-        "If the user cancels the file picker, no upload occurs and no errors/toasts are shown."
+        "In the Team Member create/edit dialog, clicking “Choose from Device” always opens the OS file chooser when not uploading.",
+        "If the file input is disabled (e.g., during upload), the UI makes it clear via the existing disabled state and does not appear clickable.",
+        "After selecting a file, upload progress and success/failure states continue to behave as currently designed (progress bar, toasts, preview, submit blocked during upload).",
+        "All user-facing strings related to this flow remain in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/team/TeamMemberCard.tsx",
+          "path": "frontend/src/components/TeamMemberFormDialog.tsx",
           "operation": "modify",
-          "description": "Add a hidden image file input (accept=image/*) and wire avatar-frame click/tap to trigger the input (ensuring it does not interfere with the card onClick or edit/delete buttons). On file selection, call uploadImage(...) from frontend/src/utils/imageUpload.ts (Verify the component's usage instructions before implementing.) and then call the existing update mutation flow (useUpdateTeamMember) to persist the returned hosted URL into member.avatar; rely on the existing React Query invalidation behavior so the cards grid refreshes with the new photo. If the picker is canceled (no file), exit silently with no toasts/errors."
-        },
-        {
-          "path": "frontend/src/components/TeamMembersTab.tsx",
-          "operation": "modify",
-          "description": "Pass a read-only/permissions-aware flag or handler into TeamMemberCard so click-to-change-photo is enabled only when edits are allowed (e.g., not for viewer role), while preserving existing edit dialog behavior and current grid rendering/wiring."
+          "description": "Harden the dialog file-picker trigger so it cannot silently fail due to ref timing/disabled-state: only trigger the hidden input when not uploading, ensure the trigger is not perceived as clickable when disabled, and add a small anti-double-click guard similar to the card flow. Preserve existing progress/toast/preview/submit-blocking behavior and keep all user-facing strings in English."
         }
       ]
     },
     {
-      "id": "REQ-64",
-      "summary": "Harden the avatar click-to-upload flow with uploading state, double-trigger prevention, URL validation, and English error messaging without breaking list interactivity.",
+      "id": "REQ-67",
+      "summary": "After successful photo upload/update from Card or Dialog, immediately reflect the new avatar across Cards and Structure View without reload, with safe fallback when URL is missing/invalid.",
       "acceptanceCriteria": [
-        "While an upload is in progress, the avatar frame shows a visible uploading indicator/state and does not allow starting another upload until completion/failure.",
-        "On upload failure (including HTTP 400-class failures surfaced by uploadImage), the user receives an English error toast/message and the avatar remains unchanged.",
-        "If uploadImage returns an empty/non-https URL, the flow treats it as an error and does not save the avatar.",
-        "The Team cards list remains interactive; no unhandled promise rejections or render crashes occur during upload/update success or failure.",
-        "User-facing messages introduced/modified for this flow are in English."
+        "After updating a member photo in Cards view, switching to Structure View shows the updated avatar for that member without a hard refresh.",
+        "After updating a member photo in the edit dialog, both Cards view and Structure View show the updated avatar after the dialog closes.",
+        "No crashes occur if the uploaded URL is missing/invalid; the UI falls back to initials gracefully."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/team/TeamMemberCard.tsx",
           "operation": "modify",
-          "description": "Implement per-card upload state management (e.g., isUploading/progress) on the avatar frame: show a clear uploading indicator overlay/state, disable re-click/re-selection while uploading, and reset the file input value after each attempt to allow re-selecting the same file. Wrap upload + save in try/catch to prevent unhandled promise rejections; validate the returned URL is non-empty and https before saving; on failures show English toast/message and keep the previous avatar intact."
+          "description": "After a successful avatar update, immediately update the in-memory team member list used by the Team UI (React Query cache for the existing team members query) so Cards and Structure View reflect the new avatar instantly without waiting for a refetch. Ensure fallback behavior remains safe if the URL is missing/invalid."
         },
         {
-          "path": "frontend/src/utils/urlValidation.ts",
+          "path": "frontend/src/components/TeamMemberFormDialog.tsx",
           "operation": "modify",
-          "description": "Reuse/extend existing URL validation helpers as needed by the TeamMemberCard avatar rendering and upload-save flow, ensuring non-https URLs are treated as invalid for avatar display and for saving during the click-to-upload flow."
+          "description": "After a successful avatar upload (and subsequent member save), update the cached team member list so the updated avatar is visible immediately after the dialog closes in both Cards and Structure View."
+        },
+        {
+          "path": "frontend/src/components/team/TeamStructureNode.tsx",
+          "operation": "modify",
+          "description": "Add the same defensive avatar URL validation/fallback behavior used elsewhere (avoid broken/invalid URL usage) so Structure View never crashes and falls back to initials gracefully when avatar is missing/invalid."
         }
       ]
     }

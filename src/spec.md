@@ -1,11 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Improve Team Member cards by making the avatar frame larger and square-with-rounded-corners, and enable direct click/tap-to-change member photos via a device file picker with robust upload/error handling.
+**Goal:** Make Team member photo upload interactions reliably clickable on mobile/desktop and ensure updated avatars refresh immediately across Team views (including Structure View) without reloading.
 
 **Planned changes:**
-- Update the TeamMemberCard avatar presentation on the Team Members “Cards” view to be larger, 1:1 square, and slightly rounded while preserving the initials/fallback behavior when no valid avatar URL exists.
-- Make the avatar frame clickable/tappable to open the native file chooser, upload the selected image using the existing image upload utility, and save the hosted URL back to the member’s `avatar` via the existing update mutation flow.
-- Add a clear uploading state on the avatar frame, prevent double uploads, handle cancel without noise, and show English error messaging on failures/invalid returned URLs without breaking card/list interactivity.
+- Fix pointer/click handling on the Team Member Card avatar frame so the file picker always opens when editing is allowed, including when hover/upload overlays are visible, and prevent multiple opens/uploads while an upload is in progress.
+- Fix the Team Member create/edit dialog “Choose from Device” control so it reliably opens the OS file picker when enabled and clearly appears disabled during upload.
+- Ensure avatar updates after successful upload propagate immediately across Cards view and Structure View, with graceful fallback to initials if the avatar URL is missing/invalid.
+- Keep all user-facing text related to these flows in English.
 
-**User-visible outcome:** On the Team “Cards” view, member avatars appear larger in a rounded-square frame, and users can tap/click an avatar to pick a new photo from their device; uploads show progress, update the card on success, and display English errors without crashes on failure.
+**User-visible outcome:** Users can consistently click/tap to choose a Team member photo in both the card and the create/edit dialog, and the new avatar appears right away across Cards and Structure View without needing a page refresh.

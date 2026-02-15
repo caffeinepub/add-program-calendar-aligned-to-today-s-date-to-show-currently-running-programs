@@ -1,82 +1,90 @@
 {
   "kind": "build_request",
-  "title": "Team Cards: larger square avatar frame + click-to-change photo via device file picker",
+  "title": "Fix Team member photo add/change click responsiveness in form and cards, with instant refresh in Structure View",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-62",
-      "text": "Update the Team member card avatar on the Team Members “Cards” view (frontend/src/components/team/TeamMemberCard.tsx used by frontend/src/components/TeamMembersTab.tsx) so the photo frame is larger, 1:1 square, and slightly rounded, while still showing an initials fallback when no valid avatar URL exists.",
+      "id": "REQ-65",
+      "text": "Fix the Team Member Card photo change interaction so clicking/tapping the avatar frame reliably opens the device file picker (mobile + desktop) when the user has edit permission, and never appears unresponsive due to overlay elements intercepting pointer events.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Ubah frame foto pada cards di fitur team jadi 1:1 persegi 4 dan lebih besar.",
-          "Iya dengan sudut rounded sedikit."
+          "Icon menambah foto belum berfungsi..",
+          "Keduanya. Iya. Ketika diklik tidak berfungsi"
         ]
       },
       "acceptanceCriteria": [
-        "In the Team cards grid, each member avatar renders as a square (1:1) with slightly rounded corners (not a perfect circle).",
-        "The avatar is visibly larger than the current 48x48 (h-12 w-12) presentation.",
-        "If member.avatar is missing/invalid, the initials (or fallback icon) remain visible and well-centered inside the square frame.",
-        "No other card layout elements (name/role/division badge/edit/delete buttons) regress in alignment or spacing on mobile and desktop."
+        "On the Team tab (Cards view), clicking/tapping a team member’s avatar frame opens the OS file chooser when editing is allowed.",
+        "The click works even when the hover upload overlay is visible (overlay must not block the click).",
+        "While an upload is in progress, the avatar click is disabled and does not trigger multiple file-chooser opens or parallel uploads.",
+        "All user-facing text shown during this flow (errors, toasts, tooltips) is English."
       ]
     },
     {
-      "id": "REQ-63",
-      "text": "Enable changing a Team member photo directly by clicking/tapping the avatar frame on the Team member card (without using the edit icon), opening the device file chooser (mobile/desktop), uploading via the existing frontend image upload utility (frontend/src/utils/imageUpload.ts), and saving the returned hosted URL into the member’s avatar field via the existing update mutation flow.",
+      "id": "REQ-66",
+      "text": "Fix the Team Member create/edit dialog photo upload control so clicking the “Choose from Device” button reliably opens the device file picker (mobile + desktop) and does not silently fail due to ref/disabled-state issues.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Untuk ganti foto bisa langsung di frame choose fotonya tanpa harus masuk di icon edit",
-          "Cukup klik frame fotonya, buka file chooser pada perangkat HP/Laptop."
+          "Keduanya. Iya. Ketika diklik tidak berfungsi"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking/tapping the avatar frame on a TeamMemberCard opens the native file picker on both desktop and mobile.",
-        "After selecting an image, the app uploads the file using uploadImage(...) from frontend/src/utils/imageUpload.ts and then updates the corresponding TeamMember avatar in backend via the existing update mutation/hook.",
-        "The card updates to show the new avatar after a successful upload + save (including proper React Query cache invalidation/refetch so the list reflects the change).",
-        "The existing edit button continues to open the full edit dialog and is not required for changing the photo anymore.",
-        "If the user cancels the file picker, no upload occurs and no errors/toasts are shown."
+        "In the Team Member create/edit dialog, clicking “Choose from Device” always opens the OS file chooser when not uploading.",
+        "If the file input is disabled (e.g., during upload), the UI makes it clear via the existing disabled state and does not appear clickable.",
+        "After selecting a file, upload progress and success/failure states continue to behave as currently designed (progress bar, toasts, preview, submit blocked during upload).",
+        "All user-facing strings related to this flow remain in English."
       ]
     },
     {
-      "id": "REQ-64",
-      "text": "Make the click-to-change-photo flow robust and error-free: show a clear uploading state on the avatar frame, prevent double-trigger uploads, handle upload failures with English error messaging, and ensure the card does not crash or become unusable if uploadImage throws or returns an invalid URL.",
+      "id": "REQ-67",
+      "text": "Ensure that after a successful photo upload/update from the Team Member Card or the Team Member form, the updated avatar URL is immediately reflected across the Team UI, including the Structure View, without requiring a page reload.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Buat berfungsi dengan baik tanpa error lagi"
+          "Di bagian card dan automatis juga diterapkan pada struktur"
         ]
       },
       "acceptanceCriteria": [
-        "While an upload is in progress, the avatar frame shows a visible uploading indicator/state and does not allow starting another upload until completion/failure.",
-        "On upload failure (including HTTP 400-class failures surfaced by uploadImage), the user receives an English error toast/message and the avatar remains unchanged.",
-        "If uploadImage returns an empty/non-https URL, the flow treats it as an error and does not save the avatar.",
-        "The Team cards list remains interactive; no unhandled promise rejections or render crashes occur during upload/update success or failure.",
-        "User-facing messages introduced/modified for this flow are in English."
+        "After updating a member photo in Cards view, switching to Structure View shows the updated avatar for that member without a hard refresh.",
+        "After updating a member photo in the edit dialog, both Cards view and Structure View show the updated avatar after the dialog closes.",
+        "No crashes occur if the uploaded URL is missing/invalid; the UI falls back to initials gracefully."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Do not change the Team backend data model or APIs as part of this request; use the existing TeamMember.avatar field and existing update mutation/query flows.",
-    "Keep the Team member photo workflow file-upload-only (no reintroducing manual photo URL input)."
+    "Frontend must not modify any files under frontend/src/components/ui.",
+    "Do not change Internet Identity hooks or actor creation logic (immutable paths in frontend/src/hooks/* and frontend/src/main.tsx).",
+    "Do not change the Team backend data model or APIs as part of this fix; this is a frontend interaction/refresh issue."
   ],
   "nonGoals": [
-    "Do not redesign the entire Team page layout beyond the avatar frame size/shape changes needed for the cards.",
-    "Do not add new third-party authentication or external database/storage services.",
-    "Do not change Structure View org-chart styling/behavior unless required to prevent regressions from shared avatar components."
+    "Changing or replacing the external image hosting providers beyond what is required to fix the click-to-open file chooser issue.",
+    "Adding new backend endpoints or storing image blobs on the backend.",
+    "Redesigning the Team UI beyond what is necessary to make the existing photo controls responsive and reliable."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [
+      "Use English for all user-facing UI text."
+    ],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

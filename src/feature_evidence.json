@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-team-member-card-avatar-on-the-team-members-cards-view-frontend-src-components-team-teammembercard-tsx-used-by-frontend-src-components-teammemberstab-tsx-so-the-photo-frame-is-larger-1-1-square-and-slightly-rounded-while-still-showing-an-initials-fallback-when-no-valid-avatar-url-exists",
-      "featureTitle": "Update the Team member card avatar on the Team Members “Cards” view (frontend/src/components/team/TeamMemberCard.tsx used by frontend/src/components/TeamMembersTab.tsx) so the photo frame is larger, 1:1 square, and slightly rounded, while still showing an initials fallback when no valid avatar URL exists.",
+      "featureId": "feature-fix-the-team-member-card-photo-change-interaction-so-clicking-tapping-the-avatar-frame-reliably-opens-the-device-file-picker-mobile-desktop-when-the-user-has-edit-permission-and-never-appears-unresponsive-due-to-overlay-elements-intercepting-pointer-events",
+      "featureTitle": "Fix the Team Member Card photo change interaction so clicking/tapping the avatar frame reliably opens the device file picker (mobile + desktop) when the user has edit permission, and never appears unresponsive due to overlay elements intercepting pointer events.",
       "files": [
         "frontend/src/components/team/TeamMemberCard.tsx"
       ],
@@ -17,16 +17,15 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-62"
+        "REQ-65"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-enable-changing-a-team-member-photo-directly-by-clicking-tapping-the-avatar-frame-on-the-team-member-card-without-using-the-edit-icon-opening-the-device-file-chooser-mobile-desktop-uploading-via-the-existing-frontend-image-upload-utility-frontend-src-utils-imageupload-ts-and-saving-the-returned-hosted-url-into-the-member-s-avatar-field-via-the-existing-update-mutation-flow",
-      "featureTitle": "Enable changing a Team member photo directly by clicking/tapping the avatar frame on the Team member card (without using the edit icon), opening the device file chooser (mobile/desktop), uploading via the existing frontend image upload utility (frontend/src/utils/imageUpload.ts), and saving the returned hosted URL into the member’s avatar field via the existing update mutation flow.",
+      "featureId": "feature-fix-the-team-member-create-edit-dialog-photo-upload-control-so-clicking-the-choose-from-device-button-reliably-opens-the-device-file-picker-mobile-desktop-and-does-not-silently-fail-due-to-ref-disabled-state-issues",
+      "featureTitle": "Fix the Team Member create/edit dialog photo upload control so clicking the “Choose from Device” button reliably opens the device file picker (mobile + desktop) and does not silently fail due to ref/disabled-state issues.",
       "files": [
-        "frontend/src/components/TeamMembersTab.tsx",
-        "frontend/src/components/team/TeamMemberCard.tsx"
+        "frontend/src/components/TeamMemberFormDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -38,16 +37,17 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-63"
+        "REQ-66"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-make-the-click-to-change-photo-flow-robust-and-error-free-show-a-clear-uploading-state-on-the-avatar-frame-prevent-double-trigger-uploads-handle-upload-failures-with-english-error-messaging-and-ensure-the-card-does-not-crash-or-become-unusable-if-uploadimage-throws-or-returns-an-invalid-url",
-      "featureTitle": "Make the click-to-change-photo flow robust and error-free: show a clear uploading state on the avatar frame, prevent double-trigger uploads, handle upload failures with English error messaging, and ensure the card does not crash or become unusable if uploadImage throws or returns an invalid URL.",
+      "featureId": "feature-ensure-that-after-a-successful-photo-upload-update-from-the-team-member-card-or-the-team-member-form-the-updated-avatar-url-is-immediately-reflected-across-the-team-ui-including-the-structure-view-without-requiring-a-page-reload",
+      "featureTitle": "Ensure that after a successful photo upload/update from the Team Member Card or the Team Member form, the updated avatar URL is immediately reflected across the Team UI, including the Structure View, without requiring a page reload.",
       "files": [
+        "frontend/src/components/TeamMemberFormDialog.tsx",
         "frontend/src/components/team/TeamMemberCard.tsx",
-        "frontend/src/utils/urlValidation.ts"
+        "frontend/src/components/team/TeamStructureNode.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -59,7 +59,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-64"
+        "REQ-67"
       ],
       "confidence": "high"
     }

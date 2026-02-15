@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T09:47:24.943Z",
+  "generatedAt": "2026-02-15T11:59:53.057Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,8 +11,8 @@
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-62",
-        "summary": "Update the Team member card avatar on the Team Members “Cards” view (frontend/src/components/team/TeamMemberCard.tsx used by frontend/src/components/TeamMembersTab.tsx) so the photo frame is larger, 1:1 square, and slightly rounded, while still showing an initials fallback when no valid avatar URL exists.",
+        "id": "REQ-65",
+        "summary": "Fix the Team Member Card photo change interaction so clicking/tapping the avatar frame reliably opens the device file picker (mobile + desktop) when the user has edit permission, and never appears unresponsive due to overlay elements intercepting pointer events.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/team/TeamMemberCard.tsx"
@@ -22,44 +22,41 @@
         ]
       },
       {
-        "id": "REQ-63",
-        "summary": "Enable changing a Team member photo directly by clicking/tapping the avatar frame on the Team member card (without using the edit icon), opening the device file chooser (mobile/desktop), uploading via the existing frontend image upload utility (frontend/src/utils/imageUpload.ts), and saving the returned hosted URL into the member’s avatar field via the existing update mutation flow.",
+        "id": "REQ-66",
+        "summary": "Fix the Team Member create/edit dialog photo upload control so clicking the “Choose from Device” button reliably opens the device file picker (mobile + desktop) and does not silently fail due to ref/disabled-state issues.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/team/TeamMemberCard.tsx",
-          "frontend/src/components/TeamMembersTab.tsx"
+          "frontend/src/components/TeamMemberFormDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/team/TeamMemberCard.tsx",
-          "frontend/src/components/TeamMembersTab.tsx"
+          "frontend/src/components/TeamMemberFormDialog.tsx"
         ]
       },
       {
-        "id": "REQ-64",
-        "summary": "Make the click-to-change-photo flow robust and error-free: show a clear uploading state on the avatar frame, prevent double-trigger uploads, handle upload failures with English error messaging, and ensure the card does not crash or become unusable if uploadImage throws or returns an invalid URL.",
+        "id": "REQ-67",
+        "summary": "Ensure that after a successful photo upload/update from the Team Member Card or the Team Member form, the updated avatar URL is immediately reflected across the Team UI, including the Structure View, without requiring a page reload.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/team/TeamMemberCard.tsx",
-          "frontend/src/utils/urlValidation.ts"
+          "frontend/src/components/TeamMemberFormDialog.tsx",
+          "frontend/src/components/team/TeamStructureNode.tsx"
         ],
         "matchedFiles": [
           "frontend/src/components/team/TeamMemberCard.tsx",
-          "frontend/src/utils/urlValidation.ts"
+          "frontend/src/components/TeamMemberFormDialog.tsx",
+          "frontend/src/components/team/TeamStructureNode.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/blob-storage/Mixin.mo",
-    "backend/blob-storage/Storage.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/TeamMembersTab.tsx",
+    "frontend/src/components/TeamMemberFormDialog.tsx",
     "frontend/src/components/team/TeamMemberCard.tsx",
-    "frontend/src/utils/urlValidation.ts",
+    "frontend/src/components/team/TeamStructureNode.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

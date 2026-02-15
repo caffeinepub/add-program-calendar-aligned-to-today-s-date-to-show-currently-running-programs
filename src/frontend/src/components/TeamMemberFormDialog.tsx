@@ -10,6 +10,7 @@ import PhotoUrlPreview from './team/PhotoUrlPreview';
 import ManagerSelect from './team/ManagerSelect';
 import { uploadImage } from '../utils/imageUpload';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TeamMemberFormDialogProps {
   open: boolean;
@@ -21,8 +22,10 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
   const createMutation = useCreateTeamMember();
   const updateMutation = useUpdateTeamMember();
   const { data: allMembers = [] } = useGetAllTeamMembers();
+  const queryClient = useQueryClient();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isFileInputOpen, setIsFileInputOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -62,7 +65,18 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
     }
     setErrors({ avatar: '', managerId: '' });
     setUploadState({ isUploading: false, progress: 0 });
+    setIsFileInputOpen(false);
   }, [member, open]);
+
+  const handleChooseFile = () => {
+    // Prevent multiple opens and don't open during upload
+    if (!uploadState.isUploading && !isFileInputOpen && fileInputRef.current) {
+      setIsFileInputOpen(true);
+      fileInputRef.current.click();
+      // Reset flag after a short delay
+      setTimeout(() => setIsFileInputOpen(false), 500);
+    }
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -151,6 +165,14 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
         id: member.id,
         member: memberData,
       });
+      
+      // Manually update the cache to reflect the change immediately
+      queryClient.setQueryData<TeamMember[]>(['teamMembers'], (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.map(m => 
+          m.id === member.id ? memberData : m
+        );
+      });
     } else {
       await createMutation.mutateAsync(memberData);
     }
@@ -234,7 +256,7 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={handleChooseFile}
                   disabled={uploadState.isUploading}
                   className="flex-1"
                 >
