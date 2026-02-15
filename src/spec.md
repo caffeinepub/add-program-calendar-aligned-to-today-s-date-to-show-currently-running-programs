@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Make Team Member photo management file-upload only by removing the manual avatar URL input, while continuing to store the hosted image URL in the existing `avatar` field for create and edit flows.
+**Goal:** Improve Team Member cards by making the avatar frame larger and square-with-rounded-corners, and enable direct click/tap-to-change member photos via a device file picker with robust upload/error handling.
 
 **Planned changes:**
-- Update `frontend/src/components/TeamMemberFormDialog.tsx` to remove the “Or enter photo URL manually” label and the avatar URL input field, leaving only the existing file picker + upload flow.
-- Ensure create flow sets the uploaded/hosted image URL into `avatar` and submits it on save; ensure edit flow previews existing `member.avatar`, allows replacement via upload, and supports clearing via the existing clear action.
-- Remove now-unused manual-URL code paths and related validation (including submit-time URL validation and any unused imports such as `isValidUrl`), while keeping upload progress/disabled states, error handling, and success/error toasts in English.
-- Keep `frontend/src/components/team/PhotoUrlPreview.tsx` in use for previewing the current `avatar` URL and showing an error state if the hosted image fails to load.
+- Update the TeamMemberCard avatar presentation on the Team Members “Cards” view to be larger, 1:1 square, and slightly rounded while preserving the initials/fallback behavior when no valid avatar URL exists.
+- Make the avatar frame clickable/tappable to open the native file chooser, upload the selected image using the existing image upload utility, and save the hosted URL back to the member’s `avatar` via the existing update mutation flow.
+- Add a clear uploading state on the avatar frame, prevent double uploads, handle cancel without noise, and show English error messaging on failures/invalid returned URLs without breaking card/list interactivity.
 
-**User-visible outcome:** Users can no longer paste a photo URL for a Team Member; they can only upload a photo file (or clear an existing photo), and the app saves the resulting hosted URL as the member’s avatar.
+**User-visible outcome:** On the Team “Cards” view, member avatars appear larger in a rounded-square frame, and users can tap/click an avatar to pick a new photo from their device; uploads show progress, update the card on success, and display English errors without crashes on failure.

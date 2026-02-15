@@ -1,41 +1,68 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove manual photo URL entry from Team Member form (file-upload only)",
+  "title": "Team Cards: square larger avatar + tap-to-upload photo on card",
   "requirements": [
     {
-      "id": "REQ-53",
-      "summary": "Update TeamMemberFormDialog UI to remove manual avatar URL entry and enforce device file upload as the only way to add/update photos while still storing hosted URL in `avatar` for create/edit.",
+      "id": "REQ-62",
+      "summary": "Make TeamMemberCard avatar larger, 1:1 square with slight rounding, preserving centered initials fallback without disturbing existing card layout.",
       "acceptanceCriteria": [
-        "The 'Or enter photo URL manually' label and the avatar URL <Input> field are removed from the Team Member form UI.",
-        "Users can only add/update a photo by selecting an image file from their device (the existing file picker + upload flow remains).",
-        "Create flow: after successful upload, the resulting hosted URL is stored into `avatar` and submitted to the backend when the form is saved.",
-        "Edit flow: existing `member.avatar` (if present) is shown via the preview; user can replace it by uploading a new file or clear it using the existing clear action.",
-        "No URL validation is performed during submit (do not block submission based on `isValidUrl`), since manual URL entry is no longer possible.",
-        "All user-facing text introduced/modified by this change remains in English."
+        "In the Team cards grid, each member avatar renders as a square (1:1) with slightly rounded corners (not a perfect circle).",
+        "The avatar is visibly larger than the current 48x48 (h-12 w-12) presentation.",
+        "If member.avatar is missing/invalid, the initials (or fallback icon) remain visible and well-centered inside the square frame.",
+        "No other card layout elements (name/role/division badge/edit/delete buttons) regress in alignment or spacing on mobile and desktop."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/TeamMemberFormDialog.tsx",
+          "path": "frontend/src/components/team/TeamMemberCard.tsx",
           "operation": "modify",
-          "description": "Remove the manual avatar URL entry section (label + input) from the Photo area, leaving only the existing file picker/upload flow and clear action; keep storing the hosted URL into formData.avatar after upload and submitting it via the existing avatar field for both create and edit."
+          "description": "Update the avatar frame sizing (increase beyond h-12 w-12), force a 1:1 square shape, and apply slight rounding (e.g., rounded-md/rounded-lg rather than a circle). Ensure AvatarImage and AvatarFallback inherit the same square + rounding so initials remain centered and visually correct when no valid avatar exists."
         }
       ]
     },
     {
-      "id": "REQ-54",
-      "summary": "Clean up manual-URL-related code paths in the Team Member form while preserving upload progress/disabled states, toast + inline error handling, and PhotoUrlPreview behavior.",
+      "id": "REQ-63",
+      "summary": "Enable click/tap on the TeamMemberCard avatar frame to open device file picker, upload via uploadImage utility, and save hosted URL via existing updateTeamMember mutation flow.",
       "acceptanceCriteria": [
-        "Any dead code paths tied to manual URL entry (e.g., `handleAvatarChange`, avatar URL validation errors meant for manual entry, and any now-unused imports such as `isValidUrl` if no longer needed) are removed.",
-        "The preview component (frontend/src/components/team/PhotoUrlPreview.tsx) is still used to preview the currently stored/uploaded `avatar` URL and shows appropriate error state if the hosted image fails to load.",
-        "The upload button remains disabled during upload; submit remains disabled during upload (no regressions to the existing protections).",
-        "Successful upload still shows an English success toast; failures still show an English error toast and inline error text."
+        "Clicking/tapping the avatar frame on a TeamMemberCard opens the native file picker on both desktop and mobile.",
+        "After selecting an image, the app uploads the file using uploadImage(...) from frontend/src/utils/imageUpload.ts and then updates the corresponding TeamMember avatar in backend via the existing update mutation/hook.",
+        "The card updates to show the new avatar after a successful upload + save (including proper React Query cache invalidation/refetch so the list reflects the change).",
+        "The existing edit button continues to open the full edit dialog and is not required for changing the photo anymore.",
+        "If the user cancels the file picker, no upload occurs and no errors/toasts are shown."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/TeamMemberFormDialog.tsx",
+          "path": "frontend/src/components/team/TeamMemberCard.tsx",
           "operation": "modify",
-          "description": "Remove manual-URL logic: delete handleAvatarChange, remove `isValidUrl` import and any avatar URL validation on submit, and ensure avatar-related errors are only set by the upload flow; keep upload progress UI, disabling rules during upload, toast messages (English), inline error rendering, and PhotoUrlPreview preview wiring intact."
+          "description": "Add a hidden image file input (accept=image/*) and wire avatar-frame click/tap to trigger the input (ensuring it does not interfere with the card onClick or edit/delete buttons). On file selection, call uploadImage(...) from frontend/src/utils/imageUpload.ts (Verify the component's usage instructions before implementing.) and then call the existing update mutation flow (useUpdateTeamMember) to persist the returned hosted URL into member.avatar; rely on the existing React Query invalidation behavior so the cards grid refreshes with the new photo. If the picker is canceled (no file), exit silently with no toasts/errors."
+        },
+        {
+          "path": "frontend/src/components/TeamMembersTab.tsx",
+          "operation": "modify",
+          "description": "Pass a read-only/permissions-aware flag or handler into TeamMemberCard so click-to-change-photo is enabled only when edits are allowed (e.g., not for viewer role), while preserving existing edit dialog behavior and current grid rendering/wiring."
+        }
+      ]
+    },
+    {
+      "id": "REQ-64",
+      "summary": "Harden the avatar click-to-upload flow with uploading state, double-trigger prevention, URL validation, and English error messaging without breaking list interactivity.",
+      "acceptanceCriteria": [
+        "While an upload is in progress, the avatar frame shows a visible uploading indicator/state and does not allow starting another upload until completion/failure.",
+        "On upload failure (including HTTP 400-class failures surfaced by uploadImage), the user receives an English error toast/message and the avatar remains unchanged.",
+        "If uploadImage returns an empty/non-https URL, the flow treats it as an error and does not save the avatar.",
+        "The Team cards list remains interactive; no unhandled promise rejections or render crashes occur during upload/update success or failure.",
+        "User-facing messages introduced/modified for this flow are in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/team/TeamMemberCard.tsx",
+          "operation": "modify",
+          "description": "Implement per-card upload state management (e.g., isUploading/progress) on the avatar frame: show a clear uploading indicator overlay/state, disable re-click/re-selection while uploading, and reset the file input value after each attempt to allow re-selecting the same file. Wrap upload + save in try/catch to prevent unhandled promise rejections; validate the returned URL is non-empty and https before saving; on failures show English toast/message and keep the previous avatar intact."
+        },
+        {
+          "path": "frontend/src/utils/urlValidation.ts",
+          "operation": "modify",
+          "description": "Reuse/extend existing URL validation helpers as needed by the TeamMemberCard avatar rendering and upload-save flow, ensuring non-https URLs are treated as invalid for avatar display and for saving during the click-to-upload flow."
         }
       ]
     }

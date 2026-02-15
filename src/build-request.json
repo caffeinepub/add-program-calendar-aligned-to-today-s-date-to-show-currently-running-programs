@@ -1,71 +1,82 @@
 {
   "kind": "build_request",
-  "title": "Remove manual photo URL option from Team Member create/edit (file-upload only)",
+  "title": "Team Cards: larger square avatar frame + click-to-change photo via device file picker",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-53",
-      "text": "Update the Team Member create/edit dialog (frontend/src/components/TeamMemberFormDialog.tsx) to remove the manual photo URL input option so photos can only be added via device file upload, while still storing only the hosted image URL in the existing `avatar` field for both create and edit flows.",
+      "id": "REQ-62",
+      "text": "Update the Team member card avatar on the Team Members “Cards” view (frontend/src/components/team/TeamMemberCard.tsx used by frontend/src/components/TeamMembersTab.tsx) so the photo frame is larger, 1:1 square, and slightly rounded, while still showing an initials fallback when no valid avatar URL exists.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-1"
+          "msg-1"
         ],
         "quotes": [
-          "Hapus pilihan URL photo",
-          "Iya. Iya. Iya berlaku.\n\nKerjakan sekarang"
+          "Ubah frame foto pada cards di fitur team jadi 1:1 persegi 4 dan lebih besar.",
+          "Iya dengan sudut rounded sedikit."
         ]
       },
       "acceptanceCriteria": [
-        "The 'Or enter photo URL manually' label and the avatar URL <Input> field are removed from the Team Member form UI.",
-        "Users can only add/update a photo by selecting an image file from their device (the existing file picker + upload flow remains).",
-        "Create flow: after successful upload, the resulting hosted URL is stored into `avatar` and submitted to the backend when the form is saved.",
-        "Edit flow: existing `member.avatar` (if present) is shown via the preview; user can replace it by uploading a new file or clear it using the existing clear action.",
-        "No URL validation is performed during submit (do not block submission based on `isValidUrl`), since manual URL entry is no longer possible.",
-        "All user-facing text introduced/modified by this change remains in English."
+        "In the Team cards grid, each member avatar renders as a square (1:1) with slightly rounded corners (not a perfect circle).",
+        "The avatar is visibly larger than the current 48x48 (h-12 w-12) presentation.",
+        "If member.avatar is missing/invalid, the initials (or fallback icon) remain visible and well-centered inside the square frame.",
+        "No other card layout elements (name/role/division badge/edit/delete buttons) regress in alignment or spacing on mobile and desktop."
       ]
     },
     {
-      "id": "REQ-54",
-      "text": "Remove now-unused manual-URL related logic from the Team Member form implementation, while keeping image upload error handling, upload progress UI, and preview behavior intact.",
+      "id": "REQ-63",
+      "text": "Enable changing a Team member photo directly by clicking/tapping the avatar frame on the Team member card (without using the edit icon), opening the device file chooser (mobile/desktop), uploading via the existing frontend image upload utility (frontend/src/utils/imageUpload.ts), and saving the returned hosted URL into the member’s avatar field via the existing update mutation flow.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-1"
+          "msg-1"
         ],
         "quotes": [
-          "Hapus pilihan URL photo"
+          "Untuk ganti foto bisa langsung di frame choose fotonya tanpa harus masuk di icon edit",
+          "Cukup klik frame fotonya, buka file chooser pada perangkat HP/Laptop."
         ]
       },
       "acceptanceCriteria": [
-        "Any dead code paths tied to manual URL entry (e.g., `handleAvatarChange`, avatar URL validation errors meant for manual entry, and any now-unused imports such as `isValidUrl` if no longer needed) are removed.",
-        "The preview component (frontend/src/components/team/PhotoUrlPreview.tsx) is still used to preview the currently stored/uploaded `avatar` URL and shows appropriate error state if the hosted image fails to load.",
-        "The upload button remains disabled during upload; submit remains disabled during upload (no regressions to the existing protections).",
-        "Successful upload still shows an English success toast; failures still show an English error toast and inline error text."
+        "Clicking/tapping the avatar frame on a TeamMemberCard opens the native file picker on both desktop and mobile.",
+        "After selecting an image, the app uploads the file using uploadImage(...) from frontend/src/utils/imageUpload.ts and then updates the corresponding TeamMember avatar in backend via the existing update mutation/hook.",
+        "The card updates to show the new avatar after a successful upload + save (including proper React Query cache invalidation/refetch so the list reflects the change).",
+        "The existing edit button continues to open the full edit dialog and is not required for changing the photo anymore.",
+        "If the user cancels the file picker, no upload occurs and no errors/toasts are shown."
+      ]
+    },
+    {
+      "id": "REQ-64",
+      "text": "Make the click-to-change-photo flow robust and error-free: show a clear uploading state on the avatar frame, prevent double-trigger uploads, handle upload failures with English error messaging, and ensure the card does not crash or become unusable if uploadImage throws or returns an invalid URL.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Buat berfungsi dengan baik tanpa error lagi"
+        ]
+      },
+      "acceptanceCriteria": [
+        "While an upload is in progress, the avatar frame shows a visible uploading indicator/state and does not allow starting another upload until completion/failure.",
+        "On upload failure (including HTTP 400-class failures surfaced by uploadImage), the user receives an English error toast/message and the avatar remains unchanged.",
+        "If uploadImage returns an empty/non-https URL, the flow treats it as an error and does not save the avatar.",
+        "The Team cards list remains interactive; no unhandled promise rejections or render crashes occur during upload/update success or failure.",
+        "User-facing messages introduced/modified for this flow are in English."
       ]
     }
   ],
   "constraints": [
     "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Do not change backend schema/APIs for this request; the backend continues to store only the hosted image URL in the existing TeamMember.avatar field."
+    "Do not change the Team backend data model or APIs as part of this request; use the existing TeamMember.avatar field and existing update mutation/query flows.",
+    "Keep the Team member photo workflow file-upload-only (no reintroducing manual photo URL input)."
   ],
   "nonGoals": [
-    "Do not add image cropping or any additional photo editing features.",
-    "Do not add alternative photo sources (camera capture, third-party providers, or URL-based input).",
-    "Do not change the external image hosting provider or upload endpoint behavior beyond what is necessary to support file-upload-only UI."
+    "Do not redesign the entire Team page layout beyond the avatar frame size/shape changes needed for the cards.",
+    "Do not add new third-party authentication or external database/storage services.",
+    "Do not change Structure View org-chart styling/behavior unless required to prevent regressions from shared avatar components."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

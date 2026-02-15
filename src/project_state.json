@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 31,
+  "projectStateVersion": 37,
   "summary": "Team member photo workflow should be file-upload-only: remove manual photo URL input option from Team Member create/edit; keep preview driven by the uploaded image URL stored in `avatar`.",
   "architectural_notes": [
     "Program Calendar UI must be full-width and dominant (not sidebar), with responsive design: desktop calendar grid + mobile agenda list view.",
@@ -19,9 +19,11 @@
     "KPI “Related Program” dropdown still does not scroll smoothly (issue persists after latest deploy/build).",
     "Users need to scroll/shift to the right to see program details; overall scrolling feels cumbersome/not smooth when browsing programs.",
     "Program Calendar tab is blank across devices/browsers (entire UI missing: header/filters/view switch/calendar body) while other tabs (e.g., Programs/KPI) render normally.",
-    "Calendar error/crash disebabkan Select.Item/SelectItem memiliki value string kosong (value=\"\"), termasuk kemungkinan dari mapping data API; perlu dihapus/diganti agar Calendar tidak error."
+    "Calendar error/crash disebabkan Select.Item/SelectItem memiliki value string kosong (value=\"\"), termasuk kemungkinan dari mapping data API; perlu dihapus/diganti agar Calendar tidak error.",
+    "Team member photo upload is failing (HTTP 400) when trying to upload a selected photo file.",
+    "Team card photo change flow should work reliably without errors when clicking the avatar frame to open the device file chooser and uploading/replacing the image."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-add-a-new-program-calendar-view-in-the-dashboard-that-defaults-to-today-highlights-today-on-a-calendar-ui-and-clearly-shows-which-programs-are-running-today",
@@ -414,6 +416,86 @@
         "REQ-54"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-team-member-photo-upload-flow-so-selecting-an-image-file-from-the-device-no-longer-fails-with-http-400-as-shown-in-img-0094-png-and-reliably-results-in-a-hosted-image-url-being-stored-into-the-teammember-avatar-field-for-both-create-and-edit-flows",
+      "title": "Fix the Team Member photo upload flow so selecting an image file from the device no longer fails with HTTP 400 (as shown in IMG_0094.png) and reliably results in a hosted image URL being stored into the TeamMember `avatar` field for both create and edit flows.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-image-upload-utility-frontend-src-utils-imageupload-ts-to-use-a-simple-practical-upload-strategy-that-does-not-require-the-user-to-pick-or-configure-a-specific-third-party-service-and-that-avoids-common-causes-of-http-400-errors-the-utility-must-still-return-a-hosted-image-url-and-keep-progress-reporting-support-used-by-the-team-member-form",
+      "title": "Update the frontend image upload utility (frontend/src/utils/imageUpload.ts) to use a simple, practical upload strategy that does not require the user to pick or configure a specific third-party service, and that avoids common causes of HTTP 400 errors. The utility must still return a hosted image URL and keep progress reporting support used by the Team Member form.",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-error-handling-and-ux-messaging-in-teammemberformdialog-frontend-src-components-teammemberformdialog-tsx-for-upload-failures-so-users-understand-what-happened-and-how-to-proceed-without-breaking-the-existing-manager-selection-preview-and-submit-disable-protections",
+      "title": "Improve error handling and UX messaging in TeamMemberFormDialog (frontend/src/components/TeamMemberFormDialog.tsx) for upload failures so users understand what happened and how to proceed, without breaking the existing manager selection, preview, and submit-disable protections.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-team-structure-view-org-chart-ui-to-visually-match-the-uploaded-example-functional-structure-a-single-leader-root-node-centered-at-the-top-a-horizontal-connector-line-beneath-then-multiple-division-columns-laid-out-horizontally-with-each-column-showing-a-division-label-and-the-members-in-that-division-beneath-it",
+      "title": "Redesign the Team \"Structure View\" org chart UI to visually match the uploaded example (functional structure): a single leader/root node centered at the top, a horizontal connector line beneath, then multiple division columns laid out horizontally, with each column showing a division label and the members in that division beneath it.",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-preserve-existing-structure-view-interactions-while-applying-the-new-layout-clicking-a-member-still-selects-them-and-opens-the-existing-teammemberdetailspanel-selection-state-remains-visible-in-the-new-node-styling",
+      "title": "Preserve existing Structure View interactions while applying the new layout: clicking a member still selects them and opens the existing TeamMemberDetailsPanel; selection state remains visible in the new node styling.",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-keep-all-existing-hierarchy-validation-behaviors-and-english-user-facing-messages-in-structure-view-warnings-missing-director-root-state-and-unassigned-orphan-members-while-updating-their-presentation-to-fit-the-new-functional-structure-layout",
+      "title": "Keep all existing hierarchy validation behaviors and English user-facing messages in Structure View (warnings, missing director/root state, and unassigned/orphan members) while updating their presentation to fit the new functional-structure layout.",
+      "reqIds": [
+        "REQ-60"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-do-not-change-any-team-data-model-backend-apis-or-stored-team-member-records-as-part-of-this-structure-view-visual-update-the-uploaded-image-is-a-ui-style-reference-only",
+      "title": "Do not change any Team data model, backend APIs, or stored team member records as part of this Structure View visual update; the uploaded image is a UI style reference only.",
+      "reqIds": [
+        "REQ-61"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-team-member-card-avatar-on-the-team-members-cards-view-frontend-src-components-team-teammembercard-tsx-used-by-frontend-src-components-teammemberstab-tsx-so-the-photo-frame-is-larger-1-1-square-and-slightly-rounded-while-still-showing-an-initials-fallback-when-no-valid-avatar-url-exists",
+      "title": "Update the Team member card avatar on the Team Members “Cards” view (frontend/src/components/team/TeamMemberCard.tsx used by frontend/src/components/TeamMembersTab.tsx) so the photo frame is larger, 1:1 square, and slightly rounded, while still showing an initials fallback when no valid avatar URL exists.",
+      "reqIds": [
+        "REQ-62"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enable-changing-a-team-member-photo-directly-by-clicking-tapping-the-avatar-frame-on-the-team-member-card-without-using-the-edit-icon-opening-the-device-file-chooser-mobile-desktop-uploading-via-the-existing-frontend-image-upload-utility-frontend-src-utils-imageupload-ts-and-saving-the-returned-hosted-url-into-the-member-s-avatar-field-via-the-existing-update-mutation-flow",
+      "title": "Enable changing a Team member photo directly by clicking/tapping the avatar frame on the Team member card (without using the edit icon), opening the device file chooser (mobile/desktop), uploading via the existing frontend image upload utility (frontend/src/utils/imageUpload.ts), and saving the returned hosted URL into the member’s avatar field via the existing update mutation flow.",
+      "reqIds": [
+        "REQ-63"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-click-to-change-photo-flow-robust-and-error-free-show-a-clear-uploading-state-on-the-avatar-frame-prevent-double-trigger-uploads-handle-upload-failures-with-english-error-messaging-and-ensure-the-card-does-not-crash-or-become-unusable-if-uploadimage-throws-or-returns-an-invalid-url",
+      "title": "Make the click-to-change-photo flow robust and error-free: show a clear uploading state on the avatar frame, prevent double-trigger uploads, handle upload failures with English error messaging, and ensure the card does not crash or become unusable if uploadImage throws or returns an invalid URL.",
+      "reqIds": [
+        "REQ-64"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -538,6 +620,18 @@
     {
       "id": "AR-20",
       "summary": "Remove the manual photo URL input option from the Team Member create/edit form so photos can only be added via device file upload (while still storing only the resulting hosted URL and keeping preview).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Update Team 'Structure View' (org chart) UI to match the provided example’s visual style (functional-structure look: one leader on top, divisions laid out horizontally beneath, members under each), without changing any existing Team data.",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Update Team member cards so avatar/photo frame is larger, square 1:1 with slight rounded corners, and supports click-on-frame to open device file chooser to change photo (no need to use edit icon)",
       "reqIds": [],
       "status": "pending"
     }

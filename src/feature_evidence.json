@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-team-member-create-edit-dialog-frontend-src-components-teammemberformdialog-tsx-to-remove-the-manual-photo-url-input-option-so-photos-can-only-be-added-via-device-file-upload-while-still-storing-only-the-hosted-image-url-in-the-existing-avatar-field-for-both-create-and-edit-flows",
-      "featureTitle": "Update the Team Member create/edit dialog (frontend/src/components/TeamMemberFormDialog.tsx) to remove the manual photo URL input option so photos can only be added via device file upload, while still storing only the hosted image URL in the existing `avatar` field for both create and edit flows.",
+      "featureId": "feature-update-the-team-member-card-avatar-on-the-team-members-cards-view-frontend-src-components-team-teammembercard-tsx-used-by-frontend-src-components-teammemberstab-tsx-so-the-photo-frame-is-larger-1-1-square-and-slightly-rounded-while-still-showing-an-initials-fallback-when-no-valid-avatar-url-exists",
+      "featureTitle": "Update the Team member card avatar on the Team Members “Cards” view (frontend/src/components/team/TeamMemberCard.tsx used by frontend/src/components/TeamMembersTab.tsx) so the photo frame is larger, 1:1 square, and slightly rounded, while still showing an initials fallback when no valid avatar URL exists.",
       "files": [
-        "frontend/src/components/TeamMemberFormDialog.tsx"
+        "frontend/src/components/team/TeamMemberCard.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -13,18 +13,20 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-53"
+        "REQ-62"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-remove-now-unused-manual-url-related-logic-from-the-team-member-form-implementation-while-keeping-image-upload-error-handling-upload-progress-ui-and-preview-behavior-intact",
-      "featureTitle": "Remove now-unused manual-URL related logic from the Team Member form implementation, while keeping image upload error handling, upload progress UI, and preview behavior intact.",
+      "featureId": "feature-enable-changing-a-team-member-photo-directly-by-clicking-tapping-the-avatar-frame-on-the-team-member-card-without-using-the-edit-icon-opening-the-device-file-chooser-mobile-desktop-uploading-via-the-existing-frontend-image-upload-utility-frontend-src-utils-imageupload-ts-and-saving-the-returned-hosted-url-into-the-member-s-avatar-field-via-the-existing-update-mutation-flow",
+      "featureTitle": "Enable changing a Team member photo directly by clicking/tapping the avatar frame on the Team member card (without using the edit icon), opening the device file chooser (mobile/desktop), uploading via the existing frontend image upload utility (frontend/src/utils/imageUpload.ts), and saving the returned hosted URL into the member’s avatar field via the existing update mutation flow.",
       "files": [
-        "frontend/src/components/TeamMemberFormDialog.tsx"
+        "frontend/src/components/TeamMembersTab.tsx",
+        "frontend/src/components/team/TeamMemberCard.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -32,10 +34,32 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-54"
+        "REQ-63"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-the-click-to-change-photo-flow-robust-and-error-free-show-a-clear-uploading-state-on-the-avatar-frame-prevent-double-trigger-uploads-handle-upload-failures-with-english-error-messaging-and-ensure-the-card-does-not-crash-or-become-unusable-if-uploadimage-throws-or-returns-an-invalid-url",
+      "featureTitle": "Make the click-to-change-photo flow robust and error-free: show a clear uploading state on the avatar frame, prevent double-trigger uploads, handle upload failures with English error messaging, and ensure the card does not crash or become unusable if uploadImage throws or returns an invalid URL.",
+      "files": [
+        "frontend/src/components/team/TeamMemberCard.tsx",
+        "frontend/src/utils/urlValidation.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-64"
       ],
       "confidence": "high"
     }

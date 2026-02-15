@@ -68,6 +68,8 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Clear any previous avatar and errors
+    setFormData({ ...formData, avatar: '' });
     setUploadState({ isUploading: true, progress: 0 });
     setErrors({ ...errors, avatar: '' });
 
@@ -79,6 +81,11 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
         },
       });
 
+      // Validate that we got a proper https URL
+      if (!url || !url.startsWith('https://')) {
+        throw new Error('Upload did not return a valid URL');
+      }
+
       setFormData({ ...formData, avatar: url });
       setUploadState({ isUploading: false, progress: 100 });
       toast.success('Image uploaded successfully');
@@ -86,10 +93,20 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload image';
       setErrors({ ...errors, avatar: errorMessage });
       setUploadState({ isUploading: false, progress: 0 });
+      setFormData({ ...formData, avatar: '' }); // Clear partial avatar
       toast.error(errorMessage);
     }
 
-    // Reset file input
+    // Reset file input to allow re-selecting the same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleClearPhoto = () => {
+    setFormData({ ...formData, avatar: '' });
+    setErrors({ ...errors, avatar: '' });
+    setUploadState({ isUploading: false, progress: 0 });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -107,6 +124,12 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Block submit if upload is in progress
+    if (uploadState.isUploading) {
+      toast.error('Please wait for the image upload to complete');
+      return;
+    }
 
     // Validate manager selection
     if (member && formData.managerId !== undefined && formData.managerId === member.id) {
@@ -136,7 +159,17 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
-  const isSubmitDisabled = isPending || uploadState.isUploading || !!errors.avatar || !!errors.managerId;
+  const isSubmitDisabled = 
+    isPending || 
+    uploadState.isUploading || 
+    !!errors.avatar || 
+    !!errors.managerId ||
+    !formData.name.trim() ||
+    !formData.division.trim() ||
+    !formData.role.trim();
+
+  // Only show preview if we have a valid https URL
+  const showPreview = formData.avatar && formData.avatar.startsWith('https://') && !errors.avatar && !uploadState.isUploading;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -222,7 +255,7 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => setFormData({ ...formData, avatar: '' })}
+                    onClick={handleClearPhoto}
                     title="Clear photo"
                   >
                     <X className="h-4 w-4" />
@@ -240,12 +273,13 @@ export default function TeamMemberFormDialog({ open, onClose, member }: TeamMemb
                 </div>
               )}
 
+              {/* Error Message - persistent until next attempt or clear */}
               {errors.avatar && (
                 <p className="text-sm text-destructive">{errors.avatar}</p>
               )}
 
-              {/* Preview */}
-              {formData.avatar && !errors.avatar && !uploadState.isUploading && (
+              {/* Preview - only when valid URL exists */}
+              {showPreview && (
                 <PhotoUrlPreview url={formData.avatar} name={formData.name || 'Team Member'} />
               )}
             </div>

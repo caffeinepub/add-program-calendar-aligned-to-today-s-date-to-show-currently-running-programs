@@ -25,6 +25,7 @@ export default function TeamMembersTab() {
   const [viewMode, setViewMode] = useState<'cards' | 'structure'>('cards');
 
   const isReadOnly = userProfile?.role === 'viewer';
+  const canEdit = !isReadOnly;
 
   // Get unique divisions for filter
   const divisions = useMemo(() => {
@@ -71,7 +72,7 @@ export default function TeamMembersTab() {
               <Users className="h-5 w-5 text-primary" />
               <CardTitle>Team Management</CardTitle>
             </div>
-            {!isReadOnly && (
+            {canEdit && (
               <Button onClick={() => setIsFormOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Team Member
@@ -136,7 +137,7 @@ export default function TeamMembersTab() {
                       ? 'No team members match the current filters'
                       : 'Start by adding your first team member'}
                   </p>
-                  {!isReadOnly && !searchQuery && divisionFilter === 'all' && (
+                  {canEdit && !searchQuery && divisionFilter === 'all' && (
                     <Button onClick={() => setIsFormOpen(true)}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Team Member
@@ -150,8 +151,9 @@ export default function TeamMembersTab() {
                       <TeamMemberCard
                         key={member.id.toString()}
                         member={member}
-                        onEdit={!isReadOnly ? handleEdit : undefined}
-                        onDelete={!isReadOnly ? setDeletingMember : undefined}
+                        onEdit={canEdit ? handleEdit : undefined}
+                        onDelete={canEdit ? setDeletingMember : undefined}
+                        canEditPhoto={canEdit}
                       />
                     ))}
                   </div>
@@ -180,7 +182,7 @@ export default function TeamMembersTab() {
               ) : (
                 <TeamStructureView
                   members={teamMembers}
-                  onEdit={!isReadOnly ? handleEdit : undefined}
+                  onEdit={canEdit ? handleEdit : undefined}
                 />
               )}
             </TabsContent>
