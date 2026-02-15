@@ -1,90 +1,81 @@
 {
   "kind": "build_request",
-  "title": "Fix Team member photo add/change click responsiveness in form and cards, with instant refresh in Structure View",
-  "priority": "high",
+  "title": "Apply SHQ dark navy theme and reposition top navigation across the full layout",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-65",
-      "text": "Fix the Team Member Card photo change interaction so clicking/tapping the avatar frame reliably opens the device file picker (mobile + desktop) when the user has edit permission, and never appears unresponsive due to overlay elements intercepting pointer events.",
+      "id": "REQ-72",
+      "text": "Apply a global SHQ theme across the entire app (all pages/tabs) using a dark navy base with light green accents, using IMG_0109.jpeg as a visual style reference only (do not set it as the literal background image). Update the global Tailwind/CSS theme tokens so that backgrounds, cards, borders, and focus rings consistently reflect the new palette while maintaining readable contrast in both light and dark modes.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-user-1"
         ],
         "quotes": [
-          "Icon menambah foto belum berfungsi..",
-          "Keduanya. Iya. Ketika diklik tidak berfungsi"
+          "Seluruh layout. ... Biru tua + aksen hijau muda. ... Sesuaikan saja, dengan tampilan yang sudah ada sekarang.",
+          "Build sekarang"
         ]
       },
       "acceptanceCriteria": [
-        "On the Team tab (Cards view), clicking/tapping a team member’s avatar frame opens the OS file chooser when editing is allowed.",
-        "The click works even when the hover upload overlay is visible (overlay must not block the click).",
-        "While an upload is in progress, the avatar click is disabled and does not trigger multiple file-chooser opens or parallel uploads.",
-        "All user-facing text shown during this flow (errors, toasts, tooltips) is English."
+        "The app uses a dark navy base with light green accents consistently on Dashboard, Calendar, Program, KPI, Team, Reports, Login, and Profile Setup screens.",
+        "The uploaded IMG_0109.jpeg is not used as a literal background image anywhere in the app.",
+        "Primary/active/selected states (e.g., selected tab, primary buttons, focus rings) use the light green accent or compatible SHQ accent styling; contrast remains accessible (text remains readable on backgrounds/cards).",
+        "No regressions in component styling that make UI elements illegible in either light mode or dark mode."
       ]
     },
     {
-      "id": "REQ-66",
-      "text": "Fix the Team Member create/edit dialog photo upload control so clicking the “Choose from Device” button reliably opens the device file picker (mobile + desktop) and does not silently fail due to ref/disabled-state issues.",
+      "id": "REQ-73",
+      "text": "Update the top navigation/menu placement to match the uploaded reference layout style: render the main tab menu as a centered, rounded, translucent 'pill' navigation bar near the top (aligned with the header area), with clear active state and spacing similar to IMG_0109.jpeg, while keeping the existing set of tabs, permissions (admin-only Users tab), and navigation behavior unchanged.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-user-1"
         ],
         "quotes": [
-          "Keduanya. Iya. Ketika diklik tidak berfungsi"
+          "Posisi menu..",
+          "Ubah tampilan background dan penempatan fitur seperti ini",
+          "Biru tua + aksen hijau muda. Sesuaikan saja, dengan tampilan yang sudah ada sekarang."
         ]
       },
       "acceptanceCriteria": [
-        "In the Team Member create/edit dialog, clicking “Choose from Device” always opens the OS file chooser when not uploading.",
-        "If the file input is disabled (e.g., during upload), the UI makes it clear via the existing disabled state and does not appear clickable.",
-        "After selecting a file, upload progress and success/failure states continue to behave as currently designed (progress bar, toasts, preview, submit blocked during upload).",
-        "All user-facing strings related to this flow remain in English."
+        "The tab menu (Dashboard/Calendar/Program/KPI/Team/Reports/(Users for admin)) is visually centered in a rounded translucent container at the top, matching the reference style direction.",
+        "Active tab state is clearly visible and uses the new SHQ accent styling.",
+        "Tab navigation continues to work exactly as before (same tabs, same content rendering, admin tab still conditional).",
+        "Navigation layout is responsive: on small screens the menu remains usable without overflowing the viewport (e.g., wraps, scrolls, or compresses appropriately without breaking clicks)."
       ]
     },
     {
-      "id": "REQ-67",
-      "text": "Ensure that after a successful photo upload/update from the Team Member Card or the Team Member form, the updated avatar URL is immediately reflected across the Team UI, including the Structure View, without requiring a page reload.",
+      "id": "REQ-74",
+      "text": "Refine the header + page background treatment to align with the SHQ look: use a subtle dark navy gradient/texture-like feel (CSS-based, not the uploaded image) and harmonize Header, main container, and Footer backgrounds so the layout feels like one cohesive system while keeping existing content and functionality unchanged.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-user-1"
         ],
         "quotes": [
-          "Di bagian card dan automatis juga diterapkan pada struktur"
+          "Tidak, itu hanya contoh. Biru tua + aksen hijau muda. Sesuaikan saja, dengan tampilan yang sudah ada sekarang."
         ]
       },
       "acceptanceCriteria": [
-        "After updating a member photo in Cards view, switching to Structure View shows the updated avatar for that member without a hard refresh.",
-        "After updating a member photo in the edit dialog, both Cards view and Structure View show the updated avatar after the dialog closes.",
-        "No crashes occur if the uploaded URL is missing/invalid; the UI falls back to initials gracefully."
+        "Header, main content background, and footer visually match the SHQ dark navy theme and look cohesive (no clashing gradients/colors).",
+        "The background treatment is implemented via CSS (gradients/noise-like styling) and does not rely on IMG_0109.jpeg as a background asset.",
+        "Existing header actions remain functional (theme toggle, user menu, logout).",
+        "No content overlaps or z-index issues: the header and centered menu remain clickable and do not cover important page content."
       ]
     }
   ],
   "constraints": [
-    "Frontend must not modify any files under frontend/src/components/ui.",
-    "Do not change Internet Identity hooks or actor creation logic (immutable paths in frontend/src/hooks/* and frontend/src/main.tsx).",
-    "Do not change the Team backend data model or APIs as part of this fix; this is a frontend interaction/refresh issue."
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Do not use IMG_0109.jpeg as the literal background image; it is reference-only.",
+    "Do not change backend APIs, data models, or persistence for this request."
   ],
   "nonGoals": [
-    "Changing or replacing the external image hosting providers beyond what is required to fix the click-to-open file chooser issue.",
-    "Adding new backend endpoints or storing image blobs on the backend.",
-    "Redesigning the Team UI beyond what is necessary to make the existing photo controls responsive and reliable."
+    "Adding new dashboard tabs or changing existing tab names/permissions.",
+    "Implementing new backend features or modifying calendar/program/team/KPI logic beyond visual/layout changes.",
+    "Introducing third-party UI frameworks beyond the existing stack."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [
-      "Use English for all user-facing UI text."
-    ],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

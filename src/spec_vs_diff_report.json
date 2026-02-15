@@ -1,43 +1,53 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T11:59:53.051Z",
-  "summary": "Diff implements anti-double-click guards for file chooser triggers in Team member card and form dialog, adds upload-in-progress disabling logic, and manually updates the React Query cache for teamMembers after card uploads. Structure view node now validates avatar URLs before rendering. However, evidence is truncated for the specific overlay pointer-event fix on cards and for the form dialog’s post-save cache refresh behavior required for instant Structure View updates after dialog close.",
+  "generatedAt": "2026-02-15T13:42:36.925Z",
+  "summary": "Diff implements a new SHQ-style global palette (OKLCH CSS variables), adds a navy gradient background utility, updates app shell (App/Dashboard/Header/Footer/Login/Profile Setup) to use the new theme, and introduces a centered translucent “pill” top tab navigation component. However, the new top nav changes tab labels away from the existing names, and the diff includes multiple non-requested functional enhancements across several feature tabs/hooks beyond the visual/layout scope.",
   "missing_requirements": [
     {
-      "id": "REQ-65",
-      "requirement": "Ensure the hover upload overlay on the Team Member Card does not intercept pointer events so clicking/tapping the avatar frame reliably opens the OS file picker, even when the overlay is visible.",
-      "reason": "TeamMemberCard.tsx is truncated at the avatar/overlay markup, so there is no visible evidence that overlay elements were changed to avoid intercepting clicks (e.g., pointer-events handling or z-index adjustments).",
+      "id": "REQ-73",
+      "requirement": "Keep the existing set of tabs and navigation behavior unchanged (including existing tab names/labels and admin-only Users tab).",
+      "reason": "The new pill navigation changes tab labels from the existing names (e.g., “Reports”/“Users”) to different labels, which violates the requirement to keep existing tab names/behavior unchanged.",
       "evidence": [
-        "frontend/src/components/team/TeamMemberCard.tsx (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-67",
-      "requirement": "After updating a member photo in the edit dialog, both Cards view and Structure View show the updated avatar after the dialog closes (no reload).",
-      "reason": "The form dialog diff shows upload-to-URL and toasts, but the file is truncated before any save/close handler logic; there is no visible evidence of React Query cache update/invalidation after a successful update mutation and dialog close to guarantee immediate refresh across views.",
-      "evidence": [
-        "frontend/src/components/TeamMemberFormDialog.tsx (truncated)"
+        "frontend/src/components/TopPillNav.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Enforce/require avatar URLs to be HTTPS-only (and validate URL format) before displaying/saving, including throwing errors when upload returns a non-https URL.",
-      "reason": "The BuildRequest focuses on click responsiveness and immediate UI refresh; it does not specify tightening avatar URL constraints to https-only. This is a behavioral change beyond the stated requirements.",
+      "description": "Program/Reports/KPI/Team feature changes beyond visual/layout (e.g., report export to PDF/Excel, priority sorting, new filters, new drawers, CRUD/validation workflow changes).",
+      "reason": "BuildRequest explicitly limits scope to theme/layout changes and lists non-goals that exclude modifying program/team/KPI/calendar/report logic; the diff summary indicates substantial functional enhancements in multiple components.",
       "evidence": [
-        "frontend/src/components/team/TeamMemberCard.tsx",
-        "frontend/src/components/TeamMemberFormDialog.tsx (truncated)",
-        "frontend/src/components/team/TeamStructureNode.tsx"
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "React Query hook expansion for unique divisions and changed toast messaging / cache invalidation behaviors.",
+      "reason": "Not requested by REQ-72/73/74 and appears to modify application logic/behavior rather than only styling/layout.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Footer adds caffeine.ai attribution link with UTM tracking.",
+      "reason": "Not requested in any requirement; introduces new outbound link/tracking behavior.",
+      "evidence": [
+        "frontend/src/components/Footer.tsx"
       ]
     }
   ],
-  "confidence": 0.6,
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/TeamMemberFormDialog.tsx",
-    "frontend/src/components/team/TeamMemberCard.tsx",
-    "frontend/src/components/team/TeamStructureNode.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/components/TopPillNav.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/LoginPage.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

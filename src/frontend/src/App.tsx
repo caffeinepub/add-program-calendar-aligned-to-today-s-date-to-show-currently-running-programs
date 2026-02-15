@@ -16,10 +16,10 @@ export default function App() {
   // Show loading state while initializing
   if (isInitializing) {
     return (
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <div className="flex h-screen items-center justify-center bg-background">
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <div className="flex h-screen items-center justify-center navy-gradient-bg">
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-accent" />
             <p className="text-sm text-muted-foreground">Memuat aplikasi...</p>
           </div>
         </div>
@@ -31,7 +31,7 @@ export default function App() {
   // Show login page if not authenticated
   if (!isAuthenticated) {
     return (
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <LoginPage />
         <Toaster />
       </ThemeProvider>
@@ -42,8 +42,8 @@ export default function App() {
   const showProfileSetup = isAuthenticated && !profileLoading && isFetched && userProfile === null;
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="min-h-screen bg-background">
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <div className="min-h-screen navy-gradient-bg">
         {showProfileSetup && <ProfileSetupModal />}
         {!showProfileSetup && <Dashboard />}
       </div>

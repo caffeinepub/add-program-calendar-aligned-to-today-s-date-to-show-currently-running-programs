@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { useIsCallerAdmin } from '../hooks/useQueries';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import TopPillNav from '../components/TopPillNav';
 import DashboardOverview from '../components/DashboardOverview';
 import ProgramsTab from '../components/ProgramsTab';
 import KPIsTab from '../components/KPIsTab';
@@ -16,57 +17,12 @@ export default function Dashboard() {
   const { data: isAdmin = false } = useIsCallerAdmin();
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col navy-gradient-bg">
       <Header />
-      <main className="flex-1 bg-gradient-to-br from-background via-muted/20 to-background">
-        <div className="container mx-auto px-4 py-8">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-7' : 'grid-cols-6'} lg:w-auto lg:inline-grid bg-card/50 backdrop-blur-sm border shadow-lg p-1.5 rounded-xl`}>
-              <TabsTrigger 
-                value="dashboard" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all duration-300"
-              >
-                Dashboard
-              </TabsTrigger>
-              <TabsTrigger 
-                value="calendar"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all duration-300"
-              >
-                Calendar
-              </TabsTrigger>
-              <TabsTrigger 
-                value="programs"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all duration-300"
-              >
-                Program
-              </TabsTrigger>
-              <TabsTrigger 
-                value="kpis"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all duration-300"
-              >
-                KPI
-              </TabsTrigger>
-              <TabsTrigger 
-                value="team"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all duration-300"
-              >
-                Team
-              </TabsTrigger>
-              <TabsTrigger 
-                value="reports"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all duration-300"
-              >
-                Laporan
-              </TabsTrigger>
-              {isAdmin && (
-                <TabsTrigger 
-                  value="users"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all duration-300"
-                >
-                  Pengguna
-                </TabsTrigger>
-              )}
-            </TabsList>
+      <main className="flex-1">
+        <div className="container mx-auto px-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TopPillNav isAdmin={isAdmin} />
 
             <TabsContent value="dashboard" className="space-y-8 slide-in">
               <DashboardOverview />

@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Make Team member photo upload interactions reliably clickable on mobile/desktop and ensure updated avatars refresh immediately across Team views (including Structure View) without reloading.
+**Goal:** Update the app’s visual design to a cohesive SHQ dark navy + light green accent theme, and reposition the top tab navigation into a centered translucent “pill” bar aligned with the header.
 
 **Planned changes:**
-- Fix pointer/click handling on the Team Member Card avatar frame so the file picker always opens when editing is allowed, including when hover/upload overlays are visible, and prevent multiple opens/uploads while an upload is in progress.
-- Fix the Team Member create/edit dialog “Choose from Device” control so it reliably opens the OS file picker when enabled and clearly appears disabled during upload.
-- Ensure avatar updates after successful upload propagate immediately across Cards view and Structure View, with graceful fallback to initials if the avatar URL is missing/invalid.
-- Keep all user-facing text related to these flows in English.
+- Apply a global SHQ color palette via Tailwind/CSS theme tokens so backgrounds, cards, borders, buttons, and focus rings consistently use a dark navy base with light green accents across all pages (Dashboard, Calendar, Program, KPI, Team, Reports, Login, Profile Setup), while preserving readable contrast in both light and dark modes.
+- Rework the top navigation layout to render the existing tabs in a centered, rounded, translucent pill-style menu near the top/header area, with a clear active state and responsive behavior (no overflow/click issues on small screens), without changing tabs, permissions (admin-only Users), or routing behavior.
+- Harmonize header, main content background, and footer styling to feel like one cohesive system using CSS-based subtle dark navy gradient/texture-like treatment (reference-only style direction from IMG_0109.jpeg; not used as an actual background asset), keeping existing header actions functional (theme toggle, user menu, logout).
 
-**User-visible outcome:** Users can consistently click/tap to choose a Team member photo in both the card and the create/edit dialog, and the new avatar appears right away across Cards and Structure View without needing a page refresh.
+**User-visible outcome:** The entire app displays a consistent SHQ dark navy theme with light green accents, and the tab menu appears as a centered translucent pill navigation at the top that remains fully functional and responsive.

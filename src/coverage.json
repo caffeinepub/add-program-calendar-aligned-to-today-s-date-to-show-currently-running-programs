@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T11:59:53.057Z",
+  "generatedAt": "2026-02-15T13:42:36.930Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,40 +11,55 @@
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-65",
-        "summary": "Fix the Team Member Card photo change interaction so clicking/tapping the avatar frame reliably opens the device file picker (mobile + desktop) when the user has edit permission, and never appears unresponsive due to overlay elements intercepting pointer events.",
+        "id": "REQ-72",
+        "summary": "Apply a global SHQ theme across the entire app (all pages/tabs) using a dark navy base with light green accents, using IMG_0109.jpeg as a visual style reference only (do not set it as the literal background image). Update the global Tailwind/CSS theme tokens so that backgrounds, cards, borders, and focus rings consistently reflect the new palette while maintaining readable contrast in both light and dark modes.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/team/TeamMemberCard.tsx"
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/pages/LoginPage.tsx",
+          "frontend/src/components/ProfileSetupModal.tsx",
+          "frontend/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/components/team/TeamMemberCard.tsx"
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/pages/LoginPage.tsx",
+          "frontend/src/components/ProfileSetupModal.tsx"
         ]
       },
       {
-        "id": "REQ-66",
-        "summary": "Fix the Team Member create/edit dialog photo upload control so clicking the “Choose from Device” button reliably opens the device file picker (mobile + desktop) and does not silently fail due to ref/disabled-state issues.",
+        "id": "REQ-73",
+        "summary": "Update the top navigation/menu placement to match the uploaded reference layout style: render the main tab menu as a centered, rounded, translucent 'pill' navigation bar near the top (aligned with the header area), with clear active state and spacing similar to IMG_0109.jpeg, while keeping the existing set of tabs, permissions (admin-only Users tab), and navigation behavior unchanged.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/TeamMemberFormDialog.tsx"
+          "frontend/src/components/TopPillNav.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/components/TeamMemberFormDialog.tsx"
+          "frontend/src/components/TopPillNav.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/index.css"
         ]
       },
       {
-        "id": "REQ-67",
-        "summary": "Ensure that after a successful photo upload/update from the Team Member Card or the Team Member form, the updated avatar URL is immediately reflected across the Team UI, including the Structure View, without requiring a page reload.",
+        "id": "REQ-74",
+        "summary": "Refine the header + page background treatment to align with the SHQ look: use a subtle dark navy gradient/texture-like feel (CSS-based, not the uploaded image) and harmonize Header, main container, and Footer backgrounds so the layout feels like one cohesive system while keeping existing content and functionality unchanged.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/team/TeamMemberCard.tsx",
-          "frontend/src/components/TeamMemberFormDialog.tsx",
-          "frontend/src/components/team/TeamStructureNode.tsx"
+          "frontend/src/index.css",
+          "frontend/src/components/Header.tsx",
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/team/TeamMemberCard.tsx",
-          "frontend/src/components/TeamMemberFormDialog.tsx",
-          "frontend/src/components/team/TeamStructureNode.tsx"
+          "frontend/src/index.css",
+          "frontend/src/components/Header.tsx",
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/App.tsx"
         ]
       }
     ]
@@ -54,9 +69,15 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/TeamMemberFormDialog.tsx",
-    "frontend/src/components/team/TeamMemberCard.tsx",
-    "frontend/src/components/team/TeamStructureNode.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/components/TopPillNav.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/LoginPage.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -22,7 +22,7 @@ export default function ProfileSetupModal() {
 
   return (
     <Dialog open={true}>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-sm border-border/50" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Selamat Datang!</DialogTitle>
           <DialogDescription>
@@ -38,12 +38,13 @@ export default function ProfileSetupModal() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              className="bg-background/50"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="role">Peran</Label>
             <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-              <SelectTrigger id="role">
+              <SelectTrigger id="role" className="bg-background/50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -56,7 +57,11 @@ export default function ProfileSetupModal() {
               Admin dan Koordinator dapat mengelola data, Viewer hanya dapat melihat
             </p>
           </div>
-          <Button type="submit" className="w-full" disabled={saveProfile.isPending || !name.trim()}>
+          <Button 
+            type="submit" 
+            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" 
+            disabled={saveProfile.isPending || !name.trim()}
+          >
             {saveProfile.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

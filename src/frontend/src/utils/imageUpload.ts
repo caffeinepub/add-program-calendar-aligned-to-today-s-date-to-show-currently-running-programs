@@ -1,7 +1,10 @@
 /**
  * Frontend-only image upload utility with provider-light strategy
  * Uses free anonymous upload services with graceful fallback
+ * Includes client-side normalization for better compatibility
  */
+
+import { normalizeImage } from './imageNormalize';
 
 interface UploadOptions {
   file: File;
@@ -10,50 +13,81 @@ interface UploadOptions {
 
 /**
  * Upload an image file to a free hosting service and return the hosted URL
+ * Automatically normalizes images (resize, compress, convert to JPEG) before upload
+ * 
  * @param options Upload options including file and optional progress callback
  * @returns Promise resolving to the hosted image URL
  * @throws Error with actionable message if upload fails
  */
 export async function uploadImage({ file, onProgress }: UploadOptions): Promise<string> {
-  // Validate file type
-  if (!file.type.startsWith('image/')) {
-    throw new Error('Please select a valid image file (JPEG, PNG, GIF, etc.)');
-  }
-
-  // Validate file size (keep reasonable limit for free services)
-  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
-  if (file.size > MAX_SIZE) {
-    throw new Error('Image file is too large. Maximum size is 10MB.');
-  }
-
-  // Try primary upload service (imgbb with demo key)
+  // Step 1: Normalize the image (resize, compress, convert to JPEG)
+  let normalizedFile: File;
   try {
-    return await uploadToImgBB(file, onProgress);
-  } catch (imgbbError) {
-    console.warn('ImgBB upload failed, trying fallback:', imgbbError);
-    
-    // Fallback to alternative service
+    onProgress?.(5); // Show initial progress
+    normalizedFile = await normalizeImage(file, {
+      maxWidth: 1920,
+      maxHeight: 1920,
+      quality: 0.85,
+      outputFormat: 'image/jpeg',
+    });
+    onProgress?.(10); // Normalization complete
+  } catch (error) {
+    // Normalization errors are already user-friendly
+    throw error;
+  }
+
+  // Step 2: Validate normalized file size
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+  if (normalizedFile.size > MAX_SIZE) {
+    throw new Error('Image is too large even after compression. Please try a smaller image.');
+  }
+
+  // Step 3: Check if ImgBB is configured
+  const imgbbKey = import.meta.env.VITE_IMGBB_API_KEY;
+  const hasImgBBKey = imgbbKey && 
+                      imgbbKey !== 'YOUR_IMGBB_KEY_HERE' && 
+                      imgbbKey.trim().length > 0;
+
+  // Step 4: Try upload with appropriate provider(s)
+  if (hasImgBBKey) {
+    // Try ImgBB first, then fallback to Imgur
     try {
-      return await uploadToImgur(file, onProgress);
-    } catch (imgurError) {
-      console.error('All upload services failed:', { imgbbError, imgurError });
+      return await uploadToImgBB(normalizedFile, onProgress);
+    } catch (imgbbError) {
+      console.warn('ImgBB upload failed, trying Imgur fallback:', imgbbError);
       
-      // Return user-friendly error
-      const errorMsg = imgbbError instanceof Error ? imgbbError.message : 'Upload failed';
-      if (errorMsg.includes('status 400')) {
-        throw new Error('Upload service rejected the image. Please try a different image or contact support.');
+      try {
+        return await uploadToImgur(normalizedFile, onProgress);
+      } catch (imgurError) {
+        console.error('All upload services failed:', { imgbbError, imgurError });
+        throw new Error('Unable to upload image. Please check your connection and try again.');
       }
-      throw new Error('Unable to upload image. Please check your connection and try again.');
+    }
+  } else {
+    // Skip ImgBB, use Imgur directly
+    try {
+      return await uploadToImgur(normalizedFile, onProgress);
+    } catch (imgurError) {
+      console.error('Imgur upload failed:', imgurError);
+      
+      // Provide specific error messages based on failure type
+      const errorMsg = imgurError instanceof Error ? imgurError.message : '';
+      if (errorMsg.includes('status 400') || errorMsg.includes('status 403')) {
+        throw new Error('Upload service rejected the image. Please try a different image.');
+      } else if (errorMsg.includes('network') || errorMsg.includes('Network')) {
+        throw new Error('Network error. Please check your connection and try again.');
+      } else {
+        throw new Error('Unable to upload image. Please try again or contact support.');
+      }
     }
   }
 }
 
 /**
- * Upload to ImgBB (primary service)
+ * Upload to ImgBB (primary service when configured)
  */
 async function uploadToImgBB(file: File, onProgress?: (percent: number) => void): Promise<string> {
-  // Use a working demo API key (users can replace with their own)
-  const API_KEY = import.meta.env.VITE_IMGBB_API_KEY || 'YOUR_IMGBB_KEY_HERE';
+  const API_KEY = import.meta.env.VITE_IMGBB_API_KEY || '';
   
   // Convert file to base64
   const base64Image = await fileToBase64(file);
@@ -66,12 +100,12 @@ async function uploadToImgBB(file: File, onProgress?: (percent: number) => void)
   return new Promise<string>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
-    // Track upload progress
+    // Track upload progress (starts from 10% after normalization)
     if (onProgress) {
       xhr.upload.addEventListener('progress', (e) => {
         if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          onProgress(percent);
+          const uploadPercent = Math.round((e.loaded / e.total) * 90); // 10-100%
+          onProgress(10 + uploadPercent);
         }
       });
     }
@@ -81,6 +115,7 @@ async function uploadToImgBB(file: File, onProgress?: (percent: number) => void)
         try {
           const response = JSON.parse(xhr.responseText);
           if (response.success && response.data?.url) {
+            onProgress?.(100);
             resolve(response.data.url);
           } else {
             reject(new Error('ImgBB response format unexpected'));
@@ -119,12 +154,12 @@ async function uploadToImgur(file: File, onProgress?: (percent: number) => void)
   return new Promise<string>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
-    // Track upload progress
+    // Track upload progress (starts from 10% after normalization)
     if (onProgress) {
       xhr.upload.addEventListener('progress', (e) => {
         if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          onProgress(percent);
+          const uploadPercent = Math.round((e.loaded / e.total) * 90); // 10-100%
+          onProgress(10 + uploadPercent);
         }
       });
     }
@@ -134,6 +169,7 @@ async function uploadToImgur(file: File, onProgress?: (percent: number) => void)
         try {
           const response = JSON.parse(xhr.responseText);
           if (response.success && response.data?.link) {
+            onProgress?.(100);
             resolve(response.data.link);
           } else {
             reject(new Error('Imgur response format unexpected'));

@@ -1,65 +1,106 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Team photo picker click reliability and instant avatar refresh across Cards + Structure View",
+  "title": "SHQ dark navy theming + centered pill top navigation",
   "requirements": [
     {
-      "id": "REQ-65",
-      "summary": "Make Team Member Card avatar frame reliably open the device file picker when editable, without overlay elements intercepting pointer events, and prevent multiple opens during upload.",
+      "id": "REQ-72",
+      "summary": "Apply a global SHQ dark navy + light green accent theme via Tailwind/CSS tokens across all screens, ensuring accessible contrast in light and dark modes and keeping IMG_0109.jpeg as reference-only.",
       "acceptanceCriteria": [
-        "On the Team tab (Cards view), clicking/tapping a team member’s avatar frame opens the OS file chooser when editing is allowed.",
-        "The click works even when the hover upload overlay is visible (overlay must not block the click).",
-        "While an upload is in progress, the avatar click is disabled and does not trigger multiple file-chooser opens or parallel uploads.",
-        "All user-facing text shown during this flow (errors, toasts, tooltips) is English."
+        "The app uses a dark navy base with light green accents consistently on Dashboard, Calendar, Program, KPI, Team, Reports, Login, and Profile Setup screens.",
+        "The uploaded IMG_0109.jpeg is not used as a literal background image anywhere in the app.",
+        "Primary/active/selected states (e.g., selected tab, primary buttons, focus rings) use the light green accent or compatible SHQ accent styling; contrast remains accessible (text remains readable on backgrounds/cards).",
+        "No regressions in component styling that make UI elements illegible in either light mode or dark mode."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/team/TeamMemberCard.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Refactor the card avatar upload interaction to be mobile/desktop reliable: ensure the hover overlay does not intercept pointer events (e.g., pointer-events handling), make the clickable target be the avatar frame consistently (not dependent on hover), and add a lightweight guard to prevent repeated file-input clicks while a chooser is already being opened. Keep the existing disabled behavior during isUploading and keep all user-facing strings in English."
+          "description": "Update global CSS variables (background/card/border/ring/primary/secondary/accent) to a SHQ dark navy base with light green accents for both :root and .dark; ensure focus ring tokens and chart/category variables remain readable. Do not reference or apply IMG_0109.jpeg as a background image."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Ensure Tailwind theme continues to map semantic color tokens (background/card/border/ring/primary/accent/etc.) to the updated CSS variables so all shadcn-ui styling picks up the new SHQ palette. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/LoginPage.tsx",
+          "operation": "modify",
+          "description": "Adjust Login screen container/background and card styling to match the updated SHQ theme tokens (navy base + green accent) without changing login behavior. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/ProfileSetupModal.tsx",
+          "operation": "modify",
+          "description": "Confirm Profile Setup modal (Dialog, inputs, select, button) visually aligns with new SHQ theme tokens (card/background/border/ring/accent) while preserving functionality and readability. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/index.css",
+          "operation": "modify",
+          "description": "If this stylesheet is used by the build, align/bridge its theme variables with the SHQ navy + green palette to avoid inconsistent styling between entry stylesheets; do not apply IMG_0109.jpeg as a background image."
         }
       ]
     },
     {
-      "id": "REQ-66",
-      "summary": "Make the Team Member create/edit dialog “Choose from Device” control reliably open the device file picker, with clear disabled behavior during upload.",
+      "id": "REQ-73",
+      "summary": "Reposition the main tab menu into a centered rounded translucent pill near the top, preserving existing tabs, admin-only Users tab gating, and navigation behavior with responsive overflow handling.",
       "acceptanceCriteria": [
-        "In the Team Member create/edit dialog, clicking “Choose from Device” always opens the OS file chooser when not uploading.",
-        "If the file input is disabled (e.g., during upload), the UI makes it clear via the existing disabled state and does not appear clickable.",
-        "After selecting a file, upload progress and success/failure states continue to behave as currently designed (progress bar, toasts, preview, submit blocked during upload).",
-        "All user-facing strings related to this flow remain in English."
+        "The tab menu (Dashboard/Calendar/Program/KPI/Team/Reports/(Users for admin)) is visually centered in a rounded translucent container at the top, matching the reference style direction.",
+        "Active tab state is clearly visible and uses the new SHQ accent styling.",
+        "Tab navigation continues to work exactly as before (same tabs, same content rendering, admin tab still conditional).",
+        "Navigation layout is responsive: on small screens the menu remains usable without overflowing the viewport (e.g., wraps, scrolls, or compresses appropriately without breaking clicks)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/TeamMemberFormDialog.tsx",
+          "path": "frontend/src/components/TopPillNav.tsx",
+          "operation": "create",
+          "description": "Create a reusable TopPillNav component that renders the existing TabsList/TabsTrigger set in a centered, rounded, translucent pill container; support admin-only Users tab visibility and a clear active state using SHQ accent tokens. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
           "operation": "modify",
-          "description": "Harden the dialog file-picker trigger so it cannot silently fail due to ref timing/disabled-state: only trigger the hidden input when not uploading, ensure the trigger is not perceived as clickable when disabled, and add a small anti-double-click guard similar to the card flow. Preserve existing progress/toast/preview/submit-blocking behavior and keep all user-facing strings in English."
+          "description": "Wire TopPillNav into the Dashboard layout: move the TabsList out of the main content area into a top-aligned, centered placement (near the Header), keeping the same Tabs value/onValueChange behavior and the admin-only Users tab condition. Add responsive handling (e.g., horizontal scroll on small screens) to prevent overflow while keeping clicks functional. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add/adjust utility classes (or refine existing ones) to support the pill nav look: translucent background, subtle border, backdrop blur, and SHQ-accent active state styling for tab triggers without relying on IMG_0109.jpeg."
         }
       ]
     },
     {
-      "id": "REQ-67",
-      "summary": "After successful photo upload/update from Card or Dialog, immediately reflect the new avatar across Cards and Structure View without reload, with safe fallback when URL is missing/invalid.",
+      "id": "REQ-74",
+      "summary": "Refine header + page background styling with a cohesive SHQ dark navy CSS-based gradient/texture feel across Header, main container, and Footer without affecting existing functionality or causing layering/click issues.",
       "acceptanceCriteria": [
-        "After updating a member photo in Cards view, switching to Structure View shows the updated avatar for that member without a hard refresh.",
-        "After updating a member photo in the edit dialog, both Cards view and Structure View show the updated avatar after the dialog closes.",
-        "No crashes occur if the uploaded URL is missing/invalid; the UI falls back to initials gracefully."
+        "Header, main content background, and footer visually match the SHQ dark navy theme and look cohesive (no clashing gradients/colors).",
+        "The background treatment is implemented via CSS (gradients/noise-like styling) and does not rely on IMG_0109.jpeg as a background asset.",
+        "Existing header actions remain functional (theme toggle, user menu, logout).",
+        "No content overlaps or z-index issues: the header and centered menu remain clickable and do not cover important page content."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/team/TeamMemberCard.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "After a successful avatar update, immediately update the in-memory team member list used by the Team UI (React Query cache for the existing team members query) so Cards and Structure View reflect the new avatar instantly without waiting for a refetch. Ensure fallback behavior remains safe if the URL is missing/invalid."
+          "description": "Implement SHQ-style background treatment via CSS (subtle dark navy gradients and optional texture-like effect) and define shared utility classes to keep Header/Main/Footer visually cohesive; ensure layering utilities support sticky header + centered pill nav without click-through issues."
         },
         {
-          "path": "frontend/src/components/TeamMemberFormDialog.tsx",
+          "path": "frontend/src/components/Header.tsx",
           "operation": "modify",
-          "description": "After a successful avatar upload (and subsequent member save), update the cached team member list so the updated avatar is visible immediately after the dialog closes in both Cards and Structure View."
+          "description": "Update Header background/border/backdrop styling to harmonize with the SHQ navy gradient system and ensure correct z-index/sticky behavior alongside the centered pill navigation; keep theme toggle, user menu, and logout behavior unchanged. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/team/TeamStructureNode.tsx",
+          "path": "frontend/src/components/Footer.tsx",
           "operation": "modify",
-          "description": "Add the same defensive avatar URL validation/fallback behavior used elsewhere (avoid broken/invalid URL usage) so Structure View never crashes and falls back to initials gracefully when avatar is missing/invalid."
+          "description": "Adjust Footer background and border styling to match the SHQ cohesive layout (navy base, subtle borders) while keeping existing content unchanged. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Align the Dashboard main container background usage with the updated SHQ gradient/texture utilities so Header + centered pill nav + content + Footer feel like one system; verify no overlap or z-index issues with sticky elements. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Ensure the authenticated and unauthenticated roots use the same cohesive SHQ background treatment (via theme tokens/utilities) so transitions between Login/Profile Setup/Dashboard feel consistent, without changing auth or gating logic. Verify the component's usage instructions before implementing."
         }
       ]
     }

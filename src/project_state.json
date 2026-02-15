@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 39,
-  "summary": "Team member photo workflow should be file-upload-only: remove manual photo URL input option from Team Member create/edit; keep preview driven by the uploaded image URL stored in `avatar`.",
+  "projectStateVersion": 43,
+  "summary": "Project now includes a full-layout UI theming update: apply a dark navy (SHQ) theme with light green accents across the entire app layout, adjusting menu placement to better match the current existing layout (reference image is style-only, not used as background).",
   "architectural_notes": [
     "Program Calendar UI must be full-width and dominant (not sidebar), with responsive design: desktop calendar grid + mobile agenda list view.",
     "Calendar supports switchable views: Monthly / Weekly / Agenda.",
@@ -22,9 +22,10 @@
     "Calendar error/crash disebabkan Select.Item/SelectItem memiliki value string kosong (value=\"\"), termasuk kemungkinan dari mapping data API; perlu dihapus/diganti agar Calendar tidak error.",
     "Team member photo upload is failing (HTTP 400) when trying to upload a selected photo file.",
     "Team card photo change flow should work reliably without errors when clicking the avatar frame to open the device file chooser and uploading/replacing the image.",
-    "Team member photo add/change controls are unresponsive: clicking the add-photo icon/avatar area in both Team Member create/edit form and Team Member card does not open the device file chooser (no click response)."
+    "Team member photo add/change controls are unresponsive: clicking the add-photo icon/avatar area in both Team Member create/edit form and Team Member card does not open the device file chooser (no click response).",
+    "Team member photo upload can be rejected by the external upload service (toast: \"Upload service rejected the image\"), likely due to large file size or unsupported formats like HEIC (iPhone/iPad)."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-add-a-new-program-calendar-view-in-the-dashboard-that-defaults-to-today-highlights-today-on-a-calendar-ui-and-clearly-shows-which-programs-are-running-today",
@@ -521,6 +522,62 @@
         "REQ-67"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-image-upload-utility-frontend-src-utils-imageupload-ts-to-normalize-photos-before-uploading-so-common-rejection-cases-http-400-upload-service-rejected-the-image-are-avoided-as-much-as-possible-especially-for-large-mobile-images",
+      "title": "Update the frontend image upload utility (frontend/src/utils/imageUpload.ts) to normalize photos before uploading so common rejection cases (HTTP 400 / “Upload service rejected the image”) are avoided as much as possible, especially for large mobile images.",
+      "reqIds": [
+        "REQ-68"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-explicit-handling-for-heic-heif-uploads-in-the-photo-upload-flow-teammemberformdialog-and-teammembercard-via-uploadimage-if-the-browser-cannot-decode-convert-the-file-show-a-clear-english-error-telling-the-user-the-format-is-unsupported-and-to-choose-a-jpeg-png-instead-or-export-as-most-compatible-on-ios",
+      "title": "Add explicit handling for HEIC/HEIF uploads in the photo upload flow (TeamMemberFormDialog and TeamMemberCard via uploadImage). If the browser cannot decode/convert the file, show a clear English error telling the user the format is unsupported and to choose a JPEG/PNG instead (or export as “Most Compatible” on iOS).",
+      "reqIds": [
+        "REQ-69"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-upload-provider-strategy-in-frontend-src-utils-imageupload-ts-robust-when-configuration-is-missing-if-vite-imgbb-api-key-is-not-set-or-is-a-placeholder-value-do-not-attempt-imgbb-and-instead-use-the-fallback-provider-directly-keep-progress-reporting-behavior-intact",
+      "title": "Make the upload provider strategy in frontend/src/utils/imageUpload.ts robust when configuration is missing: if VITE_IMGBB_API_KEY is not set or is a placeholder value, do not attempt ImgBB and instead use the fallback provider directly; keep progress reporting behavior intact.",
+      "reqIds": [
+        "REQ-70"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-error-reporting-from-uploadimage-so-users-get-actionable-english-messages-based-on-the-actual-failure-e-g-size-too-large-after-normalization-unsupported-format-provider-rejection-while-still-keeping-a-safe-generic-fallback-for-unknown-errors",
+      "title": "Improve error reporting from uploadImage so users get actionable English messages based on the actual failure (e.g., size too large after normalization, unsupported format, provider rejection) while still keeping a safe generic fallback for unknown errors.",
+      "reqIds": [
+        "REQ-71"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-global-shq-theme-across-the-entire-app-all-pages-tabs-using-a-dark-navy-base-with-light-green-accents-using-img-0109-jpeg-as-a-visual-style-reference-only-do-not-set-it-as-the-literal-background-image-update-the-global-tailwind-css-theme-tokens-so-that-backgrounds-cards-borders-and-focus-rings-consistently-reflect-the-new-palette-while-maintaining-readable-contrast-in-both-light-and-dark-modes",
+      "title": "Apply a global SHQ theme across the entire app (all pages/tabs) using a dark navy base with light green accents, using IMG_0109.jpeg as a visual style reference only (do not set it as the literal background image). Update the global Tailwind/CSS theme tokens so that backgrounds, cards, borders, and focus rings consistently reflect the new palette while maintaining readable contrast in both light and dark modes.",
+      "reqIds": [
+        "REQ-72"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-top-navigation-menu-placement-to-match-the-uploaded-reference-layout-style-render-the-main-tab-menu-as-a-centered-rounded-translucent-pill-navigation-bar-near-the-top-aligned-with-the-header-area-with-clear-active-state-and-spacing-similar-to-img-0109-jpeg-while-keeping-the-existing-set-of-tabs-permissions-admin-only-users-tab-and-navigation-behavior-unchanged",
+      "title": "Update the top navigation/menu placement to match the uploaded reference layout style: render the main tab menu as a centered, rounded, translucent 'pill' navigation bar near the top (aligned with the header area), with clear active state and spacing similar to IMG_0109.jpeg, while keeping the existing set of tabs, permissions (admin-only Users tab), and navigation behavior unchanged.",
+      "reqIds": [
+        "REQ-73"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refine-the-header-page-background-treatment-to-align-with-the-shq-look-use-a-subtle-dark-navy-gradient-texture-like-feel-css-based-not-the-uploaded-image-and-harmonize-header-main-container-and-footer-backgrounds-so-the-layout-feels-like-one-cohesive-system-while-keeping-existing-content-and-functionality-unchanged",
+      "title": "Refine the header + page background treatment to align with the SHQ look: use a subtle dark navy gradient/texture-like feel (CSS-based, not the uploaded image) and harmonize Header, main container, and Footer backgrounds so the layout feels like one cohesive system while keeping existing content and functionality unchanged.",
+      "reqIds": [
+        "REQ-74"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -657,6 +714,18 @@
     {
       "id": "AR-22",
       "summary": "Update Team member cards so avatar/photo frame is larger, square 1:1 with slight rounded corners, and supports click-on-frame to open device file chooser to change photo (no need to use edit icon)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Improve Team member photo upload robustness: auto-convert HEIC to JPG, compress/resize large images before upload, and add a fallback/retry path when external upload service rejects the image",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Update entire app layout theme: dark navy (SHQ) background with light green accents, and adjust menu positioning to fit the existing layout style (reference image is style-only, not used as a background).",
       "reqIds": [],
       "status": "pending"
     }

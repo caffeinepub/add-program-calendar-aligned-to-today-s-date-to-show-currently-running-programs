@@ -9,11 +9,11 @@ export default function LoginPage() {
   const isLoggingIn = loginStatus === 'logging-in';
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="flex min-h-screen items-center justify-center navy-gradient-bg p-4">
+      <Card className="w-full max-w-md shadow-soft-lg border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <BarChart3 className="h-8 w-8 text-primary" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/20">
+            <BarChart3 className="h-8 w-8 text-accent" />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold">Sistem Tracking KPI</CardTitle>
@@ -26,7 +26,7 @@ export default function LoginPage() {
           <Button
             onClick={login}
             disabled={isLoggingIn}
-            className="w-full"
+            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
             size="lg"
           >
             {isLoggingIn ? (
