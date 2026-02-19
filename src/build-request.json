@@ -1,78 +1,130 @@
 {
   "kind": "build_request",
-  "title": "Apply SHQ dark navy theme and reposition top navigation across the full layout",
-  "priority": "normal",
+  "title": "Fix KPI form invalid record error on save",
+  "projectName": "Sistem Tracking SHQ AQL",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-72",
-      "text": "Apply a global SHQ theme across the entire app (all pages/tabs) using a dark navy base with light green accents, using IMG_0109.jpeg as a visual style reference only (do not set it as the literal background image). Update the global Tailwind/CSS theme tokens so that backgrounds, cards, borders, and focus rings consistently reflect the new palette while maintaining readable contrast in both light and dark modes.",
-      "target": "frontend",
+      "id": "REQ-1",
+      "text": "Fix the 'invalid record' error that occurs when clicking 'Simpan' (Save) button in the KPI form by ensuring the frontend data structure matches the backend KPI type definition exactly",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-recent"
         ],
         "quotes": [
-          "Seluruh layout. ... Biru tua + aksen hijau muda. ... Sesuaikan saja, dengan tampilan yang sudah ada sekarang.",
-          "Build sekarang"
+          "Masih invalid record ketika input KPI",
+          "Tidak terbaca field yang error. Muncul saat mencoba menyimpan"
         ]
       },
       "acceptanceCriteria": [
-        "The app uses a dark navy base with light green accents consistently on Dashboard, Calendar, Program, KPI, Team, Reports, Login, and Profile Setup screens.",
-        "The uploaded IMG_0109.jpeg is not used as a literal background image anywhere in the app.",
-        "Primary/active/selected states (e.g., selected tab, primary buttons, focus rings) use the light green accent or compatible SHQ accent styling; contrast remains accessible (text remains readable on backgrounds/cards).",
-        "No regressions in component styling that make UI elements illegible in either light mode or dark mode."
+        "KPI form successfully saves without 'invalid record' error when all required fields are filled",
+        "Form validates data types correctly before submission (Nilai Target and Nilai Realisasi as numbers)",
+        "Dropdown values (Program Terkait, Tim/PIC, Periode, Status) serialize correctly to backend format",
+        "Error messages are specific and indicate which field is invalid if validation fails"
       ]
     },
     {
-      "id": "REQ-73",
-      "text": "Update the top navigation/menu placement to match the uploaded reference layout style: render the main tab menu as a centered, rounded, translucent 'pill' navigation bar near the top (aligned with the header area), with clear active state and spacing similar to IMG_0109.jpeg, while keeping the existing set of tabs, permissions (admin-only Users tab), and navigation behavior unchanged.",
+      "id": "REQ-2",
+      "text": "Ensure Nilai Target (target value) field in KPI form is properly typed and serialized as a number (Nat) when submitting to backend, not as a string",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-recent"
         ],
         "quotes": [
-          "Posisi menu..",
-          "Ubah tampilan background dan penempatan fitur seperti ini",
-          "Biru tua + aksen hijau muda. Sesuaikan saja, dengan tampilan yang sudah ada sekarang."
+          "Nilai Target: 30"
         ]
       },
       "acceptanceCriteria": [
-        "The tab menu (Dashboard/Calendar/Program/KPI/Team/Reports/(Users for admin)) is visually centered in a rounded translucent container at the top, matching the reference style direction.",
-        "Active tab state is clearly visible and uses the new SHQ accent styling.",
-        "Tab navigation continues to work exactly as before (same tabs, same content rendering, admin tab still conditional).",
-        "Navigation layout is responsive: on small screens the menu remains usable without overflowing the viewport (e.g., wraps, scrolls, or compresses appropriately without breaking clicks)."
+        "Nilai Target input field parses numeric input correctly",
+        "Form submission sends Nilai Target as number type to backend",
+        "Validation rejects non-numeric input in Nilai Target field"
       ]
     },
     {
-      "id": "REQ-74",
-      "text": "Refine the header + page background treatment to align with the SHQ look: use a subtle dark navy gradient/texture-like feel (CSS-based, not the uploaded image) and harmonize Header, main container, and Footer backgrounds so the layout feels like one cohesive system while keeping existing content and functionality unchanged.",
+      "id": "REQ-3",
+      "text": "Ensure Nilai Realisasi (realization value) field in KPI form is properly typed and serialized as a number (Nat) when submitting to backend, not as a string",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-recent"
         ],
         "quotes": [
-          "Tidak, itu hanya contoh. Biru tua + aksen hijau muda. Sesuaikan saja, dengan tampilan yang sudah ada sekarang."
+          "Nilai Realisasi: 15"
         ]
       },
       "acceptanceCriteria": [
-        "Header, main content background, and footer visually match the SHQ dark navy theme and look cohesive (no clashing gradients/colors).",
-        "The background treatment is implemented via CSS (gradients/noise-like styling) and does not rely on IMG_0109.jpeg as a background asset.",
-        "Existing header actions remain functional (theme toggle, user menu, logout).",
-        "No content overlaps or z-index issues: the header and centered menu remain clickable and do not cover important page content."
+        "Nilai Realisasi input field parses numeric input correctly",
+        "Form submission sends Nilai Realisasi as number type to backend",
+        "Validation rejects non-numeric input in Nilai Realisasi field"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Verify Program Terkait (Related Program) dropdown correctly maps the selected program to the backend-expected format (program ID or reference)",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Program Terkait: 'Mulazamah Tilawah'"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Program Terkait selection sends correct program identifier to backend",
+        "Dropdown loads available programs from backend",
+        "Selected program value matches backend KPI.relatedProgram field type"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Verify Tim/PIC (Team/Person in Charge) dropdown correctly maps the selected team member to the backend-expected format (Principal ID or team member ID)",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Tim/PIC: 'Hadi Setiawan - Akademik (Management Pendidikan)'"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Tim/PIC selection sends correct team member identifier to backend",
+        "Dropdown loads available team members from backend",
+        "Selected team member value matches backend KPI.assignedTo field type (Principal)"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add comprehensive error logging in KPI form submission to capture and display specific field validation errors from the backend response",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Tidak terbaca field yang error"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Error messages from backend are caught and displayed to user",
+        "Console logs show detailed error information including field name and validation failure reason",
+        "Toast notifications display user-friendly error messages in Indonesian"
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Do not use IMG_0109.jpeg as the literal background image; it is reference-only.",
-    "Do not change backend APIs, data models, or persistence for this request."
+    "Do not modify the backend KPI type structure (weight field has already been removed)",
+    "Maintain existing KPI form UI layout and field names shown in the screenshot",
+    "Preserve all existing form validation rules already implemented"
   ],
   "nonGoals": [
-    "Adding new dashboard tabs or changing existing tab names/permissions.",
-    "Implementing new backend features or modifying calendar/program/team/KPI logic beyond visual/layout changes.",
-    "Introducing third-party UI frameworks beyond the existing stack."
+    "Adding new fields to the KPI form",
+    "Changing the KPI form visual design or layout",
+    "Modifying other tabs or features outside KPI management",
+    "Implementing new KPI features beyond fixing the save error"
   ],
   "imageRequirements": {
     "required": [],

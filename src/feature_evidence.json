@@ -2,13 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-apply-a-global-shq-theme-across-the-entire-app-all-pages-tabs-using-a-dark-navy-base-with-light-green-accents-using-img-0109-jpeg-as-a-visual-style-reference-only-do-not-set-it-as-the-literal-background-image-update-the-global-tailwind-css-theme-tokens-so-that-backgrounds-cards-borders-and-focus-rings-consistently-reflect-the-new-palette-while-maintaining-readable-contrast-in-both-light-and-dark-modes",
-      "featureTitle": "Apply a global SHQ theme across the entire app (all pages/tabs) using a dark navy base with light green accents, using IMG_0109.jpeg as a visual style reference only (do not set it as the literal background image). Update the global Tailwind/CSS theme tokens so that backgrounds, cards, borders, and focus rings consistently reflect the new palette while maintaining readable contrast in both light and dark modes.",
+      "featureId": "feature-fix-the-invalid-record-error-that-occurs-when-clicking-simpan-save-button-in-the-kpi-form-by-ensuring-the-frontend-data-structure-matches-the-backend-kpi-type-definition-exactly",
+      "featureTitle": "Fix the 'invalid record' error that occurs when clicking 'Simpan' (Save) button in the KPI form by ensuring the frontend data structure matches the backend KPI type definition exactly",
       "files": [
-        "frontend/src/components/ProfileSetupModal.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/LoginPage.tsx",
-        "frontend/tailwind.config.js"
+        "frontend/src/components/KpiFormDialog.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -20,17 +18,15 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-72"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-top-navigation-menu-placement-to-match-the-uploaded-reference-layout-style-render-the-main-tab-menu-as-a-centered-rounded-translucent-pill-navigation-bar-near-the-top-aligned-with-the-header-area-with-clear-active-state-and-spacing-similar-to-img-0109-jpeg-while-keeping-the-existing-set-of-tabs-permissions-admin-only-users-tab-and-navigation-behavior-unchanged",
-      "featureTitle": "Update the top navigation/menu placement to match the uploaded reference layout style: render the main tab menu as a centered, rounded, translucent 'pill' navigation bar near the top (aligned with the header area), with clear active state and spacing similar to IMG_0109.jpeg, while keeping the existing set of tabs, permissions (admin-only Users tab), and navigation behavior unchanged.",
+      "featureId": "feature-ensure-nilai-target-target-value-field-in-kpi-form-is-properly-typed-and-serialized-as-a-number-nat-when-submitting-to-backend-not-as-a-string",
+      "featureTitle": "Ensure Nilai Target (target value) field in KPI form is properly typed and serialized as a number (Nat) when submitting to backend, not as a string",
       "files": [
-        "frontend/src/components/TopPillNav.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/Dashboard.tsx"
+        "frontend/src/components/KpiFormDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,19 +38,15 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-73"
+        "REQ-2"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-refine-the-header-page-background-treatment-to-align-with-the-shq-look-use-a-subtle-dark-navy-gradient-texture-like-feel-css-based-not-the-uploaded-image-and-harmonize-header-main-container-and-footer-backgrounds-so-the-layout-feels-like-one-cohesive-system-while-keeping-existing-content-and-functionality-unchanged",
-      "featureTitle": "Refine the header + page background treatment to align with the SHQ look: use a subtle dark navy gradient/texture-like feel (CSS-based, not the uploaded image) and harmonize Header, main container, and Footer backgrounds so the layout feels like one cohesive system while keeping existing content and functionality unchanged.",
+      "featureId": "feature-ensure-nilai-realisasi-realization-value-field-in-kpi-form-is-properly-typed-and-serialized-as-a-number-nat-when-submitting-to-backend-not-as-a-string",
+      "featureTitle": "Ensure Nilai Realisasi (realization value) field in KPI form is properly typed and serialized as a number (Nat) when submitting to backend, not as a string",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/Header.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/Dashboard.tsx"
+        "frontend/src/components/KpiFormDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -66,7 +58,68 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-74"
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-verify-program-terkait-related-program-dropdown-correctly-maps-the-selected-program-to-the-backend-expected-format-program-id-or-reference",
+      "featureTitle": "Verify Program Terkait (Related Program) dropdown correctly maps the selected program to the backend-expected format (program ID or reference)",
+      "files": [
+        "frontend/src/components/KpiFormDialog.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-verify-tim-pic-team-person-in-charge-dropdown-correctly-maps-the-selected-team-member-to-the-backend-expected-format-principal-id-or-team-member-id",
+      "featureTitle": "Verify Tim/PIC (Team/Person in Charge) dropdown correctly maps the selected team member to the backend-expected format (Principal ID or team member ID)",
+      "files": [
+        "frontend/src/components/KpiFormDialog.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-comprehensive-error-logging-in-kpi-form-submission-to-capture-and-display-specific-field-validation-errors-from-the-backend-response",
+      "featureTitle": "Add comprehensive error logging in KPI form submission to capture and display specific field validation errors from the backend response",
+      "files": [
+        "frontend/src/components/KpiFormDialog.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
       ],
       "confidence": "high"
     }

@@ -1,10 +1,10 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { TeamMember } from '../../backend';
+import type { TeamMemberWithAvatar } from '../../backend';
 
 interface ManagerSelectProps {
   value: bigint | undefined;
   onChange: (value: bigint | undefined) => void;
-  members: TeamMember[];
+  members: TeamMemberWithAvatar[];
   currentMemberId?: bigint;
 }
 

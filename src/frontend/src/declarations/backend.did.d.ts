@@ -14,6 +14,7 @@ export type AgendaCategory = { 'workshop' : null } |
   { 'meeting' : null } |
   { 'general' : null } |
   { 'training' : null };
+export type ExternalBlob = Uint8Array;
 export interface Kpi {
   'id' : bigint,
   'status' : KpiStatus,
@@ -64,13 +65,20 @@ export interface TeamAgendaItem {
   'attendees' : Array<string>,
   'category' : AgendaCategory,
 }
-export interface TeamMember {
+export interface TeamMemberCreateRequest {
   'id' : bigint,
   'name' : string,
   'role' : string,
   'division' : string,
   'managerId' : [] | [bigint],
-  'avatar' : [] | [string],
+}
+export interface TeamMemberWithAvatar {
+  'id' : bigint,
+  'name' : string,
+  'role' : string,
+  'division' : string,
+  'managerId' : [] | [bigint],
+  'avatar' : [] | [ExternalBlob],
 }
 export type Time = bigint;
 export interface TimeRange { 'end' : Time, 'start' : Time }
@@ -81,13 +89,41 @@ export type UserRole = { 'admin' : null } |
 export type UserRole__1 = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole__1], undefined>,
+  'calculateKpiProgress' : ActorMethod<[bigint], [] | [bigint]>,
+  'calculateProgramProgress' : ActorMethod<[bigint], [] | [bigint]>,
   'createKpi' : ActorMethod<[Kpi], bigint>,
   'createProgram' : ActorMethod<[Program], bigint>,
   'createTeamAgendaItem' : ActorMethod<[TeamAgendaItem], bigint>,
-  'createTeamMember' : ActorMethod<[TeamMember], undefined>,
+  'createTeamMember' : ActorMethod<[TeamMemberCreateRequest], undefined>,
   'deleteKpi' : ActorMethod<[bigint], undefined>,
   'deleteProgram' : ActorMethod<[bigint], undefined>,
   'deleteTeamAgendaItem' : ActorMethod<[bigint], undefined>,
@@ -95,7 +131,7 @@ export interface _SERVICE {
   'getAllKPIs' : ActorMethod<[], Array<Kpi>>,
   'getAllPrograms' : ActorMethod<[], Array<Program>>,
   'getAllTeamAgendaItems' : ActorMethod<[], Array<TeamAgendaItem>>,
-  'getAllTeamMembers' : ActorMethod<[], Array<TeamMember>>,
+  'getAllTeamMembers' : ActorMethod<[], Array<TeamMemberWithAvatar>>,
   'getAllUserProfiles' : ActorMethod<[], Array<[Principal, UserProfile]>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole__1>,
@@ -121,18 +157,30 @@ export interface _SERVICE {
   'getProgramsByStatus' : ActorMethod<[ProgramStatus], Array<Program>>,
   'getProgramsByTeam' : ActorMethod<[string], Array<Program>>,
   'getTeamAgendaItemsByRange' : ActorMethod<[TimeRange], Array<TeamAgendaItem>>,
-  'getTeamMembersByDivision' : ActorMethod<[string], Array<TeamMember>>,
-  'getTeamMembersByDivisionFiltered' : ActorMethod<[string], Array<TeamMember>>,
+  'getTeamMemberAvatar' : ActorMethod<[bigint], [] | [ExternalBlob]>,
+  'getTeamMembersByDivision' : ActorMethod<
+    [string],
+    Array<TeamMemberWithAvatar>
+  >,
+  'getTeamMembersByDivisionFiltered' : ActorMethod<
+    [string],
+    Array<TeamMemberWithAvatar>
+  >,
   'getUniqueDivisions' : ActorMethod<[], Array<string>>,
   'getUniquePICNames' : ActorMethod<[], Array<string>>,
   'getUniquePriorities' : ActorMethod<[], Array<ProgramPriority>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setTeamMemberAvatar' : ActorMethod<[bigint, ExternalBlob], undefined>,
   'updateKpi' : ActorMethod<[bigint, Kpi], undefined>,
+  'updateKpiAndSyncProgram' : ActorMethod<[bigint, Kpi], undefined>,
   'updateProgram' : ActorMethod<[bigint, Program], undefined>,
   'updateTeamAgendaItem' : ActorMethod<[bigint, TeamAgendaItem], undefined>,
-  'updateTeamMember' : ActorMethod<[bigint, TeamMember], undefined>,
+  'updateTeamMember' : ActorMethod<
+    [bigint, TeamMemberCreateRequest],
+    undefined
+  >,
   'updateUserProfileRole' : ActorMethod<[Principal, UserRole], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

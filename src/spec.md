@@ -1,11 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Update the app’s visual design to a cohesive SHQ dark navy + light green accent theme, and reposition the top tab navigation into a centered translucent “pill” bar aligned with the header.
+**Goal:** Fix the "invalid record" error when saving KPI forms by ensuring frontend data structure matches backend expectations.
 
 **Planned changes:**
-- Apply a global SHQ color palette via Tailwind/CSS theme tokens so backgrounds, cards, borders, buttons, and focus rings consistently use a dark navy base with light green accents across all pages (Dashboard, Calendar, Program, KPI, Team, Reports, Login, Profile Setup), while preserving readable contrast in both light and dark modes.
-- Rework the top navigation layout to render the existing tabs in a centered, rounded, translucent pill-style menu near the top/header area, with a clear active state and responsive behavior (no overflow/click issues on small screens), without changing tabs, permissions (admin-only Users), or routing behavior.
-- Harmonize header, main content background, and footer styling to feel like one cohesive system using CSS-based subtle dark navy gradient/texture-like treatment (reference-only style direction from IMG_0109.jpeg; not used as an actual background asset), keeping existing header actions functional (theme toggle, user menu, logout).
+- Fix data type serialization for Nilai Target and Nilai Realisasi fields (ensure they are sent as numbers, not strings)
+- Verify Program Terkait dropdown maps correctly to backend program identifier format
+- Verify Tim/PIC dropdown maps correctly to backend Principal ID format
+- Add comprehensive error logging to capture and display specific field validation errors from backend
+- Ensure all form fields serialize to exact backend KPI type structure
 
-**User-visible outcome:** The entire app displays a consistent SHQ dark navy theme with light green accents, and the tab menu appears as a centered translucent pill navigation at the top that remains fully functional and responsive.
+**User-visible outcome:** Users can successfully save KPI forms without "invalid record" errors, and receive clear error messages if any field validation fails.

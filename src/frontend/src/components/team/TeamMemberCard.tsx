@@ -3,20 +3,20 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Pencil, Trash2, User, Upload, Loader2 } from 'lucide-react';
-import type { TeamMember } from '../../backend';
-import { uploadImage } from '../../utils/imageUpload';
-import { isValidUrl } from '../../utils/urlValidation';
-import { useUpdateTeamMember } from '../../hooks/useQueries';
+import { Pencil, Trash2, User, Upload, Loader2, Lock } from 'lucide-react';
+import type { TeamMemberWithAvatar } from '../../backend';
+import { useSetTeamMemberAvatar } from '../../hooks/useQueries';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
+import { getTeamMemberAvatarSrc } from '../../utils/teamMemberAvatar';
+import { uploadTeamMemberAvatar } from '../../utils/teamMemberAvatarUpload';
 
 interface TeamMemberCardProps {
-  member: TeamMember;
-  onEdit?: (member: TeamMember) => void;
-  onDelete?: (member: TeamMember) => void;
-  onClick?: (member: TeamMember) => void;
+  member: TeamMemberWithAvatar;
+  onEdit?: (member: TeamMemberWithAvatar) => void;
+  onDelete?: (member: TeamMemberWithAvatar) => void;
+  onClick?: (member: TeamMemberWithAvatar) => void;
   canEditPhoto?: boolean;
+  isAuthenticated?: boolean;
 }
 
 export default function TeamMemberCard({ 
@@ -24,14 +24,14 @@ export default function TeamMemberCard({
   onEdit, 
   onDelete, 
   onClick,
-  canEditPhoto = false 
+  canEditPhoto = false,
+  isAuthenticated = false
 }: TeamMemberCardProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isFileInputOpen, setIsFileInputOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const updateMutation = useUpdateTeamMember();
-  const queryClient = useQueryClient();
+  const setAvatarMutation = useSetTeamMemberAvatar();
 
   const initials = member.name
     .split(' ')
@@ -40,12 +40,18 @@ export default function TeamMemberCard({
     .toUpperCase()
     .slice(0, 2);
 
-  // Validate avatar URL before using - must be https
-  const hasValidAvatar = member.avatar && isValidUrl(member.avatar) && member.avatar.startsWith('https://');
+  // Get avatar src using utility
+  const avatarSrc = getTeamMemberAvatarSrc(member);
 
   const handleAvatarClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Check authentication first
+    if (!isAuthenticated) {
+      toast.error('Please login to change photos');
+      return;
+    }
+
     // Prevent multiple opens and don't open during upload
     if (canEditPhoto && !isUploading && !isFileInputOpen && fileInputRef.current) {
       setIsFileInputOpen(true);
@@ -59,136 +65,135 @@ export default function TeamMemberCard({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!isAuthenticated) {
+      toast.error('Please login to change photos');
+      e.target.value = '';
+      return;
+    }
+
     setIsUploading(true);
     setUploadProgress(0);
 
     try {
-      // Upload the image
-      const uploadedUrl = await uploadImage({
-        file,
-        onProgress: (percent) => setUploadProgress(percent),
+      // Upload to backend blob storage with progress tracking
+      const avatarBlob = await uploadTeamMemberAvatar(file, (percentage) => {
+        setUploadProgress(percentage);
       });
 
-      // Validate the uploaded URL
-      if (!uploadedUrl || !uploadedUrl.startsWith('https://')) {
-        throw new Error('Invalid URL returned from upload service');
-      }
-
-      // Update the team member with the new avatar
-      await updateMutation.mutateAsync({
-        id: member.id,
-        member: {
-          ...member,
-          avatar: uploadedUrl,
-        },
+      // Save to backend
+      await setAvatarMutation.mutateAsync({
+        memberId: member.id,
+        avatar: avatarBlob,
       });
 
-      // Manually update the cache to reflect the change immediately
-      queryClient.setQueryData<TeamMember[]>(['teamMembers'], (oldData) => {
-        if (!oldData) return oldData;
-        return oldData.map(m => 
-          m.id === member.id ? { ...m, avatar: uploadedUrl } : m
-        );
-      });
-
-      toast.success('Photo updated successfully');
+      setUploadProgress(100);
     } catch (error) {
-      console.error('Photo upload failed:', error);
+      console.error('Avatar upload error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload photo';
       toast.error(errorMessage);
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      // Reset file input to allow re-selecting the same file
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      e.target.value = '';
     }
   };
 
+  const showActions = onEdit || onDelete;
+
   return (
     <Card 
-      className="hover:shadow-md transition-shadow cursor-pointer"
-      onClick={() => onClick?.(member)}
+      className={`group relative overflow-hidden transition-all hover:shadow-md ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick ? () => onClick(member) : undefined}
     >
       <CardContent className="p-4">
-        <div className="flex items-start gap-4">
-          {/* Avatar with click-to-upload */}
-          <div className="relative flex-shrink-0">
-            <div
-              className={`relative ${canEditPhoto && !isUploading ? 'cursor-pointer' : ''}`}
+        <div className="flex flex-col items-center gap-3">
+          {/* Avatar with upload overlay */}
+          <div className="relative">
+            <Avatar 
+              className={`h-20 w-20 rounded-lg ${canEditPhoto && isAuthenticated ? 'cursor-pointer' : ''}`}
               onClick={handleAvatarClick}
             >
-              <Avatar className="h-20 w-20 rounded-lg">
-                {hasValidAvatar ? (
-                  <AvatarImage src={member.avatar} alt={member.name} className="rounded-lg" />
-                ) : null}
-                <AvatarFallback className="bg-primary/10 text-primary rounded-lg text-lg">
-                  {initials || <User className="h-8 w-8" />}
+              {avatarSrc ? (
+                <AvatarImage src={avatarSrc} alt={member.name} />
+              ) : (
+                <AvatarFallback className="rounded-lg bg-primary/10 text-lg font-semibold">
+                  {initials}
                 </AvatarFallback>
-              </Avatar>
-              
-              {/* Upload indicator overlay */}
-              {isUploading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg pointer-events-none">
-                  <div className="text-center text-white">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-1" />
-                    <span className="text-xs font-medium">{uploadProgress}%</span>
-                  </div>
-                </div>
               )}
+            </Avatar>
 
-              {/* Upload hint icon - pointer-events-none to not block clicks */}
-              {canEditPhoto && !isUploading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/20 rounded-lg transition-colors opacity-0 hover:opacity-100 pointer-events-none">
-                  <Upload className="h-6 w-6 text-white drop-shadow-lg" />
-                </div>
-              )}
-            </div>
+            {/* Upload overlay */}
+            {canEditPhoto && (
+              <div
+                className={`absolute inset-0 flex items-center justify-center rounded-lg bg-black/60 transition-opacity ${
+                  isUploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`}
+                style={{ pointerEvents: 'none' }}
+              >
+                {isUploading ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                    <span className="text-xs text-white">{uploadProgress}%</span>
+                  </div>
+                ) : !isAuthenticated ? (
+                  <Lock className="h-5 w-5 text-white" />
+                ) : (
+                  <Upload className="h-5 w-5 text-white" />
+                )}
+              </div>
+            )}
 
             {/* Hidden file input */}
             {canEditPhoto && (
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                 className="hidden"
                 onChange={handleFileChange}
-                disabled={isUploading}
+                disabled={isUploading || !isAuthenticated}
               />
             )}
           </div>
-          
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm truncate">{member.name}</h3>
-            <p className="text-xs text-muted-foreground truncate">{member.role}</p>
-            <Badge variant="secondary" className="mt-1.5 text-xs">
+
+          {/* Member info */}
+          <div className="w-full text-center">
+            <h3 className="font-semibold text-foreground truncate">{member.name}</h3>
+            <p className="text-sm text-muted-foreground truncate">{member.role}</p>
+            <Badge variant="secondary" className="mt-1 text-xs">
               {member.division}
             </Badge>
           </div>
 
-          {(onEdit || onDelete) && (
-            <div className="flex gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          {/* Actions */}
+          {showActions && (
+            <div className="flex w-full gap-2 pt-2 border-t">
               {onEdit && (
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => onEdit(member)}
-                  title="Edit member"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(member);
+                  }}
                 >
-                  <Pencil className="h-3.5 w-3.5" />
+                  <Pencil className="h-3 w-3 mr-1" />
+                  Edit
                 </Button>
               )}
               {onDelete && (
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                  onClick={() => onDelete(member)}
-                  title="Delete member"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(member);
+                  }}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Delete
                 </Button>
               )}
             </div>

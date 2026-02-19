@@ -93,11 +93,14 @@ export default function ProgramDetailDrawer({
               </div>
 
               <div>
-                <h4 className="text-xs font-medium text-muted-foreground mb-2">Progress</h4>
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">Progress (Calculated from KPIs)</h4>
                 <div className="space-y-1.5">
                   <Progress value={Number(program.progress)} className="h-2" />
                   <p className="text-sm font-medium">{Number(program.progress)}%</p>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Progress dihitung otomatis dari bobot dan pencapaian KPI
+                </p>
               </div>
             </div>
           </div>

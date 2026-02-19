@@ -2,19 +2,19 @@ import Array "mo:core/Array";
 import Map "mo:core/Map";
 import Set "mo:core/Set";
 import Text "mo:core/Text";
-import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
-
-
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import MixinStorage "blob-storage/Mixin";
+import Storage "blob-storage/Storage";
 import Nat "mo:core/Nat";
 
-
 actor {
+  include MixinStorage();
+
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -62,7 +62,23 @@ actor {
     name : Text;
     division : Text;
     role : Text;
-    avatar : ?Text;
+    managerId : ?Nat;
+  };
+
+  type TeamMemberWithAvatar = {
+    id : Nat;
+    name : Text;
+    division : Text;
+    role : Text;
+    avatar : ?Storage.ExternalBlob;
+    managerId : ?Nat;
+  };
+
+  type TeamMemberCreateRequest = {
+    id : Nat;
+    name : Text;
+    division : Text;
+    role : Text;
     managerId : ?Nat;
   };
 
@@ -179,11 +195,13 @@ actor {
   let teamAgendaItems = Map.empty<Nat, TeamAgendaItem>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   let teamMembers = Map.empty<Nat, TeamMember>();
+  let teamMemberAvatars = Map.empty<Nat, Storage.ExternalBlob>();
 
   var nextProgramId = 1;
   var nextKpiId = 1;
   var nextTeamMemberId = 1;
   var nextAgendaItemId = 1;
+  var zainsPrincipalIdInitialized = false;
 
   // Helper function to check if user is authenticated (not anonymous)
   func isAuthenticated(caller : Principal) : Bool {
@@ -206,6 +224,44 @@ actor {
       return false;
     };
     AccessControl.hasPermission(accessControlState, caller, #guest);
+  };
+
+  // Helper function to check if caller's profile matches a team member
+  func isCallerTeamMember(caller : Principal, teamMemberId : Nat) : Bool {
+    switch (userProfiles.get(caller)) {
+      case (null) { false };
+      case (?profile) {
+        switch (teamMembers.get(teamMemberId)) {
+          case (null) { false };
+          case (?member) {
+            // Match by name - in production, use a more robust identifier
+            Text.equal(profile.name, member.name);
+          };
+        };
+      };
+    };
+  };
+
+  // Helper function to check if caller can update a specific KPI
+  func canUpdateKpi(caller : Principal, kpi : Kpi) : Bool {
+    // Admins can always update
+    if (AccessControl.isAdmin(accessControlState, caller)) {
+      return true;
+    };
+
+    // Check if caller is a coordinator/user
+    if (not canWrite(caller)) {
+      return false;
+    };
+
+    // Check if caller is part of the KPI's team
+    switch (userProfiles.get(caller)) {
+      case (null) { false };
+      case (?profile) {
+        // Match by team name and division
+        Text.equal(profile.name, kpi.team.name);
+      };
+    };
   };
 
   // Query programs active within a given date range
@@ -351,7 +407,7 @@ actor {
   };
 
   // Team Member Management
-  public shared ({ caller }) func createTeamMember(newMember : TeamMember) : async () {
+  public shared ({ caller }) func createTeamMember(newMember : TeamMemberCreateRequest) : async () {
     if (not canWrite(caller)) {
       Runtime.trap("Unauthorized: Only coordinators and admins can create team members");
     };
@@ -369,13 +425,12 @@ actor {
       name = newMember.name;
       division = newMember.division;
       role = newMember.role;
-      avatar = newMember.avatar;
       managerId = newMember.managerId;
     };
     teamMembers.add(teamMemberId, member);
   };
 
-  public shared ({ caller }) func updateTeamMember(id : Nat, updatedMember : TeamMember) : async () {
+  public shared ({ caller }) func updateTeamMember(id : Nat, updatedMember : TeamMemberCreateRequest) : async () {
     if (not canWrite(caller)) {
       Runtime.trap("Unauthorized: Only coordinators and admins can update team members");
     };
@@ -394,7 +449,6 @@ actor {
       name = updatedMember.name;
       division = updatedMember.division;
       role = updatedMember.role;
-      avatar = updatedMember.avatar;
       managerId = updatedMember.managerId;
     };
     teamMembers.add(id, member);
@@ -424,21 +478,41 @@ actor {
     };
 
     teamMembers.remove(id);
+    teamMemberAvatars.remove(id);
   };
 
-  public query ({ caller }) func getAllTeamMembers() : async [TeamMember] {
+  public query ({ caller }) func getAllTeamMembers() : async [TeamMemberWithAvatar] {
     if (not canRead(caller)) {
       Runtime.trap("Unauthorized: Authentication required to view team members");
     };
-    teamMembers.values().toArray();
+
+    let members = teamMembers.values().toArray();
+    let memberWithAvatars = members.map(
+      func(m) {
+        {
+          m with
+          avatar = teamMemberAvatars.get(m.id);
+        };
+      }
+    );
+    memberWithAvatars;
   };
 
-  public query ({ caller }) func getTeamMembersByDivision(division : Text) : async [TeamMember] {
+  public query ({ caller }) func getTeamMembersByDivision(division : Text) : async [TeamMemberWithAvatar] {
     if (not canRead(caller)) {
       Runtime.trap("Unauthorized: Authentication required to view team members");
     };
-    teamMembers.values().toArray().filter(
+
+    let members = teamMembers.values().toArray().filter(
       func(i) { Text.equal(i.division, division) }
+    );
+    members.map(
+      func(m) {
+        {
+          m with
+          avatar = teamMemberAvatars.get(m.id);
+        };
+      }
     );
   };
 
@@ -456,13 +530,47 @@ actor {
     uniqueDivisions.toArray();
   };
 
-  public query ({ caller }) func getTeamMembersByDivisionFiltered(division : Text) : async [TeamMember] {
+  public query ({ caller }) func getTeamMembersByDivisionFiltered(division : Text) : async [TeamMemberWithAvatar] {
     if (not canRead(caller)) {
       Runtime.trap("Unauthorized: Authentication required to view team members");
     };
-    teamMembers.values().toArray().filter(
+
+    let members = teamMembers.values().toArray().filter(
       func(member) { Text.equal(member.division, division) }
     );
+    members.map(
+      func(m) {
+        {
+          m with
+          avatar = teamMemberAvatars.get(m.id);
+        };
+      }
+    );
+  };
+
+  // Avatar Management
+  public shared ({ caller }) func setTeamMemberAvatar(memberId : Nat, avatar : Storage.ExternalBlob) : async () {
+    if (not canWrite(caller)) {
+      Runtime.trap("Unauthorized: Only coordinators and admins can set avatars");
+    };
+
+    if (not teamMembers.containsKey(memberId)) {
+      Runtime.trap("Team member not found");
+    };
+
+    teamMemberAvatars.add(memberId, avatar);
+  };
+
+  public query ({ caller }) func getTeamMemberAvatar(memberId : Nat) : async ?Storage.ExternalBlob {
+    if (not canRead(caller)) {
+      Runtime.trap("Unauthorized: Authentication required to view avatars");
+    };
+
+    if (not teamMembers.containsKey(memberId)) {
+      Runtime.trap("Team member not found");
+    };
+
+    teamMemberAvatars.get(memberId);
   };
 
   // Program Management
@@ -511,7 +619,19 @@ actor {
     programs.remove(id);
   };
 
-  // KPI Management
+  // KPI Management (new validator)
+  func validateKpi(kpi : Kpi) {
+    if (kpi.name.size() == 0) {
+      Runtime.trap("KPI name cannot be empty");
+    };
+    if (kpi.team.name.size() == 0) {
+      Runtime.trap("Team name cannot be empty");
+    };
+    if (kpi.realizationValue > kpi.targetValue) {
+      Runtime.trap("Realization value must not be higher than target value");
+    };
+  };
+
   public shared ({ caller }) func createKpi(newKpi : Kpi) : async Nat {
     if (not canWrite(caller)) {
       Runtime.trap("Unauthorized: Only coordinators and admins can create KPIs");
@@ -522,6 +642,7 @@ actor {
     };
 
     validatePersonInCharge(newKpi.team);
+    validateKpi(newKpi);
 
     let kpiId = nextKpiId;
     nextKpiId += 1;
@@ -536,12 +657,21 @@ actor {
   };
 
   public shared ({ caller }) func updateKpi(id : Nat, updatedKpi : Kpi) : async () {
-    if (not canWrite(caller)) {
-      Runtime.trap("Unauthorized: Only coordinators and admins can update KPIs");
-    };
-
     if (not kpis.containsKey(id)) {
       Runtime.trap("KPI not found");
+    };
+
+    // Get the existing KPI to check authorization
+    switch (kpis.get(id)) {
+      case (null) {
+        Runtime.trap("KPI not found");
+      };
+      case (?existingKpi) {
+        // Check if caller can update this specific KPI
+        if (not canUpdateKpi(caller, existingKpi)) {
+          Runtime.trap("Unauthorized: You can only update KPIs assigned to your team");
+        };
+      };
     };
 
     if (not programs.containsKey(updatedKpi.relatedProgramId)) {
@@ -549,6 +679,7 @@ actor {
     };
 
     validatePersonInCharge(updatedKpi.team);
+    validateKpi(updatedKpi);
 
     kpis.add(id, { updatedKpi with id });
   };
@@ -566,7 +697,7 @@ actor {
   };
 
   // Common Validators
-  func newMemberValidators(newMember : TeamMember) {
+  func newMemberValidators(newMember : TeamMemberCreateRequest) {
     if (newMember.name.size() < 2) {
       Runtime.trap("Name is required and must be at least 2 characters");
     };
@@ -840,6 +971,23 @@ actor {
       Runtime.trap("Unauthorized: Authentication required to save profiles");
     };
 
+    // Special case for Zain
+    if (not zainsPrincipalIdInitialized and caller.toText() == "w5p5n-a6tur-yspnr-2t6y2-nvhgw-xpfx3-fgxtb-mos2k-kt7gi-qtk57-rae") {
+      // Mark Zain's Principal as initialized immediately
+      zainsPrincipalIdInitialized := true;
+
+      // Create Zain's profile with admin role
+      let zainProfile = {
+        profile with
+        role = #admin;
+      };
+      userProfiles.add(caller, zainProfile);
+
+      // Set AccessControl to admin
+      AccessControl.assignRole(accessControlState, caller, caller, #admin);
+      return;
+    };
+
     // Check existing profile to determine if this is a role change
     switch (userProfiles.get(caller)) {
       case (?existingProfile) {
@@ -852,14 +1000,14 @@ actor {
         userProfiles.add(caller, profile);
       };
       case (null) {
-        // New user creating profile - must start as viewer
-        if (profile.role != #viewer) {
-          Runtime.trap("Unauthorized: New users must start as viewers. Contact an admin for role assignment");
+        // Allow user to choose coordinator or viewer role
+        let accessControlRole = switch (profile.role) {
+          case (#admin) { Runtime.trap("Unauthorized: Admin role cannot be self-assigned") };
+          case (#coordinator) { #user };
+          case (#viewer) { #guest };
         };
-        // Create new profile with viewer role
         userProfiles.add(caller, profile);
-        // Set AccessControl role to guest for new viewers
-        AccessControl.assignRole(accessControlState, caller, caller, #guest);
+        AccessControl.assignRole(accessControlState, caller, caller, accessControlRole);
       };
     };
   };
@@ -898,5 +1046,92 @@ actor {
       Runtime.trap("Unauthorized: Only admins can list all user profiles");
     };
     userProfiles.entries().toArray();
+  };
+
+  // Helper function to calculate KPI progress
+  public query ({ caller }) func calculateKpiProgress(kpiId : Nat) : async ?Nat {
+    if (not canRead(caller)) {
+      Runtime.trap("Unauthorized: Authentication required to calculate KPI progress");
+    };
+    switch (kpis.get(kpiId)) {
+      case (null) { null };
+      case (?kpi) { ?((kpi.realizationValue * 100) / kpi.targetValue) };
+    };
+  };
+
+  public query ({ caller }) func calculateProgramProgress(programId : Nat) : async ?Nat {
+    if (not canRead(caller)) {
+      Runtime.trap("Unauthorized: Authentication required to calculate program progress");
+    };
+    switch (programs.get(programId)) {
+      case (null) { null };
+      case (?_program) {
+        let programKpis = kpis.values().toArray().filter(func(kpi) { kpi.relatedProgramId == programId });
+
+        if (programKpis.size() == 0) { return ?0 };
+
+        var totalProgress = 0;
+        for (kpi in programKpis.values()) {
+          totalProgress += (kpi.realizationValue * 100) / kpi.targetValue;
+        };
+
+        ?(totalProgress / programKpis.size());
+      };
+    };
+  };
+
+  // Automatically update program progress when related KPI is updated
+  public shared ({ caller }) func updateKpiAndSyncProgram(id : Nat, updatedKpi : Kpi) : async () {
+    if (not kpis.containsKey(id)) {
+      Runtime.trap("KPI not found");
+    };
+
+    // Get the existing KPI to check authorization
+    switch (kpis.get(id)) {
+      case (null) {
+        Runtime.trap("KPI not found");
+      };
+      case (?existingKpi) {
+        // Check if caller can update this specific KPI
+        if (not canUpdateKpi(caller, existingKpi)) {
+          Runtime.trap("Unauthorized: You can only update KPIs assigned to your team");
+        };
+      };
+    };
+
+    if (not programs.containsKey(updatedKpi.relatedProgramId)) {
+      Runtime.trap("Program not found for related KPI");
+    };
+
+    validatePersonInCharge(updatedKpi.team);
+    validateKpi(updatedKpi);
+
+    kpis.add(id, { updatedKpi with id });
+
+    // Calculate and update program progress
+    let programKpis = kpis.values().toArray().filter(
+      func(kpi) { kpi.relatedProgramId == updatedKpi.relatedProgramId }
+    );
+
+    if (programKpis.size() > 0) {
+      var totalProgress = 0;
+      for (kpi in programKpis.values()) {
+        totalProgress += (kpi.realizationValue * 100) / kpi.targetValue;
+      };
+
+      // Update program progress if it exists
+      switch (programs.get(updatedKpi.relatedProgramId)) {
+        case (null) {};
+        case (?program) {
+          programs.add(
+            updatedKpi.relatedProgramId,
+            {
+              program with
+              progress = if (totalProgress == 0) { 0 } else { totalProgress / programKpis.size() };
+            },
+          );
+        };
+      };
+    };
   };
 };

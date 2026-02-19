@@ -1,106 +1,117 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "SHQ dark navy theming + centered pill top navigation",
+  "title": "Fix KPI Form Invalid Record Error on Save",
   "requirements": [
     {
-      "id": "REQ-72",
-      "summary": "Apply a global SHQ dark navy + light green accent theme via Tailwind/CSS tokens across all screens, ensuring accessible contrast in light and dark modes and keeping IMG_0109.jpeg as reference-only.",
+      "id": "REQ-1",
+      "summary": "Fix the 'invalid record' error when saving KPI form by ensuring frontend data structure matches backend KPI type definition exactly",
       "acceptanceCriteria": [
-        "The app uses a dark navy base with light green accents consistently on Dashboard, Calendar, Program, KPI, Team, Reports, Login, and Profile Setup screens.",
-        "The uploaded IMG_0109.jpeg is not used as a literal background image anywhere in the app.",
-        "Primary/active/selected states (e.g., selected tab, primary buttons, focus rings) use the light green accent or compatible SHQ accent styling; contrast remains accessible (text remains readable on backgrounds/cards).",
-        "No regressions in component styling that make UI elements illegible in either light mode or dark mode."
+        "KPI form successfully saves without 'invalid record' error when all required fields are filled",
+        "Form validates data types correctly before submission (Nilai Target and Nilai Realisasi as numbers)",
+        "Dropdown values (Program Terkait, Tim/PIC, Periode, Status) serialize correctly to backend format",
+        "Error messages are specific and indicate which field is invalid if validation fails"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/KpiFormDialog.tsx",
           "operation": "modify",
-          "description": "Update global CSS variables (background/card/border/ring/primary/secondary/accent) to a SHQ dark navy base with light green accents for both :root and .dark; ensure focus ring tokens and chart/category variables remain readable. Do not reference or apply IMG_0109.jpeg as a background image."
+          "description": "Fix the KPI form data serialization to match the backend Kpi interface exactly. Ensure targetValue and realizationValue are converted to BigInt (not strings), relatedProgramId is sent as bigint (not string or program name), and team field contains a PersonInCharge object with id (bigint), name, role, and division fields. Add comprehensive field-level validation before submission and improve error handling to display specific field errors from backend responses. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Ensure Tailwind theme continues to map semantic color tokens (background/card/border/ring/primary/accent/etc.) to the updated CSS variables so all shadcn-ui styling picks up the new SHQ palette. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/LoginPage.tsx",
-          "operation": "modify",
-          "description": "Adjust Login screen container/background and card styling to match the updated SHQ theme tokens (navy base + green accent) without changing login behavior. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/ProfileSetupModal.tsx",
-          "operation": "modify",
-          "description": "Confirm Profile Setup modal (Dialog, inputs, select, button) visually aligns with new SHQ theme tokens (card/background/border/ring/accent) while preserving functionality and readability. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/index.css",
-          "operation": "modify",
-          "description": "If this stylesheet is used by the build, align/bridge its theme variables with the SHQ navy + green palette to avoid inconsistent styling between entry stylesheets; do not apply IMG_0109.jpeg as a background image."
+          "description": "Update the createKpi and updateKpi mutation functions to include detailed error logging that captures and parses backend validation errors. Add console logging for the request payload structure and backend response errors. Ensure error messages are extracted and passed to the toast notifications with specific field information when available. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-73",
-      "summary": "Reposition the main tab menu into a centered rounded translucent pill near the top, preserving existing tabs, admin-only Users tab gating, and navigation behavior with responsive overflow handling.",
+      "id": "REQ-2",
+      "summary": "Ensure Nilai Target (target value) field in KPI form is properly typed and serialized as a number (Nat) when submitting to backend",
       "acceptanceCriteria": [
-        "The tab menu (Dashboard/Calendar/Program/KPI/Team/Reports/(Users for admin)) is visually centered in a rounded translucent container at the top, matching the reference style direction.",
-        "Active tab state is clearly visible and uses the new SHQ accent styling.",
-        "Tab navigation continues to work exactly as before (same tabs, same content rendering, admin tab still conditional).",
-        "Navigation layout is responsive: on small screens the menu remains usable without overflowing the viewport (e.g., wraps, scrolls, or compresses appropriately without breaking clicks)."
+        "Nilai Target input field parses numeric input correctly",
+        "Form submission sends Nilai Target as number type to backend",
+        "Validation rejects non-numeric input in Nilai Target field"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/TopPillNav.tsx",
-          "operation": "create",
-          "description": "Create a reusable TopPillNav component that renders the existing TabsList/TabsTrigger set in a centered, rounded, translucent pill container; support admin-only Users tab visibility and a clear active state using SHQ accent tokens. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
+          "path": "frontend/src/components/KpiFormDialog.tsx",
           "operation": "modify",
-          "description": "Wire TopPillNav into the Dashboard layout: move the TabsList out of the main content area into a top-aligned, centered placement (near the Header), keeping the same Tabs value/onValueChange behavior and the admin-only Users tab condition. Add responsive handling (e.g., horizontal scroll on small screens) to prevent overflow while keeping clicks functional. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add/adjust utility classes (or refine existing ones) to support the pill nav look: translucent background, subtle border, backdrop blur, and SHQ-accent active state styling for tab triggers without relying on IMG_0109.jpeg."
+          "description": "Add explicit type conversion for the Nilai Target (targetValue) field to parse the string input as an integer and convert to BigInt before submission. Add input validation to ensure only numeric values are accepted and show validation errors for non-numeric input. Update the form state to handle numeric types correctly throughout the form lifecycle."
         }
       ]
     },
     {
-      "id": "REQ-74",
-      "summary": "Refine header + page background styling with a cohesive SHQ dark navy CSS-based gradient/texture feel across Header, main container, and Footer without affecting existing functionality or causing layering/click issues.",
+      "id": "REQ-3",
+      "summary": "Ensure Nilai Realisasi (realization value) field in KPI form is properly typed and serialized as a number (Nat) when submitting to backend",
       "acceptanceCriteria": [
-        "Header, main content background, and footer visually match the SHQ dark navy theme and look cohesive (no clashing gradients/colors).",
-        "The background treatment is implemented via CSS (gradients/noise-like styling) and does not rely on IMG_0109.jpeg as a background asset.",
-        "Existing header actions remain functional (theme toggle, user menu, logout).",
-        "No content overlaps or z-index issues: the header and centered menu remain clickable and do not cover important page content."
+        "Nilai Realisasi input field parses numeric input correctly",
+        "Form submission sends Nilai Realisasi as number type to backend",
+        "Validation rejects non-numeric input in Nilai Realisasi field"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/KpiFormDialog.tsx",
           "operation": "modify",
-          "description": "Implement SHQ-style background treatment via CSS (subtle dark navy gradients and optional texture-like effect) and define shared utility classes to keep Header/Main/Footer visually cohesive; ensure layering utilities support sticky header + centered pill nav without click-through issues."
+          "description": "Add explicit type conversion for the Nilai Realisasi (realizationValue) field to parse the string input as an integer and convert to BigInt before submission. Add input validation to ensure only numeric values are accepted and show validation errors for non-numeric input. Update the form state to handle numeric types correctly throughout the form lifecycle."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Verify Program Terkait (Related Program) dropdown correctly maps the selected program to the backend-expected format (program ID)",
+      "acceptanceCriteria": [
+        "Program Terkait selection sends correct program identifier to backend",
+        "Dropdown loads available programs from backend",
+        "Selected program value matches backend KPI.relatedProgramId field type"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/KpiFormDialog.tsx",
+          "operation": "modify",
+          "description": "Ensure the Program Terkait dropdown stores and submits the program ID as a BigInt (not the program name or string ID). Update the form state to track the selected program by its numeric ID. Verify that the RelatedProgramCombobox component passes the program ID correctly and update the form submission logic to convert the program ID to BigInt for the relatedProgramId field."
         },
         {
-          "path": "frontend/src/components/Header.tsx",
+          "path": "frontend/src/components/RelatedProgramCombobox.tsx",
           "operation": "modify",
-          "description": "Update Header background/border/backdrop styling to harmonize with the SHQ navy gradient system and ensure correct z-index/sticky behavior alongside the centered pill navigation; keep theme toggle, user menu, and logout behavior unchanged. Verify the component's usage instructions before implementing."
+          "description": "Review and ensure the combobox returns the program ID (bigint) when a program is selected, not the program name or other field. Update the value prop handling to work with numeric IDs and ensure the parent form receives the correct ID type for submission."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Verify Tim/PIC (Team/Person in Charge) dropdown correctly maps the selected team member to the backend-expected PersonInCharge format",
+      "acceptanceCriteria": [
+        "Tim/PIC selection sends correct team member identifier to backend",
+        "Dropdown loads available team members from backend",
+        "Selected team member value matches backend KPI.team field type (PersonInCharge)"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/KpiFormDialog.tsx",
+          "operation": "modify",
+          "description": "Ensure the Tim/PIC dropdown creates a complete PersonInCharge object for the team field containing id (bigint), name (string), role (string), and division (string). The form should not submit just the team member ID or name string; it must construct the full PersonInCharge object structure matching the backend type. Update form state and submission logic to build this object from the selected team member data."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Add comprehensive error logging in KPI form submission to capture and display specific field validation errors from the backend response",
+      "acceptanceCriteria": [
+        "Error messages from backend are caught and displayed to user",
+        "Console logs show detailed error information including field name and validation failure reason",
+        "Toast notifications display user-friendly error messages in Indonesian"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Enhance error handling in the createKpi and updateKpi mutations to parse backend error responses and extract field-specific validation errors. Add detailed console.error logging that includes the full error object, request payload, and any error details from the backend. Update toast notifications to show specific field errors in Indonesian when available, falling back to generic error messages when field details are not present."
         },
         {
-          "path": "frontend/src/components/Footer.tsx",
+          "path": "frontend/src/components/KpiFormDialog.tsx",
           "operation": "modify",
-          "description": "Adjust Footer background and border styling to match the SHQ cohesive layout (navy base, subtle borders) while keeping existing content unchanged. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "modify",
-          "description": "Align the Dashboard main container background usage with the updated SHQ gradient/texture utilities so Header + centered pill nav + content + Footer feel like one system; verify no overlap or z-index issues with sticky elements. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Ensure the authenticated and unauthenticated roots use the same cohesive SHQ background treatment (via theme tokens/utilities) so transitions between Login/Profile Setup/Dashboard feel consistent, without changing auth or gating logic. Verify the component's usage instructions before implementing."
+          "description": "Add client-side pre-submission validation logging that outputs the complete form data structure to the console before sending to the backend. Add try-catch blocks around the mutation calls to capture and log any errors during submission. Display field-specific error messages in the form UI when validation fails, highlighting the problematic fields for the user."
         }
       ]
     }

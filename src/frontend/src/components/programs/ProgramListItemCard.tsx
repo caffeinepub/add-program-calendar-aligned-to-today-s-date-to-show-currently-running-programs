@@ -145,13 +145,13 @@ export default function ProgramListItemCard({
           {/* Progress Bar */}
           <div className="pt-2">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs text-muted-foreground">Progress</span>
-              <span className="text-sm font-semibold">{program.progress}%</span>
+              <span className="text-xs text-muted-foreground">Progress (dari KPI)</span>
+              <span className="text-sm font-semibold">{Number(program.progress)}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full bg-chart-2 transition-all"
-                style={{ width: `${program.progress}%` }}
+                style={{ width: `${Number(program.progress)}%` }}
               />
             </div>
           </div>

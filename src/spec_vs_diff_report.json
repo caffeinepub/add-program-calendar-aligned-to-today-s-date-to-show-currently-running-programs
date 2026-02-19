@@ -1,53 +1,25 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T13:42:36.925Z",
-  "summary": "Diff implements a new SHQ-style global palette (OKLCH CSS variables), adds a navy gradient background utility, updates app shell (App/Dashboard/Header/Footer/Login/Profile Setup) to use the new theme, and introduces a centered translucent “pill” top tab navigation component. However, the new top nav changes tab labels away from the existing names, and the diff includes multiple non-requested functional enhancements across several feature tabs/hooks beyond the visual/layout scope.",
+  "generatedAt": "2026-02-19T08:16:36.241Z",
+  "summary": "The diff addresses most requirements related to fixing the KPI form 'invalid record' error. Key changes include: numeric type validation and BigInt conversion for target/realization values (REQ-2, REQ-3), enhanced error logging with detailed console output and user-friendly toast messages (REQ-6), and improvements to team member dropdown handling (REQ-5). However, evidence for Program Terkait dropdown mapping (REQ-4) is incomplete due to file truncation, and validation of dropdown serialization to backend format cannot be fully verified.",
   "missing_requirements": [
     {
-      "id": "REQ-73",
-      "requirement": "Keep the existing set of tabs and navigation behavior unchanged (including existing tab names/labels and admin-only Users tab).",
-      "reason": "The new pill navigation changes tab labels from the existing names (e.g., “Reports”/“Users”) to different labels, which violates the requirement to keep existing tab names/behavior unchanged.",
+      "id": "REQ-4",
+      "requirement": "Verify Program Terkait (Related Program) dropdown correctly maps the selected program to the backend-expected format (program ID or reference)",
+      "reason": "The diff shows KpiFormDialog.tsx uses 'relatedProgramId' and converts it with BigInt(Number(formData.relatedProgramId)), but the file is truncated before the submit handler. Cannot verify if the program ID is correctly serialized to match backend KPI.relatedProgramId field type or if there are any special transformations needed.",
       "evidence": [
-        "frontend/src/components/TopPillNav.tsx"
+        "frontend/src/components/KpiFormDialog.tsx"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Program/Reports/KPI/Team feature changes beyond visual/layout (e.g., report export to PDF/Excel, priority sorting, new filters, new drawers, CRUD/validation workflow changes).",
-      "reason": "BuildRequest explicitly limits scope to theme/layout changes and lists non-goals that exclude modifying program/team/KPI/calendar/report logic; the diff summary indicates substantial functional enhancements in multiple components.",
-      "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "React Query hook expansion for unique divisions and changed toast messaging / cache invalidation behaviors.",
-      "reason": "Not requested by REQ-72/73/74 and appears to modify application logic/behavior rather than only styling/layout.",
-      "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Footer adds caffeine.ai attribution link with UTM tracking.",
-      "reason": "Not requested in any requirement; introduces new outbound link/tracking behavior.",
-      "evidence": [
-        "frontend/src/components/Footer.tsx"
-      ]
-    }
-  ],
-  "confidence": 0.74,
+  "hallucinated_features": [],
+  "confidence": 0.75,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/Footer.tsx",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/components/ProfileSetupModal.tsx",
-    "frontend/src/components/TopPillNav.tsx",
-    "frontend/src/index.css",
-    "frontend/src/pages/Dashboard.tsx",
-    "frontend/src/pages/LoginPage.tsx",
-    "frontend/tailwind.config.js",
+    "frontend/src/components/KpiFormDialog.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]
 }

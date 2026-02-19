@@ -2,15 +2,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
-import type { TeamMember } from '../../backend';
+import type { TeamMemberWithAvatar } from '../../backend';
 import type { HierarchyNode } from '../../utils/teamHierarchy';
-import { isValidUrl } from '../../utils/urlValidation';
+import { getTeamMemberAvatarSrc } from '../../utils/teamMemberAvatar';
 
 interface TeamStructureNodeProps {
-  member: TeamMember;
+  member: TeamMemberWithAvatar;
   children: HierarchyNode[];
-  members: TeamMember[];
-  onSelect: (member: TeamMember) => void;
+  members: TeamMemberWithAvatar[];
+  onSelect: (member: TeamMemberWithAvatar) => void;
   selectedId?: bigint;
 }
 
@@ -29,8 +29,8 @@ export default function TeamStructureNode({
 
   const isSelected = selectedId !== undefined && selectedId === member.id;
 
-  // Validate avatar URL - must be https and valid
-  const hasValidAvatar = member.avatar && isValidUrl(member.avatar) && member.avatar.startsWith('https://');
+  // Get avatar src using utility
+  const avatarSrc = getTeamMemberAvatarSrc(member);
 
   return (
     <div className="flex flex-col items-center">
@@ -41,12 +41,13 @@ export default function TeamStructureNode({
         onClick={() => onSelect(member)}
       >
         <Avatar className="h-12 w-12 rounded-lg">
-          {hasValidAvatar ? (
-            <AvatarImage src={member.avatar} alt={member.name} className="rounded-lg" />
-          ) : null}
-          <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
-            {initials || <User className="h-5 w-5" />}
-          </AvatarFallback>
+          {avatarSrc ? (
+            <AvatarImage src={avatarSrc} alt={member.name} className="rounded-lg" />
+          ) : (
+            <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
+              {initials || <User className="h-5 w-5" />}
+            </AvatarFallback>
+          )}
         </Avatar>
         <div className="text-center space-y-1">
           <p className="text-xs font-medium leading-tight">{member.name}</p>

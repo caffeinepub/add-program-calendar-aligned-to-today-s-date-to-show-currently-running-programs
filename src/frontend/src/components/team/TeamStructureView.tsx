@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import type { TeamMember } from '../../backend';
+import type { TeamMemberWithAvatar } from '../../backend';
 import { buildHierarchy, detectHierarchyIssues } from '../../utils/teamHierarchy';
 import { collectStructureMembers, groupByDivision, sortMembersByName } from '../../utils/teamFunctionalStructure';
 import TeamMemberDetailsPanel from './TeamMemberDetailsPanel';
 import TeamFunctionalMemberNode from './TeamFunctionalMemberNode';
 
 interface TeamStructureViewProps {
-  members: TeamMember[];
-  onEdit?: (member: TeamMember) => void;
+  members: TeamMemberWithAvatar[];
+  onEdit?: (member: TeamMemberWithAvatar) => void;
 }
 
 export default function TeamStructureView({ members, onEdit }: TeamStructureViewProps) {
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [selectedMember, setSelectedMember] = useState<TeamMemberWithAvatar | null>(null);
 
   const { root, orphans, warnings } = buildHierarchy(members);
   const issues = detectHierarchyIssues(members);

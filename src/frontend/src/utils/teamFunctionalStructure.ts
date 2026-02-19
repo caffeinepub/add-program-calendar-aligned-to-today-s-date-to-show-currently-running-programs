@@ -1,54 +1,53 @@
-import type { TeamMember } from '../backend';
+import type { TeamMemberWithAvatar } from '../backend';
 import type { HierarchyNode } from './teamHierarchy';
 
 export interface DivisionGroup {
   division: string;
-  members: TeamMember[];
+  members: TeamMemberWithAvatar[];
 }
 
 /**
- * Collect all members reachable from the root hierarchy node
+ * Collect all members from a hierarchy tree (depth-first)
  */
-export function collectStructureMembers(root: HierarchyNode | null): TeamMember[] {
-  if (!root) return [];
+export function collectStructureMembers(node: HierarchyNode | null): TeamMemberWithAvatar[] {
+  if (!node) return [];
   
-  const collected: TeamMember[] = [root.member];
+  const members: TeamMemberWithAvatar[] = [node.member];
   
-  function traverse(node: HierarchyNode) {
-    node.children.forEach(child => {
-      collected.push(child.member);
-      traverse(child);
-    });
-  }
+  node.children.forEach(child => {
+    members.push(...collectStructureMembers(child));
+  });
   
-  traverse(root);
-  return collected;
+  return members;
 }
 
 /**
- * Group members by division, normalizing division labels
+ * Group members by their division
  */
-export function groupByDivision(members: TeamMember[]): DivisionGroup[] {
-  const divisionMap = new Map<string, TeamMember[]>();
+export function groupByDivision(members: TeamMemberWithAvatar[]): DivisionGroup[] {
+  const divisionMap = new Map<string, TeamMemberWithAvatar[]>();
   
   members.forEach(member => {
-    const normalized = member.division.trim() || 'Unassigned';
-    const existing = divisionMap.get(normalized) || [];
-    existing.push(member);
-    divisionMap.set(normalized, existing);
+    const division = member.division.trim();
+    if (!division) return; // Skip empty divisions
+    
+    if (!divisionMap.has(division)) {
+      divisionMap.set(division, []);
+    }
+    divisionMap.get(division)!.push(member);
   });
   
   // Convert to array and sort by division name
-  const groups: DivisionGroup[] = Array.from(divisionMap.entries())
+  return Array.from(divisionMap.entries())
     .map(([division, members]) => ({ division, members }))
     .sort((a, b) => a.division.localeCompare(b.division));
-  
-  return groups;
 }
 
 /**
- * Sort members by name without mutating the input array
+ * Sort members by name (case-insensitive)
  */
-export function sortMembersByName(members: TeamMember[]): TeamMember[] {
-  return [...members].sort((a, b) => a.name.localeCompare(b.name));
+export function sortMembersByName(members: TeamMemberWithAvatar[]): TeamMemberWithAvatar[] {
+  return [...members].sort((a, b) => 
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  );
 }

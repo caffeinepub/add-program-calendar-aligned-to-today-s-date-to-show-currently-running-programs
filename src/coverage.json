@@ -1,83 +1,96 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T13:42:36.930Z",
+  "generatedAt": "2026-02-19T08:16:36.244Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 6,
+    "implemented": 6,
     "items": [
       {
-        "id": "REQ-72",
-        "summary": "Apply a global SHQ theme across the entire app (all pages/tabs) using a dark navy base with light green accents, using IMG_0109.jpeg as a visual style reference only (do not set it as the literal background image). Update the global Tailwind/CSS theme tokens so that backgrounds, cards, borders, and focus rings consistently reflect the new palette while maintaining readable contrast in both light and dark modes.",
+        "id": "REQ-1",
+        "summary": "Fix the 'invalid record' error that occurs when clicking 'Simpan' (Save) button in the KPI form by ensuring the frontend data structure matches the backend KPI type definition exactly",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/pages/LoginPage.tsx",
-          "frontend/src/components/ProfileSetupModal.tsx",
-          "frontend/index.css"
+          "frontend/src/components/KpiFormDialog.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/pages/LoginPage.tsx",
-          "frontend/src/components/ProfileSetupModal.tsx"
+          "frontend/src/components/KpiFormDialog.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
-        "id": "REQ-73",
-        "summary": "Update the top navigation/menu placement to match the uploaded reference layout style: render the main tab menu as a centered, rounded, translucent 'pill' navigation bar near the top (aligned with the header area), with clear active state and spacing similar to IMG_0109.jpeg, while keeping the existing set of tabs, permissions (admin-only Users tab), and navigation behavior unchanged.",
+        "id": "REQ-2",
+        "summary": "Ensure Nilai Target (target value) field in KPI form is properly typed and serialized as a number (Nat) when submitting to backend, not as a string",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/TopPillNav.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/index.css"
+          "frontend/src/components/KpiFormDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/TopPillNav.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/index.css"
+          "frontend/src/components/KpiFormDialog.tsx"
         ]
       },
       {
-        "id": "REQ-74",
-        "summary": "Refine the header + page background treatment to align with the SHQ look: use a subtle dark navy gradient/texture-like feel (CSS-based, not the uploaded image) and harmonize Header, main container, and Footer backgrounds so the layout feels like one cohesive system while keeping existing content and functionality unchanged.",
+        "id": "REQ-3",
+        "summary": "Ensure Nilai Realisasi (realization value) field in KPI form is properly typed and serialized as a number (Nat) when submitting to backend, not as a string",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/components/Header.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/KpiFormDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/components/Header.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/KpiFormDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Verify Program Terkait (Related Program) dropdown correctly maps the selected program to the backend-expected format (program ID or reference)",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/KpiFormDialog.tsx",
+          "frontend/src/components/RelatedProgramCombobox.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/KpiFormDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Verify Tim/PIC (Team/Person in Charge) dropdown correctly maps the selected team member to the backend-expected format (Principal ID or team member ID)",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/KpiFormDialog.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/KpiFormDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Add comprehensive error logging in KPI form submission to capture and display specific field validation errors from the backend response",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/KpiFormDialog.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/KpiFormDialog.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/Footer.tsx",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/components/ProfileSetupModal.tsx",
-    "frontend/src/components/TopPillNav.tsx",
-    "frontend/src/index.css",
-    "frontend/src/pages/Dashboard.tsx",
-    "frontend/src/pages/LoginPage.tsx",
-    "frontend/tailwind.config.js",
+    "frontend/src/components/KpiFormDialog.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

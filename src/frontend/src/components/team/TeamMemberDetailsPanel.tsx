@@ -4,14 +4,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Pencil, User, Users } from 'lucide-react';
-import type { TeamMember } from '../../backend';
+import type { TeamMemberWithAvatar } from '../../backend';
+import { getTeamMemberAvatarSrc } from '../../utils/teamMemberAvatar';
 
 interface TeamMemberDetailsPanelProps {
-  member: TeamMember | null;
-  allMembers: TeamMember[];
+  member: TeamMemberWithAvatar | null;
+  allMembers: TeamMemberWithAvatar[];
   open: boolean;
   onClose: () => void;
-  onEdit?: (member: TeamMember) => void;
+  onEdit?: (member: TeamMemberWithAvatar) => void;
 }
 
 export default function TeamMemberDetailsPanel({ 
@@ -36,8 +37,8 @@ export default function TeamMemberDetailsPanel({
     .toUpperCase()
     .slice(0, 2);
 
-  // Validate avatar URL before using
-  const hasValidAvatar = member.avatar && member.avatar.startsWith('https://');
+  // Get avatar src using utility
+  const avatarSrc = getTeamMemberAvatarSrc(member);
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -51,12 +52,13 @@ export default function TeamMemberDetailsPanel({
           {/* Avatar and Basic Info */}
           <div className="flex items-start gap-4">
             <Avatar className="h-20 w-20 flex-shrink-0">
-              {hasValidAvatar ? (
-                <AvatarImage src={member.avatar} alt={member.name} />
-              ) : null}
-              <AvatarFallback className="bg-primary/10 text-primary text-xl">
-                {initials || <User className="h-8 w-8" />}
-              </AvatarFallback>
+              {avatarSrc ? (
+                <AvatarImage src={avatarSrc} alt={member.name} />
+              ) : (
+                <AvatarFallback className="bg-primary/10 text-primary text-xl">
+                  {initials || <User className="h-8 w-8" />}
+                </AvatarFallback>
+              )}
             </Avatar>
             <div className="flex-1 min-w-0">
               <h2 className="text-xl font-semibold">{member.name}</h2>
@@ -78,12 +80,13 @@ export default function TeamMemberDetailsPanel({
             {manager ? (
               <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/50">
                 <Avatar className="h-10 w-10">
-                  {manager.avatar && manager.avatar.startsWith('https://') ? (
-                    <AvatarImage src={manager.avatar} alt={manager.name} />
-                  ) : null}
-                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                    {manager.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                  </AvatarFallback>
+                  {getTeamMemberAvatarSrc(manager) ? (
+                    <AvatarImage src={getTeamMemberAvatarSrc(manager)!} alt={manager.name} />
+                  ) : (
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                      {manager.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{manager.name}</p>
@@ -106,16 +109,17 @@ export default function TeamMemberDetailsPanel({
                 </h3>
                 <div className="space-y-2">
                   {directReports.map(report => {
-                    const hasValidReportAvatar = report.avatar && report.avatar.startsWith('https://');
+                    const reportAvatarSrc = getTeamMemberAvatarSrc(report);
                     return (
                       <div key={report.id.toString()} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/50">
                         <Avatar className="h-10 w-10">
-                          {hasValidReportAvatar ? (
-                            <AvatarImage src={report.avatar} alt={report.name} />
-                          ) : null}
-                          <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                            {report.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                          </AvatarFallback>
+                          {reportAvatarSrc ? (
+                            <AvatarImage src={reportAvatarSrc} alt={report.name} />
+                          ) : (
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                              {report.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                            </AvatarFallback>
+                          )}
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium">{report.name}</p>

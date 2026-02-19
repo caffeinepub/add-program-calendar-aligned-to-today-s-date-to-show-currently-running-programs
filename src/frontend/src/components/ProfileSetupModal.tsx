@@ -48,7 +48,6 @@ export default function ProfileSetupModal() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={UserRole.admin}>Admin</SelectItem>
                 <SelectItem value={UserRole.coordinator}>Koordinator</SelectItem>
                 <SelectItem value={UserRole.viewer}>Viewer</SelectItem>
               </SelectContent>

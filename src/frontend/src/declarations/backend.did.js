@@ -8,6 +8,17 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
 export const UserRole__1 = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -77,13 +88,21 @@ export const TeamAgendaItem = IDL.Record({
   'attendees' : IDL.Vec(IDL.Text),
   'category' : AgendaCategory,
 });
-export const TeamMember = IDL.Record({
+export const TeamMemberCreateRequest = IDL.Record({
   'id' : IDL.Nat,
   'name' : IDL.Text,
   'role' : IDL.Text,
   'division' : IDL.Text,
   'managerId' : IDL.Opt(IDL.Nat),
-  'avatar' : IDL.Opt(IDL.Text),
+});
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const TeamMemberWithAvatar = IDL.Record({
+  'id' : IDL.Nat,
+  'name' : IDL.Text,
+  'role' : IDL.Text,
+  'division' : IDL.Text,
+  'managerId' : IDL.Opt(IDL.Nat),
+  'avatar' : IDL.Opt(ExternalBlob),
 });
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
@@ -95,12 +114,44 @@ export const Time = IDL.Int;
 export const TimeRange = IDL.Record({ 'end' : Time, 'start' : Time });
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
+  'calculateKpiProgress' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Nat)], ['query']),
+  'calculateProgramProgress' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Opt(IDL.Nat)],
+      ['query'],
+    ),
   'createKpi' : IDL.Func([Kpi], [IDL.Nat], []),
   'createProgram' : IDL.Func([Program], [IDL.Nat], []),
   'createTeamAgendaItem' : IDL.Func([TeamAgendaItem], [IDL.Nat], []),
-  'createTeamMember' : IDL.Func([TeamMember], [], []),
+  'createTeamMember' : IDL.Func([TeamMemberCreateRequest], [], []),
   'deleteKpi' : IDL.Func([IDL.Nat], [], []),
   'deleteProgram' : IDL.Func([IDL.Nat], [], []),
   'deleteTeamAgendaItem' : IDL.Func([IDL.Nat], [], []),
@@ -108,7 +159,11 @@ export const idlService = IDL.Service({
   'getAllKPIs' : IDL.Func([], [IDL.Vec(Kpi)], ['query']),
   'getAllPrograms' : IDL.Func([], [IDL.Vec(Program)], ['query']),
   'getAllTeamAgendaItems' : IDL.Func([], [IDL.Vec(TeamAgendaItem)], ['query']),
-  'getAllTeamMembers' : IDL.Func([], [IDL.Vec(TeamMember)], ['query']),
+  'getAllTeamMembers' : IDL.Func(
+      [],
+      [IDL.Vec(TeamMemberWithAvatar)],
+      ['query'],
+    ),
   'getAllUserProfiles' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
@@ -171,14 +226,19 @@ export const idlService = IDL.Service({
       [IDL.Vec(TeamAgendaItem)],
       ['query'],
     ),
+  'getTeamMemberAvatar' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Opt(ExternalBlob)],
+      ['query'],
+    ),
   'getTeamMembersByDivision' : IDL.Func(
       [IDL.Text],
-      [IDL.Vec(TeamMember)],
+      [IDL.Vec(TeamMemberWithAvatar)],
       ['query'],
     ),
   'getTeamMembersByDivisionFiltered' : IDL.Func(
       [IDL.Text],
-      [IDL.Vec(TeamMember)],
+      [IDL.Vec(TeamMemberWithAvatar)],
       ['query'],
     ),
   'getUniqueDivisions' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
@@ -191,16 +251,29 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setTeamMemberAvatar' : IDL.Func([IDL.Nat, ExternalBlob], [], []),
   'updateKpi' : IDL.Func([IDL.Nat, Kpi], [], []),
+  'updateKpiAndSyncProgram' : IDL.Func([IDL.Nat, Kpi], [], []),
   'updateProgram' : IDL.Func([IDL.Nat, Program], [], []),
   'updateTeamAgendaItem' : IDL.Func([IDL.Nat, TeamAgendaItem], [], []),
-  'updateTeamMember' : IDL.Func([IDL.Nat, TeamMember], [], []),
+  'updateTeamMember' : IDL.Func([IDL.Nat, TeamMemberCreateRequest], [], []),
   'updateUserProfileRole' : IDL.Func([IDL.Principal, UserRole], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
   const UserRole__1 = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -270,13 +343,21 @@ export const idlFactory = ({ IDL }) => {
     'attendees' : IDL.Vec(IDL.Text),
     'category' : AgendaCategory,
   });
-  const TeamMember = IDL.Record({
+  const TeamMemberCreateRequest = IDL.Record({
     'id' : IDL.Nat,
     'name' : IDL.Text,
     'role' : IDL.Text,
     'division' : IDL.Text,
     'managerId' : IDL.Opt(IDL.Nat),
-    'avatar' : IDL.Opt(IDL.Text),
+  });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const TeamMemberWithAvatar = IDL.Record({
+    'id' : IDL.Nat,
+    'name' : IDL.Text,
+    'role' : IDL.Text,
+    'division' : IDL.Text,
+    'managerId' : IDL.Opt(IDL.Nat),
+    'avatar' : IDL.Opt(ExternalBlob),
   });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
@@ -288,12 +369,44 @@ export const idlFactory = ({ IDL }) => {
   const TimeRange = IDL.Record({ 'end' : Time, 'start' : Time });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole__1], [], []),
+    'calculateKpiProgress' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Nat)], ['query']),
+    'calculateProgramProgress' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(IDL.Nat)],
+        ['query'],
+      ),
     'createKpi' : IDL.Func([Kpi], [IDL.Nat], []),
     'createProgram' : IDL.Func([Program], [IDL.Nat], []),
     'createTeamAgendaItem' : IDL.Func([TeamAgendaItem], [IDL.Nat], []),
-    'createTeamMember' : IDL.Func([TeamMember], [], []),
+    'createTeamMember' : IDL.Func([TeamMemberCreateRequest], [], []),
     'deleteKpi' : IDL.Func([IDL.Nat], [], []),
     'deleteProgram' : IDL.Func([IDL.Nat], [], []),
     'deleteTeamAgendaItem' : IDL.Func([IDL.Nat], [], []),
@@ -305,7 +418,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(TeamAgendaItem)],
         ['query'],
       ),
-    'getAllTeamMembers' : IDL.Func([], [IDL.Vec(TeamMember)], ['query']),
+    'getAllTeamMembers' : IDL.Func(
+        [],
+        [IDL.Vec(TeamMemberWithAvatar)],
+        ['query'],
+      ),
     'getAllUserProfiles' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Principal, UserProfile))],
@@ -372,14 +489,19 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(TeamAgendaItem)],
         ['query'],
       ),
+    'getTeamMemberAvatar' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(ExternalBlob)],
+        ['query'],
+      ),
     'getTeamMembersByDivision' : IDL.Func(
         [IDL.Text],
-        [IDL.Vec(TeamMember)],
+        [IDL.Vec(TeamMemberWithAvatar)],
         ['query'],
       ),
     'getTeamMembersByDivisionFiltered' : IDL.Func(
         [IDL.Text],
-        [IDL.Vec(TeamMember)],
+        [IDL.Vec(TeamMemberWithAvatar)],
         ['query'],
       ),
     'getUniqueDivisions' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
@@ -392,10 +514,12 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setTeamMemberAvatar' : IDL.Func([IDL.Nat, ExternalBlob], [], []),
     'updateKpi' : IDL.Func([IDL.Nat, Kpi], [], []),
+    'updateKpiAndSyncProgram' : IDL.Func([IDL.Nat, Kpi], [], []),
     'updateProgram' : IDL.Func([IDL.Nat, Program], [], []),
     'updateTeamAgendaItem' : IDL.Func([IDL.Nat, TeamAgendaItem], [], []),
-    'updateTeamMember' : IDL.Func([IDL.Nat, TeamMember], [], []),
+    'updateTeamMember' : IDL.Func([IDL.Nat, TeamMemberCreateRequest], [], []),
     'updateUserProfileRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   });
 };
