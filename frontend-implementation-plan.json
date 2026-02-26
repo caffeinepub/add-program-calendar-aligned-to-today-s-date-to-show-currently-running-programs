@@ -1,0 +1,55 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix login flow: resolve 'Only admins can assign user roles' error and ensure smooth first-user registration",
+  "requirements": [
+    {
+      "id": "REQ-4",
+      "summary": "Update ProfileSetupModal to handle profile save errors gracefully with inline error display, retry capability, and functional close button",
+      "acceptanceCriteria": [
+        "If profile save fails, an inline error message is displayed inside the modal (not just a toast).",
+        "The 'Simpan Profil' button becomes re-enabled after a failure so the user can retry.",
+        "The modal's close (X) button remains visible and functional even after a save error.",
+        "On successful save, the modal closes and the user lands on the dashboard."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProfileSetupModal.tsx",
+          "operation": "modify",
+          "description": "Add error state management to display inline error messages when profile save fails. Ensure the save button re-enables after errors for retry attempts. Keep the close button (X) functional at all times so users are never locked in. Show clear English error messages extracted from backend responses. On successful save, close the modal and invalidate the user profile query to trigger navigation to the dashboard."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Enforce required Full Name field in ProfileSetupModal and display fallback Principal ID identifiers throughout the UI when no name is stored",
+      "acceptanceCriteria": [
+        "The 'Simpan Profil' button is disabled when the name field is empty.",
+        "If a user somehow bypasses the modal without a name, the system displays 'User-<first 5 chars of principal>' in the header and other name-display locations.",
+        "Once the user saves a name, that name replaces any fallback identifier everywhere in the UI."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProfileSetupModal.tsx",
+          "operation": "modify",
+          "description": "Add client-side validation to disable the 'Simpan Profil' button when the name field is empty or contains only whitespace (minimum 1 character required). Display validation feedback to guide the user."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Update the user display logic to show a fallback identifier 'User-<first 5 chars of principal>' when userProfile exists but has no name or an empty name. Use the identity principal from useInternetIdentity to generate the fallback. Once a name is saved, display that name instead."
+        },
+        {
+          "path": "frontend/src/utils/userDisplayName.ts",
+          "operation": "create",
+          "description": "Create a utility function that accepts a UserProfile and Principal, returning the user's name if present, or a fallback 'User-<first 5 chars of principal toText()>' if the name is missing or empty. Export this helper for reuse across components that display user identity."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "If the Dashboard or any child component displays the current user's name, ensure it uses the userDisplayName utility to show the fallback identifier when no name is stored. Review and update any hardcoded name references."
+        }
+      ]
+    }
+  ]
+}

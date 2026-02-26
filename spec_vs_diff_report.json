@@ -1,0 +1,64 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-26T12:18:23.051Z",
+  "summary": "The diff implements most requirements but has notable gaps. REQ-3 (stable variables and migration module for persistence) shows no evidence of implementation in the backend. REQ-4's AC about 'clear English error messages' is partially met (messages are in Indonesian, not English). REQ-5 minimum character requirement is implemented as 2 characters instead of 1. The frontend improvements for ProfileSetupModal, Header fallback display, and userDisplayName utility are well implemented.",
+  "missing_requirements": [
+    {
+      "id": "REQ-3",
+      "requirement": "Ensure user data (profiles, roles, admin flags) persists across canister upgrades and redeployments using stable variables or a migration module. backend/migration.mo must be updated.",
+      "reason": "The backend/main.mo diff shows regular mutable variables (var firstAdminInitialized, let userProfiles = Map.empty<...>(), etc.) with no 'stable var' declarations visible. There is no evidence of backend/migration.mo being added or modified. No stable variable migration logic is shown.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-1",
+      "requirement": "Fix the backend logic so the first user is automatically assigned Admin role bypassing the admin-only guard entirely.",
+      "reason": "The diff of backend/main.mo is truncated and does not show the saveCallerUserProfile or registration endpoint implementation. While firstAdminInitialized variable is declared, the actual bypass logic checking if no users exist and skipping the admin guard is not visible in the truncated diff.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Fix the backend registration/profile-save endpoint so saving a new user profile never returns an Unauthorized error for any new user.",
+      "reason": "The backend/main.mo is truncated and does not show the saveCallerUserProfile function body or any changes to authorization checks for profile saving.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Minimum name length validation set to 2 characters instead of the required 1 character minimum",
+      "reason": "The ProfileSetupModal enforces a minimum of 2 characters with message 'Nama harus minimal 2 karakter' but REQ-5 specifies minimum 1 character before the save button is enabled.",
+      "evidence": [
+        "frontend/src/components/ProfileSetupModal.tsx"
+      ]
+    },
+    {
+      "description": "Error messages displayed in Indonesian language rather than English",
+      "reason": "REQ-4 explicitly states 'a clear English error message is shown', but the inline error messages in ProfileSetupModal are in Indonesian (e.g., 'Sesi Anda telah berakhir', 'Gagal menyimpan profil').",
+      "evidence": [
+        "frontend/src/components/ProfileSetupModal.tsx"
+      ]
+    },
+    {
+      "description": "getUserDisplayName uses uppercase 5-char principal with dashes stripped, diverging from the spec example format",
+      "reason": "REQ-5 specifies the fallback format as 'User-<first 5 chars of principal>' with example 'User-abc12' (lowercase), but the implementation strips dashes and uppercases the characters.",
+      "evidence": [
+        "frontend/src/utils/userDisplayName.ts"
+      ]
+    }
+  ],
+  "confidence": 0.62,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/utils/userDisplayName.ts",
+    "project_state.json"
+  ]
+}

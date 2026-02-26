@@ -1,0 +1,117 @@
+{
+  "kind": "build_request",
+  "title": "Fix login flow: resolve 'Only admins can assign user roles' error and ensure smooth first-user registration",
+  "projectName": "Sistem Tracking",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Fix the backend logic so that the very first user to register is automatically assigned the Admin role without triggering the 'Only admins can assign user roles' authorization check. The first-user detection and role assignment must bypass the admin-only guard entirely.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-screenshot",
+          "msg-perbaiki"
+        ],
+        "quotes": [
+          "Gagal menyimpan profil: Unauthorized: Only admins can assign user roles",
+          "Bug backend: pengguna pertama otomatis jadi admin tanpa konflik validasi role"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When no users exist yet, the first user to call the profile-save (or registration) endpoint is automatically assigned the Admin role without any authorization error.",
+        "Subsequent users do NOT get auto-assigned Admin — only the very first user does.",
+        "The 'Only admins can assign user roles' error never appears during first-time registration."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Fix the backend registration/profile-save endpoint so that saving a new user profile (including name) never returns an Unauthorized error for any new user. The profile save flow must complete successfully for all users regardless of role state.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-screenshot"
+        ],
+        "quotes": [
+          "Gagal menyimpan profil: Unauthorized: Only admins can assign user roles"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new user entering their name and clicking 'Simpan Profil' never receives an error toast.",
+        "The profile is saved successfully and the user proceeds to the dashboard without any error."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Ensure user data (profiles, roles, admin flags) persists across canister upgrades and redeployments. Use stable variables or a migration module so that existing registered users are never lost and a previously-registered admin is not demoted or replaced by a new 'first user' after a redeploy.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-data-persisten"
+        ],
+        "quotes": [
+          "Data pengguna yang sudah ada tidak terhapus saat sistem diperbarui",
+          "Bug: User data may reset on redeployment causing new users to be treated as first user/admin"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After a canister upgrade, all existing user profiles and roles remain intact.",
+        "The firstAdminInitialized flag and user registry survive upgrades — no second 'first user' situation occurs post-redeploy.",
+        "A migration module is updated (backend/migration.mo) to carry over all necessary stable state."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Update the ProfileSetupModal frontend component so that if the backend returns any error during profile save, a clear English error message is shown but the modal does NOT permanently block the user. If the save fails, display the error inline and allow the user to retry. The close button must remain functional so the user is not permanently locked out.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-screenshot",
+          "msg-tidak-mau-gagal"
+        ],
+        "quotes": [
+          "Saya tidak mau lagi ada kegagalan dan error, jadi tolong perbaiki dan siap pakai. Tidak ada error log in lagi"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If profile save fails, an inline error message is displayed inside the modal (not just a toast).",
+        "The 'Simpan Profil' button becomes re-enabled after a failure so the user can retry.",
+        "The modal's close (X) button remains visible and functional even after a save error.",
+        "On successful save, the modal closes and the user lands on the dashboard."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "In the ProfileSetupModal, the Full Name field must be required (minimum 1 character) before the save button is enabled. If the user has no stored name, fall back to displaying a shortened Principal ID (e.g., 'User-abc12') as a placeholder identifier within the system until the profile is saved.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-nama-bagaimana"
+        ],
+        "quotes": [
+          "Nama wajib diisi (minimal 1 karakter)",
+          "jika tidak ada nama, sistem bisa fallback ke sebagian Principal ID (misal: 'User-abc12')"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The 'Simpan Profil' button is disabled when the name field is empty.",
+        "If a user somehow bypasses the modal without a name, the system displays 'User-<first 5 chars of principal>' in the header and other name-display locations.",
+        "Once the user saves a name, that name replaces any fallback identifier everywhere in the UI."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not change the Internet Identity authentication flow or the useInternetIdentity hook.",
+    "All Motoko logic must remain in the single main actor (backend/main.mo).",
+    "The fix must not remove the role-based access control system — only the first-user bootstrapping path should bypass the admin guard."
+  ],
+  "nonGoals": [
+    "Adding alternative authentication methods (only Internet Identity is supported).",
+    "Redesigning the profile setup UI beyond fixing the error handling.",
+    "Adding email or SMS notification for new user registrations."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Web application with Internet Identity authentication. Fixing critical login bugs: 'Only admins can assign user roles' error during profile save, first-user auto-admin logic conflict, profile form blocking login flow, and ensuring user data persists across system updates.",
+  "architectural_notes": [
+    "Uses Internet Identity for authentication - no separate username/password login",
+    "First registered user should automatically become Admin",
+    "Display name is required (minimum 1 character); fallback to partial Principal ID if not set"
+  ],
+  "known_issues": [
+    "Bug: 'Only admins can assign user roles' error when first user tries to save profile during registration",
+    "Bug: User data may reset on redeployment causing new users to be treated as first user/admin"
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-update-the-profilesetupmodal-frontend-component-so-that-if-the-backend-returns-any-error-during-profile-save-a-clear-english-error-message-is-shown-but-the-modal-does-not-permanently-block-the-user-if-the-save-fails-display-the-error-inline-and-allow-the-user-to-retry-the-close-button-must-remain-functional-so-the-user-is-not-permanently-locked-out",
+      "title": "Update the ProfileSetupModal frontend component so that if the backend returns any error during profile save, a clear English error message is shown but the modal does NOT permanently block the user. If the save fails, display the error inline and allow the user to retry. The close button must remain functional so the user is not permanently locked out.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-profilesetupmodal-the-full-name-field-must-be-required-minimum-1-character-before-the-save-button-is-enabled-if-the-user-has-no-stored-name-fall-back-to-displaying-a-shortened-principal-id-e-g-user-abc12-as-a-placeholder-identifier-within-the-system-until-the-profile-is-saved",
+      "title": "In the ProfileSetupModal, the Full Name field must be required (minimum 1 character) before the save button is enabled. If the user has no stored name, fall back to displaying a shortened Principal ID (e.g., 'User-abc12') as a placeholder identifier within the system until the profile is saved.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Fix 'Only admins can assign user roles' error - first user should automatically become admin without validation conflict",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Fix login flow - profile form should not block access, profile save must not fail",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Ensure user data persists across system updates and redeployments",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Fix the backend logic so that the very first user to register is automatically assigned the Admin role without triggering the 'Only admins can assign user roles' authorization check. The first-user detection and role assignment must bypass the admin-only guard entirely.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Fix the backend registration/profile-save endpoint so that saving a new user profile (including name) never returns an Unauthorized error for any new user. The profile save flow must complete successfully for all users regardless of role state.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Ensure user data (profiles, roles, admin flags) persists across canister upgrades and redeployments. Use stable variables or a migration module so that existing registered users are never lost and a previously-registered admin is not demoted or replaced by a new 'first user' after a redeploy.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Sistem Tracking",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

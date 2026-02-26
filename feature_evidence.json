@@ -1,0 +1,49 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-profilesetupmodal-frontend-component-so-that-if-the-backend-returns-any-error-during-profile-save-a-clear-english-error-message-is-shown-but-the-modal-does-not-permanently-block-the-user-if-the-save-fails-display-the-error-inline-and-allow-the-user-to-retry-the-close-button-must-remain-functional-so-the-user-is-not-permanently-locked-out",
+      "featureTitle": "Update the ProfileSetupModal frontend component so that if the backend returns any error during profile save, a clear English error message is shown but the modal does NOT permanently block the user. If the save fails, display the error inline and allow the user to retry. The close button must remain functional so the user is not permanently locked out.",
+      "files": [
+        "frontend/src/components/ProfileSetupModal.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-in-the-profilesetupmodal-the-full-name-field-must-be-required-minimum-1-character-before-the-save-button-is-enabled-if-the-user-has-no-stored-name-fall-back-to-displaying-a-shortened-principal-id-e-g-user-abc12-as-a-placeholder-identifier-within-the-system-until-the-profile-is-saved",
+      "featureTitle": "In the ProfileSetupModal, the Full Name field must be required (minimum 1 character) before the save button is enabled. If the user has no stored name, fall back to displaying a shortened Principal ID (e.g., 'User-abc12') as a placeholder identifier within the system until the profile is saved.",
+      "files": [
+        "frontend/src/components/Header.tsx",
+        "frontend/src/components/ProfileSetupModal.tsx",
+        "frontend/src/utils/userDisplayName.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

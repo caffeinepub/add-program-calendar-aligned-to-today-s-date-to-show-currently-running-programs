@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.75rem;
+        /* Purple-Blue-Green Gradient Theme - Light Mode */
+        --background: 0.98 0.005 280;
+        --foreground: 0.18 0.04 280;
+        --card: 0.99 0.003 280;
+        --card-foreground: 0.18 0.04 280;
+        --popover: 0.99 0.003 280;
+        --popover-foreground: 0.18 0.04 280;
+        --primary: 0.55 0.20 280;
+        --primary-foreground: 0.98 0 0;
+        --secondary: 0.50 0.18 220;
+        --secondary-foreground: 0.98 0 0;
+        --muted: 0.94 0.01 280;
+        --muted-foreground: 0.40 0.03 280;
+        --accent: 0.60 0.22 160;
+        --accent-foreground: 0.12 0.04 280;
+        --destructive: 0.55 0.22 15;
+        --destructive-foreground: 0.98 0 0;
+        --border: 0.88 0.02 280;
+        --input: 0.88 0.02 280;
+        --ring: 0.60 0.22 160;
+        --chart-1: 0.55 0.20 280;
+        --chart-2: 0.50 0.18 220;
+        --chart-3: 0.60 0.22 160;
+        --chart-4: 0.52 0.19 250;
+        --chart-5: 0.58 0.21 190;
+        --sidebar: 0.99 0.003 280;
+        --sidebar-foreground: 0.18 0.04 280;
+        --sidebar-primary: 0.55 0.20 280;
+        --sidebar-primary-foreground: 0.98 0 0;
+        --sidebar-accent: 0.94 0.01 280;
+        --sidebar-accent-foreground: 0.18 0.04 280;
+        --sidebar-border: 0.88 0.02 280;
+        --sidebar-ring: 0.60 0.22 160;
+        --gradient-from: 0.55 0.20 280;
+        --gradient-via: 0.50 0.18 220;
+        --gradient-to: 0.60 0.22 160;
+        
+        --category-program: 139 92 246;
+        --category-agenda: 59 130 246;
+        --category-kpi: 16 185 129;
+    }
+
+    .dark {
+        /* Purple-Blue-Green Gradient Theme - Dark Mode */
+        --background: 0.16 0.04 280;
+        --foreground: 0.96 0.01 0;
+        --card: 0.22 0.05 280;
+        --card-foreground: 0.96 0.01 0;
+        --popover: 0.24 0.05 280;
+        --popover-foreground: 0.96 0.01 0;
+        --primary: 0.55 0.20 280;
+        --primary-foreground: 0.98 0 0;
+        --secondary: 0.50 0.18 220;
+        --secondary-foreground: 0.98 0 0;
+        --muted: 0.28 0.04 280;
+        --muted-foreground: 0.70 0.02 280;
+        --accent: 0.65 0.24 160;
+        --accent-foreground: 0.16 0.04 280;
+        --destructive: 0.62 0.22 27;
+        --destructive-foreground: 0.98 0 0;
+        --border: 0.32 0.04 280;
+        --input: 0.32 0.04 280;
+        --ring: 0.65 0.24 160;
+        --chart-1: 0.60 0.22 280;
+        --chart-2: 0.55 0.20 220;
+        --chart-3: 0.65 0.24 160;
+        --chart-4: 0.58 0.21 250;
+        --chart-5: 0.62 0.23 190;
+        --sidebar: 0.20 0.05 280;
+        --sidebar-foreground: 0.96 0.01 0;
+        --sidebar-primary: 0.55 0.20 280;
+        --sidebar-primary-foreground: 0.98 0 0;
+        --sidebar-accent: 0.28 0.04 280;
+        --sidebar-accent-foreground: 0.96 0.01 0;
+        --sidebar-border: 0.32 0.04 280;
+        --sidebar-ring: 0.65 0.24 160;
+        --gradient-from: 0.25 0.08 280;
+        --gradient-via: 0.28 0.08 220;
+        --gradient-to: 0.32 0.10 160;
+        
+        --category-program: 167 139 250;
+        --category-agenda: 96 165 250;
+        --category-kpi: 52 211 153;
+    }
+
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+@layer utilities {
+    .gradient-bg {
+        background: linear-gradient(135deg, oklch(var(--gradient-from)) 0%, oklch(var(--gradient-via)) 50%, oklch(var(--gradient-to)) 100%);
+    }
+    
+    .purple-blue-green-gradient {
+        background: linear-gradient(135deg, 
+            oklch(0.55 0.20 280) 0%, 
+            oklch(0.50 0.18 220) 50%,
+            oklch(0.60 0.22 160) 100%
+        );
+    }
+    
+    .purple-blue-green-gradient-dark {
+        background: linear-gradient(135deg, 
+            oklch(0.25 0.08 280) 0%, 
+            oklch(0.28 0.08 220) 50%,
+            oklch(0.32 0.10 160) 100%
+        );
+    }
+    
+    .pill-nav-container {
+        background: linear-gradient(135deg, 
+            oklch(var(--card) / 0.6) 0%, 
+            oklch(var(--card) / 0.4) 100%
+        );
+        backdrop-filter: blur(12px);
+        border: 1px solid oklch(var(--border) / 0.5);
+        border-radius: 9999px;
+        box-shadow: 0 8px 24px -4px rgba(139, 92, 246, 0.2);
+    }
+    
+    .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px -8px oklch(var(--primary) / 0.25);
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .slide-in {
+        animation: slideIn 0.4s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+}

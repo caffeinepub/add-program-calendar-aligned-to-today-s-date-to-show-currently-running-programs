@@ -1,0 +1,77 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-26T12:18:23.055Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 5,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Fix the backend logic so that the very first user to register is automatically assigned the Admin role without triggering the 'Only admins can assign user roles' authorization check. The first-user detection and role assignment must bypass the admin-only guard entirely.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Fix the backend registration/profile-save endpoint so that saving a new user profile (including name) never returns an Unauthorized error for any new user. The profile save flow must complete successfully for all users regardless of role state.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Ensure user data (profiles, roles, admin flags) persists across canister upgrades and redeployments. Use stable variables or a migration module so that existing registered users are never lost and a previously-registered admin is not demoted or replaced by a new 'first user' after a redeploy.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Update the ProfileSetupModal frontend component so that if the backend returns any error during profile save, a clear English error message is shown but the modal does NOT permanently block the user. If the save fails, display the error inline and allow the user to retry. The close button must remain functional so the user is not permanently locked out.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ProfileSetupModal.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ProfileSetupModal.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "In the ProfileSetupModal, the Full Name field must be required (minimum 1 character) before the save button is enabled. If the user has no stored name, fall back to displaying a shortened Principal ID (e.g., 'User-abc12') as a placeholder identifier within the system until the profile is saved.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ProfileSetupModal.tsx",
+          "frontend/src/components/Header.tsx",
+          "frontend/src/utils/userDisplayName.ts",
+          "frontend/src/pages/Dashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ProfileSetupModal.tsx",
+          "frontend/src/components/Header.tsx",
+          "frontend/src/utils/userDisplayName.ts"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/utils/userDisplayName.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}
